@@ -1,24 +1,18 @@
-/* App shell for design 10: Today, Chapters, chapter pages, Cheat sheet. Hash routing, per-viewer progress (chapters reviewed). */
+/* App shell for design 10: Today, Chapters, chapter pages, Speeds, Cheat sheet. Hash routing; remembers the last opened chapter. */
 (function () {
   const { CATS, RULES } = window.BGData;
   const { signSVG, DATA: SIGNDATA } = window.BGSigns;
   const W = window.BGWidgets;
 
-  // ---------- progress ----------
-  const STORE_KEY = "bg-driving-refresher.v1";
-  let progress = { read: {} };
-  try {
-    const raw = localStorage.getItem(STORE_KEY);
-    if (raw) progress = JSON.parse(raw) || progress;
-    if (!progress.read) progress.read = {};
-  } catch (e) { /* storage unavailable: progress lives only in memory */ }
-  const save = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(progress)); } catch (e) { /* ignore */ } };
+  // ---------- last opened chapter (so "Днес" can offer to continue) ----------
+  const LAST_KEY = "bg-driving-refresher.last";
+  let lastChapter = null;
+  try { lastChapter = localStorage.getItem(LAST_KEY); } catch (e) { /* storage unavailable */ }
+  const rememberChapter = (id) => { lastChapter = id; try { localStorage.setItem(LAST_KEY, id); } catch (e) { /* ignore */ } };
 
   const h = (html) => { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstElementChild; };
   const chapters = CATS.filter((c) => c.id !== "izpit");
   const shuffle = (arr) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-  const isRead = (id) => !!progress.read[id];
-  const readCount = () => chapters.filter((c) => isRead(c.id)).length;
 
   // ---------- theme: auto (follows the device), light or dark ----------
   const THEME_KEY = "bg-theme";
@@ -70,8 +64,7 @@
   const TABS = [["nachalo", "Днес"], ["glavi", "Глави"], ["znaci", "Знаци"], ["skorosti", "Скорости"], ["nakratko", "Накратко"]];
 
   function chapterRow(c, active) {
-    const done = isRead(c.id);
-    return `<a class="row" href="#${c.id}" ${active === c.id ? 'aria-current="page"' : ""}>${signSVG(c.sign, "")}<span class="t">${c.title}</span><small>${c.short}</small><span class="count ${done ? "done" : ""}">${done ? "✓" : ""}</span></a>`;
+    return `<a class="row" href="#${c.id}" ${active === c.id ? 'aria-current="page"' : ""}>${signSVG(c.sign, "")}<span class="t">${c.title}</span><small>${c.short}</small><span class="count"></span></a>`;
   }
   function renderNav(active) {
     nav.innerHTML = `
@@ -89,7 +82,6 @@
   }
 
   // ---------- Today ----------
-  const ring = (pct) => `<svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--surface-3)" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="var(--green)" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="${Math.max(pct, 0.01)} 100" transform="rotate(-90 18 18)"/><text x="18" y="18.6" text-anchor="middle" dominant-baseline="central" font-size="8.5" font-weight="700" fill="var(--ink)">${pct}%</text></svg>`;
   const dayIndex = () => Math.floor(Date.now() / 86400000);
 
   function matchGame(root) {
@@ -190,9 +182,8 @@
   const factList = (rows) => `<div class="list facts">${rows.map(([v, t, ref, sign]) => `<div class="fact">${sign ? signSVG(sign, "") : `<span class="fv">${v}</span>`}<div><span class="ft">${sign ? `<b>${v}</b> · ` : ""}${t}</span>${ref ? `<span class="fr">${ref}</span>` : ""}</div></div>`).join("")}</div>`;
 
   function today() {
-    const done = readCount();
-    const pct = Math.round((done / chapters.length) * 100);
-    const nextCh = chapters.find((c) => !isRead(c.id));
+    const last = chapters.find((c) => c.id === lastChapter);
+    const nextCh = last ? chapters[(chapters.indexOf(last) + 1) % chapters.length] : chapters[0];
     const pool = SIGNDATA.SIGNS.filter((s) => "АБВГД".includes(s.g));
     const sotd = pool[dayIndex() % pool.length];
     const allFacts = [...FACTS.distances, ...FACTS.numbers];
@@ -202,9 +193,9 @@
 
     const page = h(`<div class="today">
       <header class="large">${themeToggle()}<span class="eyebrow">${dateStr}</span><h1>Днес</h1><p class="lede">Шофьорски опреснителен курс · категория B · по ЗДвП 2025</p></header>
-      <div class="hero-card">${ring(pct)}<div>${nextCh
-        ? `<b>${done ? `Продължи с „${nextCh.title}“` : "Започни с „Основни правила“"}</b><p>${done ? `Прегледани ${done} от ${chapters.length} глави.` : nextCh.short}</p><a class="btn primary small" href="#${nextCh.id}">${done ? "Продължи" : "Започни"}</a>`
-        : `<b>Прегледа всички глави</b><p>Освежи паметта с „Накратко“ – всичко важно на един екран.</p><a class="btn primary small" href="#nakratko">Накратко</a>`}</div></div>
+      <div class="hero-card">${signSVG((last || nextCh).sign, "")}<div>${last
+        ? `<b>Последно отвори „${last.title}“</b><p>Следваща глава: „${nextCh.title}“ – ${nextCh.short.toLowerCase()}.</p><div class="hero-btns"><a class="btn primary small" href="#${nextCh.id}">Към „${nextCh.title}“</a><a class="btn small" href="#${last.id}">Обратно към „${last.title}“</a></div>`
+        : `<b>Започни с „${nextCh.title}“</b><p>${nextCh.short}</p><a class="btn primary small" href="#${nextCh.id}">Започни</a>`}</div></div>
       <div class="tiles">
         <div><h2 class="section-title">Знак на деня</h2><div class="card"><div class="sotd"><img src="${sotd.f}" alt="${sotd.c}"><div style="display:grid;gap:6px"><h3>${sotd.c} · ${sotd.n}</h3><p>${sotd.d}</p></div></div><div class="sx-mnem"><span>Как да запомниш</span><p>${sotd.m}</p></div><a class="btn small" href="#znaci" style="justify-self:start">Всички знаци</a></div></div>
         <div><h2 class="section-title">Числа за помнене</h2>${factList(dayFacts)}<a class="btn small" href="#nakratko" style="margin-top:10px">Всички на един екран</a></div>
@@ -246,7 +237,7 @@
   // ---------- Chapters list ----------
   function chaptersPage() {
     return h(`<div>
-      <header class="large">${themeToggle()}<span class="eyebrow">Прегледани ${readCount()} от ${chapters.length}</span><h1>Глави</h1><p class="lede">Всяка глава има интерактивен модел, илюстрации и правилата с членовете от закона.</p></header>
+      <header class="large">${themeToggle()}<span class="eyebrow">${chapters.length} глави</span><h1>Глави</h1><p class="lede">Всяка глава има интерактивен модел, илюстрации и правилата с членовете от закона.</p></header>
       <div class="list">${chapters.map((c) => chapterRow(c, "")).join("")}</div>
       <h2 class="section-title">Настройки</h2>
       <div class="card settings"><div class="set-row"><span>Тема</span><div data-theme-seg>${themeSeg()}</div></div></div>
@@ -260,7 +251,6 @@
       <header class="large">${themeToggle()}<span class="eyebrow">Глава ${n + 1} от ${chapters.length}${c.law ? ` · ${c.law}` : ""}</span><div class="row-h">${signSVG(c.sign, "")}<h1>${c.title}</h1></div><p class="lede">${c.lede}</p></header>
       <div class="w-slot"></div>
       <div class="r-slot"></div>
-      <div class="done-card"></div>
       <nav class="pager" aria-label="Съседни глави"></nav>
     </div>`);
     if (W[c.id]) {
@@ -278,16 +268,7 @@
       });
       r.appendChild(list);
     }
-    const doneCard = page.querySelector(".done-card");
-    const drawDone = () => {
-      const read = isRead(c.id);
-      doneCard.innerHTML = `<div class="card done ${read ? "is-read" : ""}"><div><b>${read ? "Главата е прегледана" : "Прегледа ли главата?"}</b><p>${read ? "Ще я отбележим с ✓ в списъка. Можеш да се върнеш по всяко време." : "Отбележи я, за да знаеш докъде си стигнал."}</p></div><button type="button" class="btn ${read ? "" : "primary"} small">${read ? "Отмени" : "Прегледах я"}</button></div>`;
-      doneCard.querySelector("button").addEventListener("click", () => {
-        if (isRead(c.id)) delete progress.read[c.id]; else progress.read[c.id] = true;
-        save(); renderNav(current); drawDone();
-      });
-    };
-    drawDone();
+    rememberChapter(c.id);
     const pager = page.querySelector(".pager");
     const prev = chapters[n - 1], next = chapters[n + 1];
     if (next) pager.appendChild(h(`<a href="#${next.id}">Следваща: ${next.title}<span>›</span></a>`));

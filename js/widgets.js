@@ -1109,33 +1109,45 @@
   function dashboardWidget(root) {
     let filter = "all";
     let selected = "oil";
-    const box = h(`<div class="widget">
-      <div class="widget-head"><h3>Контролни лампи</h3><p>Натисни символ, за да видиш какво означава и какво правиш.</p></div>
-      <div class="controls"></div>
-      <div class="legend-row"><span><i class="dot" style="background:#ff4a3d"></i>Спри безопасно</span><span><i class="dot" style="background:#ffb21a"></i>Провери скоро</span><span><i class="dot" style="background:#3ee07a"></i>Включено</span><span><i class="dot" style="background:#4c8dff"></i>Дълги светлини</span></div>
-      <div class="sx-mnem dash-rule"><span>Как да запомниш цветовете</span><p>Като светофара: <b>червено</b> – спри веднага, <b>жълто</b> – внимание, провери скоро, <b>зелено</b> – просто е включено. <b>Синьо</b> има само една лампа – дългите светлини.</p></div>
-      <div class="dash-detail readout" aria-live="polite"></div>
-      <div class="dash-grid"></div>
+    const COLS = [["all", "Всички", ""], ["red", "Червени", "спри безопасно"], ["amber", "Жълти", "провери скоро"], ["green", "Зелени и сини", "само включено"]];
+    const box = h(`<div class="widget dash-w">
+      <div class="dash-top">
+        <h3>Контролни лампи</h3>
+        <p>Цветовете са като на светофара: <b class="c-red">червено</b> – спри веднага, <b class="c-amber">жълто</b> – внимание, <b class="c-green">зелено</b> – просто е включено. <b class="c-blue">Синьо</b> е само за дългите светлини.</p>
+        <div class="dash-filter" role="group" aria-label="Цвят">${COLS.map(([k, t, sub]) => `<button type="button" data-f="${k}" aria-pressed="${k === filter}">${k === "all" ? "" : `<i class="dot ${k}"></i>`}<span>${t}</span>${sub ? `<small>${sub}</small>` : ""}</button>`).join("")}</div>
+      </div>
+      <div class="dash-body">
+        <div class="dash-panel"><div class="dash-grid" role="listbox" aria-label="Символи"></div></div>
+        <div class="dash-detail" aria-live="polite"></div>
+      </div>
     </div>`);
     const grid = box.querySelector(".dash-grid");
     const detail = box.querySelector(".dash-detail");
-    box.querySelector(".controls").appendChild(
-      segmented([["all", "Всички"], ["red", "Червени"], ["amber", "Жълти"], ["green", "Зелени и сини"]], filter, (v) => { filter = v; draw(); }, "Цвят")
-    );
-    const word = { red: "Червен", amber: "Жълт", green: "Зелен", blue: "Син" };
+    const word = { red: "Червен – спри безопасно", amber: "Жълт – провери скоро", green: "Зелен – включено", blue: "Син – дълги светлини" };
+    box.querySelectorAll(".dash-filter button").forEach((b) => b.addEventListener("click", () => {
+      filter = b.dataset.f;
+      box.querySelectorAll(".dash-filter button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      draw();
+    }));
     function showDetail() {
       const d = DASH.find((x) => x.id === selected);
-      detail.innerHTML = `<div class="lamp ${d.color}">${ICONS[d.id]}</div><div style="display:grid;gap:6px;min-width:0"><span class="pill ${d.color === "red" ? "stop" : d.color === "amber" ? "wait" : d.color === "blue" ? "info" : "go"}">${word[d.color]}</span><h4>${d.name}</h4><p>${d.what}</p><p><b>Какво правиш:</b> ${d.act}</p>${d.tip ? `<div class="sx-mnem"><span>Как да запомниш</span><p>${d.tip}</p></div>` : ""}</div>`;
+      detail.innerHTML = `<div class="dd-head"><div class="lamp ${d.color}">${ICONS[d.id]}</div><div><span class="pill ${d.color === "red" ? "stop" : d.color === "amber" ? "wait" : d.color === "blue" ? "info" : "go"}">${word[d.color]}</span><h4>${d.name}</h4></div></div>
+        <dl><dt>Какво значи</dt><dd>${d.what}</dd><dt>Какво правиш</dt><dd>${d.act}</dd></dl>
+        ${d.tip ? `<div class="sx-mnem"><span>Как да запомниш</span><p>${d.tip}</p></div>` : ""}`;
     }
     function draw() {
       grid.innerHTML = "";
-      DASH.filter((d) => filter === "all" || d.color === filter || (filter === "green" && d.color === "blue")).forEach((d) => {
-        const b = h(`<button type="button" class="dash-btn ${d.color}" aria-pressed="${d.id === selected}">${ICONS[d.id]}<span>${d.name}</span></button>`);
+      const list = DASH.filter((d) => filter === "all" || d.color === filter || (filter === "green" && d.color === "blue"));
+      if (!list.some((d) => d.id === selected)) selected = list[0].id;
+      list.forEach((d) => {
+        const b = h(`<button type="button" class="dash-btn ${d.color}" role="option" aria-selected="${d.id === selected}" aria-pressed="${d.id === selected}">${ICONS[d.id]}<span>${d.name}</span></button>`);
         b.addEventListener("click", () => {
           selected = d.id;
-          grid.querySelectorAll(".dash-btn").forEach((x) => x.setAttribute("aria-pressed", "false"));
+          grid.querySelectorAll(".dash-btn").forEach((x) => { x.setAttribute("aria-pressed", "false"); x.setAttribute("aria-selected", "false"); });
           b.setAttribute("aria-pressed", "true");
+          b.setAttribute("aria-selected", "true");
           showDetail();
+          if (window.matchMedia("(max-width: 899px)").matches) detail.scrollIntoView({ block: "nearest", behavior: reduceMotion() ? "auto" : "smooth" });
         });
         grid.appendChild(b);
       });
@@ -1144,6 +1156,7 @@
     draw();
     root.appendChild(box);
   }
+
 
   // ================= Stopping distance =================
   function stoppingWidget(root) {
