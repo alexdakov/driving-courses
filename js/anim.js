@@ -161,7 +161,7 @@
     }
     function reset() {
       cars.forEach((c) => place(c, c.start));
-      caption.innerHTML = `<b>${sc.title}.</b> Кой минава първи? Натисни „Пусни“.`;
+      caption.innerHTML = `<b>${sc.title}.</b> Кой минава първи? Натисни бутона, за да видиш реда.`;
       playBtn.textContent = opts.playLabel || "▶ Пусни";
     }
     let raf = null, timers = [], runId = 0;
