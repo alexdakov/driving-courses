@@ -805,20 +805,6 @@
   "license": "CC BY-SA 4.0"
  },
  {
-  "code": "Д11",
-  "file": "D11.svg",
-  "source": "https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9411.svg",
-  "author": "มองโกเลีย๔๔",
-  "license": "CC BY-SA 4.0"
- },
- {
-  "code": "Д12",
-  "file": "D12.svg",
-  "source": "https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9412.svg",
-  "author": "มองโกเลีย๔๔",
-  "license": "CC BY-SA 4.0"
- },
- {
   "code": "Д13.2",
   "file": "D13_2.svg",
   "source": "https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9413.2.svg",
@@ -864,13 +850,6 @@
   "code": "Д17",
   "file": "D17.svg",
   "source": "https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9417.svg",
-  "author": "มองโกเลีย๔๔",
-  "license": "CC BY-SA 4.0"
- },
- {
-  "code": "Д18",
-  "file": "D18.svg",
-  "source": "https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9418.svg",
   "author": "มองโกเลีย๔๔",
   "license": "CC BY-SA 4.0"
  },
@@ -1435,13 +1414,6 @@
   "license": "CC BY-SA 4.0"
  },
  {
-  "code": "А41",
-  "file": "A41.svg",
-  "source": "https://commons.wikimedia.org/wiki/File%3ABG_road_sign_%D0%9041.svg",
-  "author": "มองโกเลีย๔๔",
-  "license": "CC BY-SA 4.0"
- },
- {
   "code": "А42",
   "file": "A42.svg",
   "source": "https://commons.wikimedia.org/wiki/File%3ABG_road_sign_%D0%9042.svg",
@@ -1454,5 +1426,33 @@
   "source": "https://commons.wikimedia.org/wiki/File%3ABG_road_sign_%D0%9043.svg",
   "author": "มองโกเลีย๔๔",
   "license": "CC BY-SA 4.0"
+ },
+ {
+  "code": "А41",
+  "file": "A41.svg",
+  "source": "Начертан за проекта по образеца в Наредба № 18 / ППЗДвП",
+  "author": "driving-courses",
+  "license": "CC0"
+ },
+ {
+  "code": "Д18",
+  "file": "D18.svg",
+  "source": "https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9418.svg",
+  "author": "(виж Commons)",
+  "license": "CC BY-SA 4.0"
+ },
+ {
+  "code": "Д11",
+  "file": "D11.svg",
+  "source": "Начертан за проекта по образеца в Наредба № 18 / ППЗДвП",
+  "author": "driving-courses",
+  "license": "CC0"
+ },
+ {
+  "code": "Д12",
+  "file": "D12.svg",
+  "source": "Начертан за проекта по образеца в Наредба № 18 / ППЗДвП",
+  "author": "driving-courses",
+  "license": "CC0"
  }
 ]

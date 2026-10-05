@@ -1,7 +1,7 @@
 /* Interactive widgets, one per chapter. Each takes a container element and renders into it. */
 (function () {
-  const { SIGNS, signSVG, signLabel, ICONS } = window.BGSigns;
-  const { SIGN_GROUPS, MARKINGS, DASH } = window.BGData;
+  const { signSVG, signImage, ICONS, DATA: SIGNDATA } = window.BGSigns;
+  const { MARKINGS, DASH } = window.BGData;
 
   const h = (html) => {
     const t = document.createElement("template");
@@ -14,8 +14,7 @@
   const reduceMotion = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // nested sign inside a bigger SVG
-  const signAt = (code, x, y, size) =>
-    `<svg x="${x}" y="${y}" width="${size}" height="${size}" viewBox="0 0 100 100">${SIGNS[code].svg()}</svg>`;
+  const signAt = (code, x, y, size) => signImage(code, x, y, size);
 
   function segmented(items, current, onPick, label) {
     const el = h(`<div class="seg" role="group" aria-label="${label}"></div>`);
@@ -31,51 +30,112 @@
     return el;
   }
 
-  // ================= Signs gallery =================
+  // ================= Signs explorer =================
+  const KIND = { warn: ["Предупреждава", "wait"], priority: ["Предимство", "info"], ban: ["Забранява", "stop"], must: ["Задължава", "info"], info: ["Указва", "go"], end: ["Отменя", ""] };
+  function signDetail(s) {
+    const g = SIGNDATA.GROUPS.find((x) => x.g === s.g);
+    return `<div class="sx-detail-img"><img src="${s.f}" alt="${s.c} ${s.n}"></div>
+      <div class="sx-detail-body">
+        <div class="sx-meta"><span class="sx-code">${s.c}</span><span>Група ${s.g} · ${g.title}</span><span class="pill ${KIND[s.k][1]}">${KIND[s.k][0]}</span></div>
+        <h3>${s.n}</h3>
+        <p>${s.d}</p>
+        <div class="sx-mnem"><span>Как да запомниш</span><p>${s.m}</p></div>
+      </div>`;
+  }
   function signsWidget(root) {
-    let group = "all";
-    let showNames = true;
-    const box = h(`<div class="widget">
-      <div class="widget-head"><h3>Галерия на знаците</h3><p>Натисни знак, за да видиш какво означава.</p></div>
-      <div class="filters"></div>
-      <div class="group-legend"></div>
-      <div class="sign-grid"></div>
+    const ALL = SIGNDATA.SIGNS;
+    let group = "Б", mode = "learn", query = "", current = ALL.find((s) => s.c === "Б1");
+    const box = h(`<div class="widget sx">
+      <div class="sx-groups" role="tablist" aria-label="Групи знаци"></div>
+      <p class="sx-hook"></p>
+      <div class="controls" style="align-items:center;justify-content:space-between">
+        <div class="sx-modes"></div>
+        <label class="sx-search"><span class="visually-hidden">Търси знак</span><input type="search" id="sx-q" placeholder="Търси: паркиране, Б2, деца…" autocomplete="off"></label>
+      </div>
+      <div class="sx-stage"></div>
     </div>`);
-    const filters = box.querySelector(".filters");
-    const grid = box.querySelector(".sign-grid");
-    const legend = box.querySelector(".group-legend");
+    const groupsEl = box.querySelector(".sx-groups"), hook = box.querySelector(".sx-hook"), stage = box.querySelector(".sx-stage");
+    const input = box.querySelector("input");
 
-    filters.appendChild(
-      segmented([["all", "Всички"], ...SIGN_GROUPS.map((g) => [g.g, g.g])], group, (v) => { group = v; draw(); }, "Група знаци")
+    SIGNDATA.GROUPS.forEach((g) => {
+      const first = ALL.find((s) => s.g === g.g);
+      const b = h(`<button type="button" role="tab" data-g="${g.g}"><img src="${first.f}" alt=""><span><b>${g.g}</b> ${g.title}</span><small>${g.shape}</small></button>`);
+      b.addEventListener("click", () => { group = g.g; query = ""; input.value = ""; current = ALL.find((s) => s.g === group); draw(); });
+      groupsEl.appendChild(b);
+    });
+    box.querySelector(".sx-modes").appendChild(
+      segmented([["learn", "Разгледай"], ["guess", "Познай"], ["deck", "Тесте карти"]], mode, (v) => { mode = v; draw(); }, "Режим")
     );
-    const namesBtn = h(`<button type="button" class="btn small" aria-pressed="true">Имената са видими</button>`);
-    namesBtn.addEventListener("click", () => {
-      showNames = !showNames;
-      namesBtn.setAttribute("aria-pressed", String(showNames));
-      namesBtn.textContent = showNames ? "Имената са видими" : "Имената са скрити – познай";
-      draw();
-    });
-    filters.appendChild(namesBtn);
+    input.addEventListener("input", () => { query = input.value.trim().toLowerCase(); mode = "learn"; box.querySelectorAll(".sx-modes button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === 0))); draw(); });
 
-    SIGN_GROUPS.forEach((g) => {
-      legend.appendChild(h(`<div>${signSVG(g.codes[0])}<span><b>${g.title}.</b> ${g.note}</span></div>`));
-    });
+    const list = () => (query ? ALL.filter((s) => (s.c + " " + s.n + " " + s.d).toLowerCase().includes(query)) : ALL.filter((s) => s.g === group));
+
+    function drawLearn() {
+      const items = list();
+      if (!items.length) { stage.innerHTML = `<p class="sx-empty">Няма знак, който да отговаря на „${query}“. Опитай с друга дума или код.</p>`; return; }
+      if (!items.includes(current)) current = items[0];
+      stage.innerHTML = `<div class="sx-learn"><div class="sx-grid" role="listbox" aria-label="Знаци"></div><div class="sx-detail" aria-live="polite"></div></div>`;
+      const grid = stage.querySelector(".sx-grid"), det = stage.querySelector(".sx-detail");
+      items.forEach((s) => {
+        const b = h(`<button type="button" role="option" class="sx-tile" aria-selected="${s === current}" title="${s.n}"><img src="${s.f}" alt="" loading="lazy"><span>${s.c}</span></button>`);
+        b.addEventListener("click", () => { current = s; grid.querySelectorAll(".sx-tile").forEach((x) => x.setAttribute("aria-selected", "false")); b.setAttribute("aria-selected", "true"); det.innerHTML = signDetail(s); });
+        grid.appendChild(b);
+      });
+      det.innerHTML = signDetail(current);
+    }
+
+    let gScore = 0, gTotal = 0;
+    function drawGuess() {
+      const pool = list();
+      const s = pool[Math.floor(Math.random() * pool.length)];
+      const others = ALL.filter((x) => x.g === s.g && x.c !== s.c && x.k !== "end").sort(() => Math.random() - 0.5).slice(0, 2);
+      const opts = [s, ...others].sort(() => Math.random() - 0.5);
+      stage.innerHTML = `<div class="sx-guess"><div class="sx-guess-img"><img src="${s.f}" alt="Знак за познаване"><p>Какво означава този знак?</p><span class="quiz-count">Познати: ${gScore} от ${gTotal}</span></div><div class="opts"></div><div class="sx-out"></div></div>`;
+      const o = stage.querySelector(".opts");
+      opts.forEach((x, i) => {
+        const b = h(`<button type="button" class="opt"><span class="k">${i + 1}</span><span>${x.n}</span></button>`);
+        b.addEventListener("click", () => {
+          gTotal++;
+          const ok = x === s;
+          if (ok) gScore++;
+          o.querySelectorAll(".opt").forEach((y, k) => { y.disabled = true; if (opts[k] === s) y.classList.add("right"); });
+          if (!ok) b.classList.add("wrong");
+          const out = stage.querySelector(".sx-out");
+          out.innerHTML = `<div class="explain"><span class="verdict ${ok ? "ok" : "no"}">${ok ? "Точно така." : "Не е това."}</span><span><b>${s.c} ${s.n}.</b> ${s.d}</span><div class="sx-mnem"><span>Как да запомниш</span><p>${s.m}</p></div></div>`;
+          const n = h(`<button type="button" class="btn primary small" style="justify-self:start">Следващ знак →</button>`);
+          n.addEventListener("click", drawGuess);
+          out.appendChild(n);
+          n.focus({ preventScroll: true });
+        });
+        o.appendChild(b);
+      });
+    }
+
+    let deck = [], known = 0, open = false;
+    function drawDeck(reset) {
+      if (reset || !deck.length && !known) { deck = list().slice().sort(() => Math.random() - 0.5); known = 0; open = false; }
+      if (!deck.length) {
+        stage.innerHTML = `<div class="sx-deck"><div class="sx-card"><b>Тестето свърши – знаеш всички ${known}.</b><button type="button" class="btn primary small sx-again">Отначало</button></div></div>`;
+        stage.querySelector(".sx-again").onclick = () => drawDeck(true);
+        return;
+      }
+      const s = deck[0];
+      stage.innerHTML = `<div class="sx-deck"><div class="sx-card ${open ? "open" : ""}"><img src="${s.f}" alt="Знак">${open ? `<div class="sx-card-body"><h3>${s.c} ${s.n}</h3><p>${s.d}</p><div class="sx-mnem"><span>Как да запомниш</span><p>${s.m}</p></div></div>` : `<p class="sx-card-q">Сети ли се какво означава?</p>`}</div>
+        <div class="controls" style="justify-content:center">${open ? `<button type="button" class="btn sx-no">Не го знаех</button><button type="button" class="btn primary sx-yes">Знаех го</button>` : `<button type="button" class="btn primary sx-show">Обърни картата</button>`}</div>
+        <p class="quiz-count" style="text-align:center">В тестето: ${deck.length} · знаеш: ${known}</p></div>`;
+      const q = (c) => stage.querySelector(c);
+      if (q(".sx-show")) q(".sx-show").onclick = () => { open = true; drawDeck(); };
+      if (q(".sx-yes")) q(".sx-yes").onclick = () => { known++; deck.shift(); open = false; drawDeck(); };
+      if (q(".sx-no")) q(".sx-no").onclick = () => { deck.push(deck.shift()); open = false; drawDeck(); };
+    }
 
     function draw() {
-      grid.innerHTML = "";
-      SIGN_GROUPS.filter((g) => group === "all" || g.g === group).forEach((g) => {
-        g.codes.forEach((code) => {
-          const s = SIGNS[code];
-          const card = h(`<button type="button" class="sign-card" aria-pressed="false" aria-label="${signLabel(code)}">
-            <div class="inner">
-              <div class="face front">${signSVG(code)}<span class="code">${signLabel(code)}</span>${showNames ? `<b style="font-size:.82rem;text-align:center;line-height:1.25">${s.name}</b>` : ""}</div>
-              <div class="face back"><span class="code">${signLabel(code)}</span><b>${s.name}</b><span>${s.d}</span></div>
-            </div>
-          </button>`);
-          card.addEventListener("click", () => card.setAttribute("aria-pressed", card.getAttribute("aria-pressed") === "true" ? "false" : "true"));
-          grid.appendChild(card);
-        });
-      });
+      groupsEl.querySelectorAll("button").forEach((b) => { const on = !query && b.dataset.g === group; b.setAttribute("aria-selected", String(on)); });
+      const g = SIGNDATA.GROUPS.find((x) => x.g === group);
+      hook.innerHTML = query ? `Резултати за „${query}“ във всички групи.` : `<b>${g.shape}.</b> ${g.hook} <span class="sx-what">${g.what}</span>`;
+      if (mode === "learn") drawLearn();
+      else if (mode === "guess") drawGuess();
+      else drawDeck(true);
     }
     draw();
     root.appendChild(box);
@@ -373,121 +433,40 @@
     root.appendChild(box);
   }
 
-  // ================= Priority scenarios =================
-  const SCENARIOS = [
-    {
-      title: "Равнозначно кръстовище",
-      cars: [{ id: "А", from: "S", move: "straight", color: "#2b6fe0" }, { id: "Б", from: "E", move: "straight", color: "#f08a24" }],
-      signs: {},
-      answer: "Б",
-      e: "Няма знаци – важи правилото на дясното. Б идва отдясно на А, затова А го пропуска.",
-      ref: "ЗДвП чл. 48",
-    },
-    {
-      title: "Завой наляво",
-      cars: [{ id: "А", from: "S", move: "left", color: "#2b6fe0" }, { id: "Б", from: "N", move: "straight", color: "#f08a24" }],
-      signs: {},
-      answer: "Б",
-      e: "Завиващият наляво пропуска насрещно движещите се. Б минава първи.",
-      ref: "ЗДвП чл. 37",
-    },
-    {
-      title: "Път с предимство",
-      cars: [{ id: "А", from: "W", move: "straight", color: "#2b6fe0" }, { id: "Б", from: "N", move: "straight", color: "#f08a24" }],
-      signs: { N: "B3", S: "B3", W: "B1", E: "B1" },
-      answer: "Б",
-      e: "Б е на пътя с предимство (Б3). А е след знак Б1 и пропуска, макар Б да е отляво.",
-      ref: "ЗДвП чл. 50",
-    },
-    {
-      title: "Кой е отдясно?",
-      cars: [{ id: "А", from: "S", move: "straight", color: "#2b6fe0" }, { id: "Б", from: "W", move: "right", color: "#f08a24" }],
-      signs: {},
-      answer: "А",
-      e: "Б идва отляво и завива надясно. А е отдясно на Б, а отдясно на А няма никого – А минава първи.",
-      ref: "ЗДвП чл. 48",
-    },
-    {
-      title: "Трамвай",
-      cars: [{ id: "А", from: "S", move: "straight", color: "#2b6fe0" }, { id: "Т", from: "W", move: "straight", color: "#f2b300", tram: true }],
-      signs: {},
-      answer: "Т",
-      e: "На кръстовище на равнозначни пътища трамваят минава преди нерелсовите превозни средства независимо от посоката.",
-      ref: "ЗДвП чл. 48",
-    },
-    {
-      title: "Две коли към една улица",
-      cars: [{ id: "А", from: "S", move: "right", color: "#2b6fe0" }, { id: "Б", from: "N", move: "left", color: "#f08a24" }],
-      signs: {},
-      answer: "А",
-      e: "Двете коли отиват надясно на екрана. Б завива наляво и пропуска насрещната А.",
-      ref: "ЗДвП чл. 37",
-    },
-  ];
+  // ================= Priority: animated scenarios =================
   function priorityWidget(root) {
+    const keys = Object.keys(window.BGAnim.SCENARIOS);
     let idx = 0;
-    let done = false;
     const box = h(`<div class="widget">
       <div class="widget-head"><h3>Кой минава първи?</h3><p class="sc-count"></p></div>
       <div class="split">
-        <svg class="stage" viewBox="-34 -34 368 368"></svg>
+        <div class="sc-anim"></div>
         <div class="readout" aria-live="polite"></div>
       </div>
     </div>`);
-    const svg = box.querySelector("svg");
-    const readout = box.querySelector(".readout");
-    const count = box.querySelector(".sc-count");
-
+    const animEl = box.querySelector(".sc-anim"), readout = box.querySelector(".readout"), count = box.querySelector(".sc-count");
     function draw() {
-      const sc = SCENARIOS[idx];
-      done = false;
-      count.textContent = `Ситуация ${idx + 1} от ${SCENARIOS.length}`;
-      let s = crossroads();
-      // rails for trams
-      sc.cars.filter((c) => c.tram).forEach((c) => {
-        const horizontal = c.from === "W" || c.from === "E";
-        if (horizontal) s += `<line x1="0" y1="162" x2="300" y2="162" stroke="#8a8f96" stroke-width="2"/><line x1="0" y1="174" x2="300" y2="174" stroke="#8a8f96" stroke-width="2"/>`;
-      });
-      Object.entries(sc.signs).forEach(([d, code]) => {
-        const [x, y] = rotPt(204, 222, ROT[d]);
-        s += signAt(code, x - 13, y - 13, 26);
-      });
-      sc.cars.forEach((c) => {
-        const a = ROT[c.from];
-        s += `<g transform="rotate(${a} 150 150)"><path d="${MOVE_PATH[c.move]}" fill="none" stroke="${c.color}" stroke-width="4" stroke-dasharray="7 5" marker-end="url(#mk-${c.id === "Т" ? "t" : c.id === "А" ? "a" : "b"})"/>`;
-        s += c.tram
-          ? `<rect x="155" y="214" width="24" height="70" rx="5" fill="${c.color}" stroke="rgba(0,0,0,.4)"/><rect x="158" y="218" width="18" height="8" rx="2" fill="rgba(255,255,255,.75)"/>`
-          : carShape(c.color);
-        s += `</g>`;
-        const [lx, ly] = rotPt(c.tram ? 167 : 167, c.tram ? 250 : 236, a);
-        s += `<circle cx="${lx}" cy="${ly}" r="10" fill="#fff" stroke="#111" stroke-width="1.5"/><text x="${lx}" y="${ly + 1}" font-size="12" font-weight="800" text-anchor="middle" dominant-baseline="central" fill="#111">${c.id}</text>`;
-      });
-      const mk = (id, col) => `<marker id="mk-${id}" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="${col}"/></marker>`;
-      svg.innerHTML = `<defs>${mk("a", "#2b6fe0")}${mk("b", "#f08a24")}${mk("t", "#f2b300")}</defs>` + s;
-
-      readout.innerHTML = `<h4>${sc.title}</h4><p>Кой минава пръв през кръстовището?</p><div class="opts"></div><div class="sc-explain"></div>`;
+      const key = keys[idx];
+      const api = window.BGAnim.mount(animEl, key, { base: "", playLabel: "▶ Покажи реда" });
+      const sc = api.scenario;
+      count.textContent = `Ситуация ${idx + 1} от ${keys.length}`;
+      readout.innerHTML = `<h4>${sc.title}</h4><p>Погледни знаците и посоките. Кой тръгва пръв?</p><div class="opts"></div><div class="sc-explain"></div>`;
       const opts = readout.querySelector(".opts");
       sc.cars.forEach((c, i) => {
         const b = h(`<button type="button" class="opt"><span class="k">${i + 1}</span><span>${c.tram ? "Трамваят" : "Колата"} <b>${c.id}</b></span></button>`);
-        b.addEventListener("click", () => answer(c.id, b));
+        b.addEventListener("click", () => {
+          const ok = c.id === sc.order[0];
+          opts.querySelectorAll(".opt").forEach((x, k) => { x.disabled = true; if (sc.cars[k].id === sc.order[0]) x.classList.add("right"); });
+          if (!ok) b.classList.add("wrong");
+          const ex = readout.querySelector(".sc-explain");
+          ex.innerHTML = `<div class="explain"><span class="verdict ${ok ? "ok" : "no"}">${ok ? "Вярно." : "Не съвсем."}</span><span>Редът е: <b>${sc.order.join(" → ")}</b>. Гледай анимацията.</span><span class="lawref">${sc.ref}</span></div>`;
+          const next = h(`<button type="button" class="btn small" style="justify-self:start">${idx + 1 < keys.length ? "Следваща ситуация →" : "Започни отначало"}</button>`);
+          next.addEventListener("click", () => { idx = (idx + 1) % keys.length; draw(); });
+          ex.appendChild(next);
+          api.play();
+        });
         opts.appendChild(b);
       });
-    }
-    function answer(id, btn) {
-      if (done) return;
-      done = true;
-      const sc = SCENARIOS[idx];
-      const ok = id === sc.answer;
-      readout.querySelectorAll(".opt").forEach((b) => {
-        b.disabled = true;
-        if (b.textContent.includes(sc.answer)) b.classList.add("right");
-      });
-      if (!ok) btn.classList.add("wrong");
-      const ex = readout.querySelector(".sc-explain");
-      ex.innerHTML = `<div class="explain"><span class="verdict ${ok ? "ok" : "no"}">${ok ? "Вярно." : "Не съвсем."}</span><span>${sc.e}</span><span class="lawref">${sc.ref}</span></div>`;
-      const next = h(`<button type="button" class="btn small" style="justify-self:start">${idx + 1 < SCENARIOS.length ? "Следваща ситуация →" : "Започни отначало"}</button>`);
-      next.addEventListener("click", () => { idx = (idx + 1) % SCENARIOS.length; draw(); });
-      ex.appendChild(next);
     }
     draw();
     root.appendChild(box);

@@ -1,6 +1,6 @@
 # Изображения на пътните знаци
 
-SVG файловете са от Wikimedia Commons (категория „Diagrams of road signs of Bulgaria“). Те изобразяват официалните български пътни знаци по ППЗДвП. Всеки файл е използван под лиценза, посочен от автора му.
+SVG файловете изобразяват официалните български пътни знаци по Наредба № 18 и ППЗДвП. Повечето са от Wikimedia Commons и се използват под лиценза, посочен от автора. Три файла (А41, Д11, Д12) са начертани за проекта по официалния образец. Сверката е описана в docs/sverka-znaci.md.
 
 | Знак | Файл | Автор | Лиценз | Източник |
 |---|---|---|---|---|
@@ -119,8 +119,6 @@ SVG файловете са от Wikimedia Commons (категория „Diagra
 | Д3б | D3b.svg | มองโกเลีย๔๔ | CC0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABG_road_sign_%D0%943b.svg) |
 | Д10 | D10.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9410.svg) |
 | Д10а | D10a.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9410a.svg) |
-| Д11 | D11.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9411.svg) |
-| Д12 | D12.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9412.svg) |
 | Д13.2 | D13_2.svg | มองโกเลีย๔๔ | CC0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9413.2.svg) |
 | Д13 | D13.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9413.svg) |
 | Д14.2 | D14_2.svg | มองโกเลีย๔๔ | CC0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9414.2.svg) |
@@ -128,7 +126,6 @@ SVG файловете са от Wikimedia Commons (категория „Diagra
 | Д15 | D15.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9415.svg) |
 | Д16 | D16.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9416.svg) |
 | Д17 | D17.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9417.svg) |
-| Д18 | D18.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9418.svg) |
 | Д21 | D21.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9421.svg) |
 | Д25.1 | D25_1.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9425.1.svg) |
 | Д25.2 | D25_2.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9425.2.svg) |
@@ -209,6 +206,9 @@ SVG файловете са от Wikimedia Commons (категория „Diagra
 | А38 | A38.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABG_road_sign_%D0%9038.svg) |
 | А39 | A39.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABG_road_sign_%D0%9039.svg) |
 | А40 | A40.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABG_road_sign_%D0%9040.svg) |
-| А41 | A41.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABG_road_sign_%D0%9041.svg) |
 | А42 | A42.svg | มองโกเลีย๔๔ | CC0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABG_road_sign_%D0%9042.svg) |
 | А43 | A43.svg | มองโกเลีย๔๔ | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABG_road_sign_%D0%9043.svg) |
+| А41 | A41.svg | driving-courses | CC0 | Начертан за проекта по образеца в Наредба № 18 / ППЗДвП |
+| Д18 | D18.svg | (виж Commons) | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File%3ABulgaria_road_sign_%D0%9418.svg) |
+| Д11 | D11.svg | driving-courses | CC0 | Начертан за проекта по образеца в Наредба № 18 / ППЗДвП |
+| Д12 | D12.svg | driving-courses | CC0 | Начертан за проекта по образеца в Наредба № 18 / ППЗДвП |

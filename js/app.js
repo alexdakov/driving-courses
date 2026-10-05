@@ -194,7 +194,7 @@
       const r = page.querySelector(".r-slot");
       r.appendChild(h(`<h2 class="section-title">Правилата</h2>`));
       const grid = h(`<div class="rules"></div>`);
-      rules.forEach((x) => grid.appendChild(h(`<article class="rule ${x.k || ""}"><h4>${x.t}</h4><div class="body">${x.b}</div><span class="lawref">${x.ref}</span></article>`)));
+      rules.forEach((x) => grid.appendChild(h(`<article class="rule ${x.k || ""} ${x.il ? "has-il" : ""}">${x.il && window.BGIllustrations[x.il] ? `<figure class="rule-il">${window.BGIllustrations[x.il]()}</figure>` : ""}<h4>${x.t}</h4><div class="body">${x.b}</div><span class="lawref">${x.ref}</span></article>`)));
       r.appendChild(grid);
     }
     quiz(page.querySelector(".q-slot"), qsFor(c.id));
