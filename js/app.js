@@ -1,30 +1,59 @@
-/* App shell for design 10: Today, Chapters, chapter pages, test. Hash routing, quizzes, per-viewer progress. */
+/* App shell for design 10: Today, Chapters, chapter pages, Cheat sheet. Hash routing, per-viewer progress (chapters reviewed). */
 (function () {
-  const { CATS, RULES, Q } = window.BGData;
+  const { CATS, RULES } = window.BGData;
   const { signSVG, DATA: SIGNDATA } = window.BGSigns;
   const W = window.BGWidgets;
 
   // ---------- progress ----------
   const STORE_KEY = "bg-driving-refresher.v1";
-  let progress = { q: {} };
+  let progress = { read: {} };
   try {
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) progress = JSON.parse(raw) || progress;
-    if (!progress.q) progress.q = {};
+    if (!progress.read) progress.read = {};
   } catch (e) { /* storage unavailable: progress lives only in memory */ }
   const save = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(progress)); } catch (e) { /* ignore */ } };
 
   const h = (html) => { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstElementChild; };
   const chapters = CATS.filter((c) => c.id !== "izpit");
-  const qsFor = (id) => Q.filter((q) => q.c === id);
-  const stats = (id) => {
-    const list = id ? qsFor(id) : Q;
-    let right = 0, wrong = 0;
-    list.forEach((q) => { if (progress.q[q.id] === 1) right++; else if (progress.q[q.id] === 0) wrong++; });
-    return { total: list.length, right, wrong };
-  };
   const shuffle = (arr) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-  const pickExam = () => shuffle(Q).slice(0, 20);
+  const isRead = (id) => !!progress.read[id];
+  const readCount = () => chapters.filter((c) => isRead(c.id)).length;
+
+  // ---------- theme: auto (follows the device), light or dark ----------
+  const THEME_KEY = "bg-theme";
+  const root = document.documentElement;
+  const darkMQ = window.matchMedia ? matchMedia("(prefers-color-scheme: dark)") : null;
+  const themeMode = () => root.getAttribute("data-theme") || "auto";
+  const effectiveTheme = () => (themeMode() === "auto" ? (darkMQ && darkMQ.matches ? "dark" : "light") : themeMode());
+  const SUN = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></svg>`;
+  const MOON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1z" fill="currentColor"/></svg>`;
+  function setTheme(mode) {
+    if (mode === "auto") root.removeAttribute("data-theme"); else root.setAttribute("data-theme", mode);
+    try { if (mode === "auto") localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, mode); } catch (e) { /* ignore */ }
+    syncTheme();
+  }
+  function syncTheme() {
+    const eff = effectiveTheme(), mode = themeMode();
+    document.querySelectorAll("[data-theme-toggle]").forEach((b) => {
+      b.innerHTML = eff === "dark" ? SUN : MOON;
+      const label = eff === "dark" ? "Включи светлата тема" : "Включи тъмната тема";
+      b.setAttribute("aria-label", label);
+      b.title = label;
+    });
+    document.querySelectorAll("[data-theme-seg] button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+    document.querySelectorAll('meta[name="theme-color"]').forEach((m) => { m.setAttribute("content", eff === "dark" ? "#000000" : "#f2f2f7"); m.removeAttribute("media"); });
+  }
+  const themeToggle = () => `<button type="button" class="theme-btn" data-theme-toggle></button>`;
+  const themeSeg = () => `<div class="seg" role="group" aria-label="Тема">${[["auto", "Автоматично"], ["light", "Светла"], ["dark", "Тъмна"]].map(([m, l]) => `<button type="button" data-mode="${m}" aria-pressed="false">${l}</button>`).join("")}</div>`;
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-theme-toggle]");
+    if (t) { setTheme(effectiveTheme() === "dark" ? "light" : "dark"); return; }
+    const m = e.target.closest("[data-theme-seg] button");
+    if (m) setTheme(m.dataset.mode);
+  });
+  if (darkMQ && darkMQ.addEventListener) darkMQ.addEventListener("change", syncTheme);
+  document.querySelectorAll(".side-theme [data-theme-seg]").forEach((el) => (el.innerHTML = themeSeg()));
 
   // ---------- chrome: sidebar, navbar, tab bar ----------
   const nav = document.getElementById("nav");
@@ -34,95 +63,28 @@
     nachalo: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 2.5 11h2.7v9h5.3v-6h3v6h5.3v-9h2.7z"/></svg>`,
     glavi: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 5h3v3H4zm5 0h11v3H9zM4 10.5h3v3H4zm5 0h11v3H9zM4 16h3v3H4zm5 0h11v3H9z"/></svg>`,
     znaci: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5 22 20.5H2zm0 4.6L5.7 18.5h12.6z"/><rect x="11" y="10" width="2" height="5" rx="1"/><circle cx="12" cy="16.6" r="1.1"/></svg>`,
-    izpit: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 3h8l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm7 1.5V8h3.5zM8.5 12.2l1.1-1.1 1.9 1.9 3.9-3.9 1.1 1.1-5 5z"/></svg>`,
+    nakratko: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 2 5 13.5h5.6L9.5 22 19 9.8h-5.7z"/></svg>`,
   };
-  const TABS = [["nachalo", "Днес"], ["glavi", "Глави"], ["znaci", "Знаци"], ["izpit", "Тест"]];
+  const TABS = [["nachalo", "Днес"], ["glavi", "Глави"], ["znaci", "Знаци"], ["nakratko", "Накратко"]];
 
   function chapterRow(c, active) {
-    const st = c.id === "izpit" ? null : stats(c.id);
-    const done = st && st.right === st.total;
-    return `<a class="row" href="#${c.id}" ${active === c.id ? 'aria-current="page"' : ""}>${signSVG(c.sign, "")}<span class="t">${c.title}</span><small>${c.short}</small><span class="count ${done ? "done" : ""}">${st ? (done ? "✓" : `${st.right}/${st.total}`) : ""}</span></a>`;
+    const done = isRead(c.id);
+    return `<a class="row" href="#${c.id}" ${active === c.id ? 'aria-current="page"' : ""}>${signSVG(c.sign, "")}<span class="t">${c.title}</span><small>${c.short}</small><span class="count ${done ? "done" : ""}">${done ? "✓" : ""}</span></a>`;
   }
   function renderNav(active) {
     nav.innerHTML = `
-      <div class="list"><a class="row" href="#nachalo" ${active === "nachalo" ? 'aria-current="page"' : ""}><img src="assets/signs/B3.svg" alt=""><span class="t">Днес</span><small>Какво да учиш сега</small><span class="count"></span></a></div>
+      <div class="list"><a class="row" href="#nachalo" ${active === "nachalo" ? 'aria-current="page"' : ""}><img src="assets/signs/B3.svg" alt=""><span class="t">Днес</span><small>Какво да опресниш сега</small><span class="count"></span></a><a class="row" href="#nakratko" ${active === "nakratko" ? 'aria-current="page"' : ""}><img src="assets/signs/V26-50.svg" alt=""><span class="t">Накратко</span><small>Всички числа на един екран</small><span class="count"></span></a></div>
       <p class="list-label">Глави</p>
-      <div class="list">${chapters.map((c) => chapterRow(c, active)).join("")}</div>
-      <p class="list-label">Проверка</p>
-      <div class="list">${chapterRow(CATS.find((c) => c.id === "izpit"), active)}</div>`;
-    const tabOf = active === "nachalo" ? "nachalo" : active === "znaci" ? "znaci" : active === "izpit" ? "izpit" : "glavi";
+      <div class="list">${chapters.map((c) => chapterRow(c, active)).join("")}</div>`;
+    const tabOf = ["nachalo", "znaci", "nakratko"].includes(active) ? active : "glavi";
     tabbar.innerHTML = TABS.map(([id, label]) => `<a href="#${id}" ${tabOf === id ? 'aria-current="page"' : ""}>${ICON[id]}<span>${label}</span></a>`).join("");
-    const isRoot = ["nachalo", "glavi", "znaci", "izpit"].includes(active);
+    const isRoot = ["nachalo", "glavi", "znaci", "nakratko"].includes(active);
     navbar.hidden = isRoot;
     if (!isRoot) {
       const c = CATS.find((x) => x.id === active);
       navbar.innerHTML = `<a href="#glavi">Глави</a><span class="nt">${c ? c.title : ""}</span><span></span>`;
     }
   }
-
-  // ---------- quiz ----------
-  let activeQuiz = null;
-  function quiz(root, list, opts = {}) {
-    let i = 0, answered = false, score = 0;
-    const wrongs = [];
-    const box = h(`<div class="quiz"></div>`);
-    root.appendChild(box);
-    function show() {
-      answered = false;
-      const q = list[i];
-      box.innerHTML = `
-        ${list.length > 1 ? `<div class="quiz-top"><span class="quiz-count">Въпрос ${i + 1} от ${list.length}</span>${opts.exam ? `<span class="quiz-count">Верни: ${score}</span>` : ""}</div>` : ""}
-        <div class="quiz-q ${q.img ? "" : "noimg"}">${q.img ? signSVG(q.img) : ""}<h3>${q.q}</h3></div>
-        <div class="opts">${q.o.map((o, k) => `<button type="button" class="opt" data-k="${k}"><span class="k">${k + 1}</span><span>${o}</span></button>`).join("")}</div>
-        <div class="slot"></div>`;
-      box.querySelectorAll(".opt").forEach((b) => b.addEventListener("click", () => pick(parseInt(b.dataset.k, 10))));
-      activeQuiz = { pick, isAnswered: () => answered, el: box };
-    }
-    function pick(k) {
-      if (answered) return;
-      const q = list[i];
-      if (k < 0 || k >= q.o.length) return;
-      answered = true;
-      const ok = k === q.a;
-      if (ok) score++; else wrongs.push({ q, k });
-      progress.q[q.id] = ok ? 1 : 0;
-      save();
-      renderNav(current);
-      box.querySelectorAll(".opt").forEach((b) => {
-        const kk = parseInt(b.dataset.k, 10);
-        b.disabled = true;
-        if (kk === q.a) b.classList.add("right");
-        if (kk === k && !ok) b.classList.add("wrong");
-      });
-      const slot = box.querySelector(".slot");
-      const last = i + 1 >= list.length;
-      slot.innerHTML = `<div class="explain" aria-live="polite"><span class="verdict ${ok ? "ok" : "no"}">${ok ? "Вярно." : `Грешно. Верният отговор е: ${q.o[q.a]}`}</span><span>${q.e}</span><span class="lawref" style="justify-self:start">${q.ref}</span></div>
-        ${opts.single ? "" : `<div class="quiz-foot"><button type="button" class="btn primary small next">${last ? "Виж резултата" : "Следващ въпрос"}</button></div>`}`;
-      const nb = slot.querySelector(".next");
-      if (nb) { nb.addEventListener("click", next); nb.focus({ preventScroll: true }); }
-      if (opts.single && opts.onDone) opts.onDone(slot);
-    }
-    function next() {
-      if (!answered) return;
-      i++;
-      if (i < list.length) show(); else finish();
-    }
-    function finish() {
-      activeQuiz = null;
-      const pct = Math.round((score / list.length) * 100);
-      const msg = pct === 100 ? "Чисто. Всичко е вярно." : pct >= 85 ? "Много добре – прегледай грешките." : pct >= 60 ? "Добра основа. Върни се към правилата за грешните въпроси." : "Има какво да се опресни. Прочети правилата и опитай пак.";
-      box.innerHTML = `<div class="result"><span class="eyebrow">Резултат</span><span class="big">${score} / ${list.length}</span><p>${msg}</p>
-        ${wrongs.length ? `<div class="review">${wrongs.map((w) => `<div><b>${w.q.q}</b>Твоят отговор: ${w.q.o[w.k]}<br>Верен: ${w.q.o[w.q.a]} <span class="lawref">${w.q.ref}</span></div>`).join("")}</div>` : ""}
-        <div class="controls"><button type="button" class="btn primary small again">${opts.exam ? "Нов тест" : "Опитай пак"}</button></div></div>`;
-      box.querySelector(".again").addEventListener("click", () => { root.innerHTML = ""; quiz(root, opts.exam ? pickExam() : list, opts); });
-    }
-    show();
-  }
-  document.addEventListener("keydown", (e) => {
-    if (!activeQuiz || !document.body.contains(activeQuiz.el)) return;
-    if (e.target.closest("input, textarea, select")) return;
-    if (/^[1-4]$/.test(e.key) && !activeQuiz.isAnswered()) { activeQuiz.pick(parseInt(e.key, 10) - 1); e.preventDefault(); }
-  });
 
   // ---------- Today ----------
   const ring = (pct) => `<svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--surface-3)" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="var(--green)" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="${Math.max(pct, 0.01)} 100" transform="rotate(-90 18 18)"/><text x="18" y="18.6" text-anchor="middle" dominant-baseline="central" font-size="8.5" font-weight="700" fill="var(--ink)">${pct}%</text></svg>`;
@@ -180,48 +142,112 @@
     });
   }
 
+  // Key facts for the cheat sheet and Today. v = value, t = what it means, ref = law, sign = optional sign code.
+  const FACTS = {
+    speeds: [
+      ["20", "Жилищна зона", "ЗДвП чл. 62", "Д15"],
+      ["30", "„Зона 30“ в населено място", "ЗДвП чл. 62а", ""],
+      ["50", "Населено място", "ЗДвП чл. 21", "Д11"],
+      ["90", "Извън населено място", "ЗДвП чл. 21", ""],
+      ["120", "Скоростен път", "ЗДвП чл. 21", "Д7а"],
+      ["140", "Автомагистрала", "ЗДвП чл. 21", "Д5"],
+    ],
+    distances: [
+      ["5 м", "Без спиране на и пред пешеходна пътека и от кръстовище", "ЗДвП чл. 98", "Д17"],
+      ["3 м", "Минимум между спряната кола и непрекъсната линия", "ЗДвП чл. 98", ""],
+      ["2 м", "Свободни за пешеходци, ако паркираш на тротоар", "ЗДвП чл. 94", ""],
+      ["30 м", "Триъгълник при повреда; на магистрала – 100 м", "ЗДвП чл. 97", ""],
+      ["150 м", "Най-късно тук сменяш дълги с къси при разминаване", "ЗДвП чл. 70", ""],
+      ["50 м", "Без дълги зад кола; задна мъгла само при видимост под 50 м", "ЗДвП чл. 70, 74", ""],
+      ["2 м", "Спираш пред първата релса на прелез без бариери (1 м пред бариера)", "ЗДвП чл. 51", "А33"],
+      ["1 м", "Зад трамвай, спрял на спирка, ако го доближаваш отдясно", "ЗДвП чл. 66", ""],
+    ],
+    numbers: [
+      ["0,5 ‰", "Над тази граница алкохолът е забранен (над 1,2 ‰ – престъпление)", "ЗДвП чл. 5", ""],
+      ["150 см", "Под този ръст детето пътува в столче или седалка", "ЗДвП чл. 137в", ""],
+      ["4 мм", "Протектор от 15 ноември до 1 март (или зимни гуми)", "ЗДвП чл. 139", ""],
+      ["2,5 т", "Максимум за паркиране на тротоар (само на определени места)", "ЗДвП чл. 94", ""],
+      ["12 г.", "Деца до тази възраст слизат откъм тротоара", "ЗДвП чл. 95", ""],
+      ["112", "Спешен номер", "", ""],
+    ],
+    priority: [
+      ["1", "Регулировчик → светофар → знаци → маркировка", "ЗДвП чл. 7", ""],
+      ["2", "Без знаци – пропусни идващите отдясно. Трамваят минава пръв", "ЗДвП чл. 48", "А25"],
+      ["3", "Завиваш наляво – пропусни насрещните", "ЗДвП чл. 37", ""],
+      ["4", "Излизаш от имот, паркинг или черен път – пропусни всички", "ЗДвП чл. 37, 49", ""],
+      ["5", "Пешеходци на пътеката и тези, които сигнализират с ръка – пропусни", "ЗДвП чл. 119", "Д17"],
+      ["6", "Кръгово: решават знаците на входа – обикновено Б1, пропускаш колите в кръга", "ППЗДвП чл. 46, 52", "Г12"],
+    ],
+    gear: [
+      ["✓", "Триъгълник, аптечка, светлоотразителна жилетка, пожарогасител", "ЗДвП чл. 139", ""],
+      ["✓", "Денем – светлини за движение през деня или къси; в тунел – къси", "ЗДвП чл. 63, 70", ""],
+      ["✓", "Телефон – само без ръце или през системата на колата", "ЗДвП чл. 104а", ""],
+      ["✓", "Коланът е задължителен на всички седалки", "ЗДвП чл. 137а", ""],
+    ],
+  };
+  const factList = (rows) => `<div class="list facts">${rows.map(([v, t, ref, sign]) => `<div class="fact">${sign ? signSVG(sign, "") : `<span class="fv">${v}</span>`}<div><span class="ft">${sign ? `<b>${v}</b> · ` : ""}${t}</span>${ref ? `<span class="fr">${ref}</span>` : ""}</div></div>`).join("")}</div>`;
+
   function today() {
-    const all = stats(null);
-    const answered = all.right + all.wrong;
-    const pct = Math.round((all.right / Q.length) * 100);
-    const nextCh = chapters.find((c) => { const s = stats(c.id); return s.right < s.total; }) || chapters[0];
-    const ns = stats(nextCh.id);
+    const done = readCount();
+    const pct = Math.round((done / chapters.length) * 100);
+    const nextCh = chapters.find((c) => !isRead(c.id));
     const pool = SIGNDATA.SIGNS.filter((s) => "АБВГД".includes(s.g));
     const sotd = pool[dayIndex() % pool.length];
-    const qPool = Q.filter((q) => progress.q[q.id] !== 1);
-    const qOfDay = (qPool.length ? qPool : Q)[dayIndex() % (qPool.length || Q.length)];
+    const allFacts = [...FACTS.distances, ...FACTS.numbers];
+    const start = (dayIndex() * 3) % allFacts.length;
+    const dayFacts = [0, 1, 2].map((k) => allFacts[(start + k) % allFacts.length]);
     const dateStr = new Date().toLocaleDateString("bg-BG", { weekday: "long", day: "numeric", month: "long" });
 
     const page = h(`<div class="today">
-      <header class="large"><span class="eyebrow">${dateStr}</span><h1>Днес</h1><p class="lede">Шофьорски опреснителен курс · категория B · по ЗДвП 2025</p></header>
-      <div class="hero-card">${ring(pct)}<div><b>${answered ? `Продължи с „${nextCh.title}“` : "Започни с „Основни правила“"}</b><p>${answered ? `${ns.total - ns.right} въпроса до края на главата · общо верни ${all.right} от ${Q.length}` : "Скорости, алкохол, колан, оборудване – числата, които трябва да помниш."}</p><a class="btn primary small" href="#${answered ? nextCh.id : "osnovni"}">Продължи</a></div></div>
+      <header class="large">${themeToggle()}<span class="eyebrow">${dateStr}</span><h1>Днес</h1><p class="lede">Шофьорски опреснителен курс · категория B · по ЗДвП 2025</p></header>
+      <div class="hero-card">${ring(pct)}<div>${nextCh
+        ? `<b>${done ? `Продължи с „${nextCh.title}“` : "Започни с „Основни правила“"}</b><p>${done ? `Прегледани ${done} от ${chapters.length} глави.` : nextCh.short}</p><a class="btn primary small" href="#${nextCh.id}">${done ? "Продължи" : "Започни"}</a>`
+        : `<b>Прегледа всички глави</b><p>Освежи паметта с „Накратко“ – всичко важно на един екран.</p><a class="btn primary small" href="#nakratko">Накратко</a>`}</div></div>
       <div class="tiles">
         <div><h2 class="section-title">Знак на деня</h2><div class="card"><div class="sotd"><img src="${sotd.f}" alt="${sotd.c}"><div style="display:grid;gap:6px"><h3>${sotd.c} · ${sotd.n}</h3><p>${sotd.d}</p></div></div><div class="sx-mnem"><span>Как да запомниш</span><p>${sotd.m}</p></div><a class="btn small" href="#znaci" style="justify-self:start">Всички знаци</a></div></div>
-        <div><h2 class="section-title">Намери двойката</h2><div class="card t-match"></div></div>
+        <div><h2 class="section-title">Числа за помнене</h2>${factList(dayFacts)}<a class="btn small" href="#nakratko" style="margin-top:10px">Всички на един екран</a></div>
       </div>
       <div class="tiles">
         <div><h2 class="section-title">Кой минава първи?</h2><div class="card t-inter"></div></div>
-        <div><h2 class="section-title">Бърз въпрос</h2><div class="t-q"></div></div>
+        <div><h2 class="section-title">Намери двойката</h2><div class="card t-match"></div></div>
       </div>
+      <div class="t-sit"></div>
       <h2 class="section-title">Глави</h2>
       <div class="list">${chapters.map((c) => chapterRow(c, "")).join("")}</div>
-      <h2 class="section-title">За курса</h2>
-      <p class="note"><b>Източници.</b> Закон за движението по пътищата с измененията от 7.09.2025 г. и Правилник за прилагане на ЗДвП. Знаците са официалните образци, сверени с Наредба № 18. Съветите, отбелязани „Добра практика“, не са законови изисквания. Курсът е за опресняване и не замества официалните изпитни материали на ИААА.</p>
     </div>`);
     matchGame(page.querySelector(".t-match"));
+    const sits = window.BGScenarios || [];
+    if (sits.length) {
+      const x = sits[(dayIndex() * 7) % sits.length];
+      let pic = "";
+      try { pic = x.svg(); } catch (e) { pic = ""; }
+      page.querySelector(".t-sit").appendChild(h(`<div><h2 class="section-title">Ситуация на деня</h2><article class="rule has-il sit-card"><figure class="rule-il">${pic}</figure><div class="rule-text"><h4>${x.title}</h4><p class="sit-q">${x.q}</p><ol class="sit-steps">${x.steps.map((t) => `<li>${t}</li>`).join("")}</ol><span class="lawref">${x.ref}</span><a class="btn small" href="#situacii" style="align-self:flex-start;margin-top:4px">Всички ситуации</a></div></article></div>`));
+    }
     miniIntersection(page.querySelector(".t-inter"));
-    quiz(page.querySelector(".t-q"), [qOfDay], { single: true });
     return page;
+  }
+
+  // ---------- Cheat sheet ----------
+  function nakratko() {
+    return h(`<div>
+      <header class="large">${themeToggle()}<span class="eyebrow">Всичко важно на един екран</span><h1>Накратко</h1><p class="lede">Числата и правилата, които най-лесно се забравят. Подробностите са в главите.</p></header>
+      <h2 class="section-title">Скорости · категория B · km/h</h2>
+      <div class="speed-strip">${FACTS.speeds.map(([v, t, , sign]) => `<div class="sp">${sign ? signSVG(sign, "") : `<span class="sp-road"></span>`}<b>${v}</b><span>${t}</span></div>`).join("")}</div>
+      <h2 class="section-title">Разстояния</h2>${factList(FACTS.distances)}
+      <h2 class="section-title">Числа</h2>${factList(FACTS.numbers)}
+      <h2 class="section-title">Кой минава пръв</h2>${factList(FACTS.priority)}
+      <h2 class="section-title">В колата</h2>${factList(FACTS.gear)}
+      <nav class="pager"><a href="#glavi">Към главите<span>›</span></a></nav>
+    </div>`);
   }
 
   // ---------- Chapters list ----------
   function chaptersPage() {
-    const all = stats(null);
     return h(`<div>
-      <header class="large"><span class="eyebrow">${all.right} от ${Q.length} верни отговора</span><h1>Глави</h1><p class="lede">Всяка глава има интерактивен модел, правилата с членовете от закона и въпроси с обяснение.</p></header>
+      <header class="large">${themeToggle()}<span class="eyebrow">Прегледани ${readCount()} от ${chapters.length}</span><h1>Глави</h1><p class="lede">Всяка глава има интерактивен модел, илюстрации и правилата с членовете от закона.</p></header>
       <div class="list">${chapters.map((c) => chapterRow(c, "")).join("")}</div>
-      <h2 class="section-title">Проверка</h2>
-      <div class="list">${chapterRow(CATS.find((c) => c.id === "izpit"), "")}</div>
+      <h2 class="section-title">Настройки</h2>
+      <div class="card settings"><div class="set-row"><span>Тема</span><div data-theme-seg>${themeSeg()}</div></div></div>
     </div>`);
   }
 
@@ -229,39 +255,42 @@
   function chapter(c) {
     const n = CATS.indexOf(c);
     const page = h(`<div>
-      <header class="large"><span class="eyebrow">Глава ${n + 1} от ${chapters.length}${c.law ? ` · ${c.law}` : ""}</span><div class="row-h">${signSVG(c.sign, "")}<h1>${c.title}</h1></div><p class="lede">${c.lede}</p></header>
+      <header class="large">${themeToggle()}<span class="eyebrow">Глава ${n + 1} от ${chapters.length}${c.law ? ` · ${c.law}` : ""}</span><div class="row-h">${signSVG(c.sign, "")}<h1>${c.title}</h1></div><p class="lede">${c.lede}</p></header>
       <div class="w-slot"></div>
       <div class="r-slot"></div>
-      <h2 class="section-title">Провери се <small>${qsFor(c.id).length} въпроса · клавиши 1–4</small></h2>
-      <div class="q-slot"></div>
+      <div class="done-card"></div>
       <nav class="pager" aria-label="Съседни глави"></nav>
     </div>`);
     if (W[c.id]) {
-      page.querySelector(".w-slot").appendChild(h(`<h2 class="section-title">Опитай</h2>`));
+      page.querySelector(".w-slot").appendChild(h(`<h2 class="section-title">${c.id === "situacii" ? "Пусни анимацията" : "Опитай"}</h2>`));
       W[c.id](page.querySelector(".w-slot"));
     }
     const rules = RULES[c.id] || [];
     if (rules.length) {
       const r = page.querySelector(".r-slot");
       r.appendChild(h(`<h2 class="section-title">Правилата</h2>`));
-      const grid = h(`<div class="rules"></div>`);
-      rules.forEach((x) => grid.appendChild(h(`<article class="rule ${x.k || ""}">${x.il && window.BGIllustrations[x.il] ? `<figure class="rule-il">${window.BGIllustrations[x.il]()}</figure>` : ""}<h4>${x.t}</h4><div class="body">${x.b}</div><span class="lawref">${x.ref}</span></article>`)));
-      r.appendChild(grid);
+      const list = h(`<div class="rules"></div>`);
+      rules.forEach((x) => {
+        const il = x.il && window.BGIllustrations[x.il] ? `<figure class="rule-il">${window.BGIllustrations[x.il]()}</figure>` : "";
+        list.appendChild(h(`<article class="rule ${x.k || ""} ${il ? "has-il" : ""}">${il}<div class="rule-text"><h4>${x.t}</h4><div class="body">${x.b}</div><span class="lawref">${x.ref}</span></div></article>`));
+      });
+      r.appendChild(list);
     }
-    quiz(page.querySelector(".q-slot"), qsFor(c.id));
+    const doneCard = page.querySelector(".done-card");
+    const drawDone = () => {
+      const read = isRead(c.id);
+      doneCard.innerHTML = `<div class="card done ${read ? "is-read" : ""}"><div><b>${read ? "Главата е прегледана" : "Прегледа ли главата?"}</b><p>${read ? "Ще я отбележим с ✓ в списъка. Можеш да се върнеш по всяко време." : "Отбележи я, за да знаеш докъде си стигнал."}</p></div><button type="button" class="btn ${read ? "" : "primary"} small">${read ? "Отмени" : "Прегледах я"}</button></div>`;
+      doneCard.querySelector("button").addEventListener("click", () => {
+        if (isRead(c.id)) delete progress.read[c.id]; else progress.read[c.id] = true;
+        save(); renderNav(current); drawDone();
+      });
+    };
+    drawDone();
     const pager = page.querySelector(".pager");
-    const prev = chapters[n - 1], next = chapters[n + 1] || CATS.find((x) => x.id === "izpit");
+    const prev = chapters[n - 1], next = chapters[n + 1];
     if (next) pager.appendChild(h(`<a href="#${next.id}">Следваща: ${next.title}<span>›</span></a>`));
+    else pager.appendChild(h(`<a href="#nakratko">Накратко – всичко на един екран<span>›</span></a>`));
     if (prev) pager.appendChild(h(`<a href="#${prev.id}">Предишна: ${prev.title}<span>‹</span></a>`));
-    return page;
-  }
-
-  function exam(c) {
-    const page = h(`<div>
-      <header class="large"><span class="eyebrow">Всички глави</span><h1>${c.title}</h1><p class="lede">${c.lede}</p></header>
-      <div class="q-slot"></div>
-    </div>`);
-    quiz(page.querySelector(".q-slot"), pickExam(), { exam: true });
     return page;
   }
 
@@ -271,28 +300,14 @@
   function route() {
     const id = (location.hash || "#nachalo").slice(1);
     const c = CATS.find((x) => x.id === id);
-    current = c ? c.id : id === "glavi" ? "glavi" : "nachalo";
-    activeQuiz = null;
+    current = c ? c.id : ["glavi", "nakratko"].includes(id) ? id : "nachalo";
     main.innerHTML = "";
-    main.appendChild(current === "glavi" ? chaptersPage() : !c ? today() : c.id === "izpit" ? exam(c) : chapter(c));
+    main.appendChild(current === "glavi" ? chaptersPage() : current === "nakratko" ? nakratko() : !c ? today() : chapter(c));
     renderNav(current);
+    syncTheme();
     window.scrollTo({ top: 0 });
   }
 
-  document.getElementById("reset").addEventListener("click", (e) => {
-    const btn = e.currentTarget;
-    if (btn.dataset.armed !== "1") {
-      btn.dataset.armed = "1";
-      btn.textContent = "Сигурен ли си? Натисни пак";
-      setTimeout(() => { btn.dataset.armed = ""; btn.textContent = "Изчисти напредъка"; }, 4000);
-      return;
-    }
-    progress = { q: {} };
-    save();
-    btn.dataset.armed = "";
-    btn.textContent = "Изчистено";
-    route();
-  });
   window.addEventListener("hashchange", route);
   route();
 })();

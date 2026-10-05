@@ -155,50 +155,53 @@
     for (let x = from; x < to; x += len + gap) s += `<rect x="${x}" y="${y - th / 2}" width="${Math.min(len, to - x)}" height="${th}" class="${cls}"/>`;
     return s;
   }
+  // moving group for the marking cards: values = translate list, kt = keyTimes
+  const mv = (inner, values, kt, dur = 6) => `<g><animateTransform attributeName="transform" type="translate" values="${values}"${kt ? ` keyTimes="${kt}"` : ""} dur="${dur}s" repeatCount="indefinite"/>${inner}</g>`;
+  const walkerDot = (x, y) => `<g transform="translate(${x} ${y})"><circle r="5.5" fill="#f08a24" stroke="#fff" stroke-width="1.5"/><circle cy="-8" r="3.5" fill="#f3c7a1"/></g>`;
   function markSVG(id) {
     let s = roadBase();
     switch (id) {
       case "m1":
-        s += `<rect x="0" y="58.5" width="300" height="3" class="r-paint"/>${car(70, 82)}${car(220, 38, -1, "car-b")}`;
+        s += `<rect x="0" y="58.5" width="300" height="3" class="r-paint"/>${mv(car(70, 82), "0 0;180 0;-90 0;0 0", "0;.67;.67;1")}${mv(car(220, 38, -1, "car-b"), "0 0;-260 0;60 0;0 0", "0;.8;.8;1")}`;
         break;
       case "m2":
-        s += `<rect x="0" y="55.5" width="300" height="3" class="r-paint"/><rect x="0" y="61.5" width="300" height="3" class="r-paint"/>${car(70, 84)}${car(220, 36, -1, "car-b")}`;
+        s += `<rect x="0" y="55.5" width="300" height="3" class="r-paint"/><rect x="0" y="61.5" width="300" height="3" class="r-paint"/>${mv(car(70, 84), "0 0;180 0;-90 0;0 0", "0;.67;.67;1")}${mv(car(220, 36, -1, "car-b"), "0 0;-260 0;60 0;0 0", "0;.8;.8;1")}`;
         break;
       case "m3":
-        s += dashes(60, 30, 20) + car(60, 82) + `<path d="M84 82 C120 82 120 38 160 38" class="s-go" fill="none" stroke-width="3" stroke-dasharray="6 5" marker-end="url(#mk-go)"/>`;
+        s += dashes(60, 30, 20) + mv(car(60, 82), "0 0;30 0;100 -44;180 -44;180 -44", "0;.2;.55;.85;1") + `<path d="M84 82 C120 82 120 38 160 38" class="s-go" fill="none" stroke-width="3" stroke-dasharray="6 5" marker-end="url(#mk-go)"/>`;
         break;
       case "warnline":
-        s += dashes(60, 42, 10, 0, 200) + `<rect x="210" y="58.5" width="90" height="3" class="r-paint"/>` + car(60, 82);
+        s += dashes(60, 42, 10, 0, 200) + `<rect x="210" y="58.5" width="90" height="3" class="r-paint"/>` + car(150, 82, 1, "car-b") + mv(car(60, 82), "0 0;30 -44;130 -44;160 0;220 0;220 0", "0;.2;.55;.75;.95;1");
         break;
       case "m5":
-        s += `<rect x="0" y="54.5" width="300" height="3" class="r-paint"/>` + dashes(63, 30, 20) + car(50, 84) + car(250, 35, -1, "car-b") +
+        s += `<rect x="0" y="54.5" width="300" height="3" class="r-paint"/>` + dashes(63, 30, 20) + mv(car(50, 84), "0 0;30 0;100 -44;170 -44;170 -44", "0;.2;.55;.85;1") + mv(car(250, 35, -1, "car-b"), "0 0;-300 0;0 0", "0;.9;1") +
           `<path d="M74 84 C110 84 110 40 150 40" class="s-go" fill="none" stroke-width="3" stroke-dasharray="6 5" marker-end="url(#mk-go)"/>`;
         break;
       case "m6":
-        s += `<rect x="0" y="58.5" width="300" height="3" class="r-paint"/><rect x="222" y="62" width="8" height="40" class="r-paint"/><text x="198" y="82" class="r-text" font-size="15" font-weight="800" text-anchor="middle" dominant-baseline="central" transform="rotate(-90 198 82)">STOP</text>${car(150, 82)}${signAt("B2", 236, 76, 30)}`;
+        s += `<rect x="0" y="58.5" width="300" height="3" class="r-paint"/><rect x="222" y="62" width="8" height="40" class="r-paint"/><text x="198" y="82" class="r-text" font-size="15" font-weight="800" text-anchor="middle" dominant-baseline="central" transform="rotate(-90 198 82)">STOP</text>${mv(car(150, 82), "-110 0;48 0;48 0;160 0;160 0", "0;.35;.6;.85;1")}${signAt("B2", 236, 76, 30)}`;
         break;
       case "m7":
         s += `<rect x="0" y="58.5" width="300" height="3" class="r-paint"/>`;
         for (let y = 64; y < 102; y += 9) s += `<rect x="226" y="${y}" width="6" height="5" class="r-paint"/>`;
-        s += `<polygon points="178,82 206,70 206,94" fill="none" class="s-paint" stroke-width="3"/>${car(120, 82)}${signAt("B1", 238, 74, 30)}`;
+        s += `<polygon points="178,82 206,70 206,94" fill="none" class="s-paint" stroke-width="3"/>${mv(car(120, 82), "-80 0;85 0;85 0;190 0;190 0", "0;.35;.55;.85;1")}${signAt("B1", 238, 74, 30)}`;
         break;
       case "m8":
         s = roadBase();
         for (let y = 20; y < 100; y += 13) s += `<rect x="128" y="${y}" width="44" height="8" class="r-paint"/>`;
-        s += `${car(70, 82)}${car(240, 38, -1, "car-b")}`;
+        s += `${mv(car(70, 82), "0 0;35 0;35 0;200 0;200 0", "0;.2;.65;.95;1")}${mv(car(240, 38, -1, "car-b"), "0 0;-35 0;-35 0;-240 0;-240 0", "0;.2;.65;.95;1")}${mv(walkerDot(150, 112), "0 0;0 0;0 -96;0 -96", "0;.2;.62;1")}`;
         break;
       case "m14": {
         s += `<rect x="0" y="58.5" width="300" height="3" class="r-paint"/>`;
         let pts = "";
         for (let i = 0, x = 50; x <= 250; x += 12, i++) pts += `${x},${i % 2 ? 90 : 99} `;
-        s += `<polyline points="${pts}" fill="none" class="s-yellow" stroke-width="3.5" stroke-linejoin="miter"/><text x="150" y="76" class="r-text" font-size="11" font-weight="700" text-anchor="middle">BUS</text>`;
+        s += `<polyline points="${pts}" fill="none" class="s-yellow" stroke-width="3.5" stroke-linejoin="miter"/><text x="150" y="76" class="r-text" font-size="11" font-weight="700" text-anchor="middle">BUS</text>${mv(`<rect x="-30" y="-10" width="60" height="20" rx="4" fill="#2ea44f"/><rect x="-24" y="-6" width="40" height="5" rx="1" fill="#cfe6fb"/>`, "-60 0;150 0;150 0;380 0;380 0", "0;.35;.65;1;1", 7).replace("<g>", '<g transform="translate(0 92)"><g>') + "</g>"}`;
         break;
       }
       case "m15":
         s += `<defs><clipPath id="cp-m15"><polygon points="60,60 150,44 240,44 240,76 150,76"/></clipPath></defs>`;
         s += `<g clip-path="url(#cp-m15)">`;
         for (let x = 40; x < 280; x += 12) s += `<line x1="${x}" y1="80" x2="${x + 32}" y2="40" class="s-paint" stroke-width="3"/>`;
-        s += `</g><polygon points="60,60 150,44 240,44 240,76 150,76" fill="none" class="s-paint" stroke-width="3"/>${car(30, 86)}${car(280, 32, -1, "car-b")}`;
+        s += `</g><polygon points="60,60 150,44 240,44 240,76 150,76" fill="none" class="s-paint" stroke-width="3"/>${mv(car(30, 86), "0 0;300 0;0 0", "0;.9;1")}${mv(car(280, 32, -1, "car-b"), "0 0;-300 0;0 0", "0;.9;1")}`;
         break;
       case "m10": {
         s += dashes(44, 26, 18) + dashes(76, 26, 18);
@@ -207,14 +210,14 @@
           if (kind === "l") return `<path d="M${x} ${y - 3} H${x + 22} V${y - 14} H${x + 16} L${x + 25} ${y - 26} L${x + 34} ${y - 14} H${x + 28} V${y + 3} H${x} Z" class="r-paint"/>`;
           return `<path d="M${x} ${y + 3} H${x + 22} V${y + 14} H${x + 16} L${x + 25} ${y + 26} L${x + 34} ${y + 14} H${x + 28} V${y - 3} H${x} Z" class="r-paint"/>`;
         };
-        s += arrow(150, 32, "l") + arrow(150, 60, "s") + arrow(150, 86, "r") + car(70, 28) + car(70, 60) + car(70, 92);
+        s += arrow(150, 32, "l") + arrow(150, 60, "s") + arrow(150, 86, "r") + mv(car(70, 28), "0 0;140 0;180 -40;180 -40", "0;.6;.8;1") + mv(car(70, 60), "0 0;240 0;240 0", "0;.8;1") + mv(car(70, 92), "0 0;140 0;180 40;180 40", "0;.6;.8;1");
         break;
       }
       case "m17":
         s += `<rect x="0" y="58.5" width="300" height="3" class="r-paint"/><rect x="140" y="17" width="26" height="86" class="r-bump"/>`;
         for (let y = 66; y < 100; y += 12) s += `<polygon points="144,${y} 162,${y + 5} 144,${y + 10}" class="r-paint"/>`;
         for (let y = 22; y < 56; y += 12) s += `<polygon points="162,${y} 144,${y + 5} 162,${y + 10}" class="r-paint"/>`;
-        s += car(70, 82) + car(240, 38, -1, "car-b");
+        s += mv(car(70, 82), "0 0;50 0;90 0;200 0;200 0", "0;.3;.65;.9;1") + mv(car(240, 38, -1, "car-b"), "0 0;-50 0;-90 0;-210 0;-210 0", "0;.3;.65;.9;1");
         break;
     }
     return `<svg viewBox="0 0 300 120" role="img" aria-hidden="true"><defs><marker id="mk-go" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" class="f-go"/></marker></defs>${s}</svg>`;
@@ -240,9 +243,8 @@
   };
   function trafficLightWidget(root) {
     let state = "red";
-    let timer = null;
     const box = h(`<div class="widget">
-      <div class="widget-head"><h3>Светофар</h3><p>Избери сигнал или пусни цикъла.</p></div>
+      <div class="widget-head"><h3>Светофар</h3><p>Избери сигнал, за да видиш какво означава.</p></div>
       <div class="split">
         <div style="display:grid;gap:14px;justify-items:center"><svg class="stage tl-svg" viewBox="0 0 220 300" style="max-width:260px"></svg></div>
         <div class="readout" aria-live="polite"></div>
@@ -253,11 +255,8 @@
     const readout = box.querySelector(".readout");
     const controls = box.querySelector(".controls");
     const order = [["red", "Червено"], ["ry", "Червено + жълто"], ["green", "Зелено"], ["yellow", "Жълто"], ["flash", "Мигащо жълто"], ["arrow", "Зелена стрелка"], ["gblink", "Мигащо зелено"]];
-    const seg = segmented(order, state, (v) => { stop(); set(v); }, "Сигнал на светофара");
+    const seg = segmented(order, state, (v) => set(v), "Сигнал на светофара");
     controls.appendChild(seg);
-    const play = h(`<button type="button" class="btn small">▶ Цикъл</button>`);
-    controls.appendChild(play);
-    play.addEventListener("click", () => (timer ? stop() : start()));
 
     function lamp(cx, cy, color, on) {
       const cls = on === "blink" ? "blink" : "";
@@ -282,22 +281,6 @@
       state = v;
       seg.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(order[i][0] === v)));
       draw();
-    }
-    const cycle = [["red", 3200], ["ry", 1400], ["green", 3200], ["yellow", 1600]];
-    function start() {
-      let i = 0;
-      play.textContent = "■ Спри цикъла";
-      const step = () => {
-        set(cycle[i][0]);
-        timer = setTimeout(step, cycle[i][1]);
-        i = (i + 1) % cycle.length;
-      };
-      step();
-    }
-    function stop() {
-      if (timer) clearTimeout(timer);
-      timer = null;
-      play.textContent = "▶ Цикъл";
     }
     draw();
     root.appendChild(box);
@@ -339,14 +322,27 @@
     return `<rect x="156" y="216" width="22" height="38" rx="5" fill="${fill}" stroke="rgba(0,0,0,.35)"/><rect x="159" y="220" width="16" height="8" rx="2" fill="rgba(255,255,255,.75)"/>`;
   }
 
+  // drag horizontally on a 3D stage to orbit the camera
+  function dragOrbit(el, active, onDelta) {
+    let last = null;
+    el.addEventListener("pointerdown", (e) => { if (!active()) return; last = e.clientX; el.setPointerCapture(e.pointerId); });
+    el.addEventListener("pointermove", (e) => { if (last === null) return; const dx = e.clientX - last; last = e.clientX; if (dx) onDelta(-dx * 0.6); });
+    const end = () => (last = null);
+    el.addEventListener("pointerup", end);
+    el.addEventListener("pointercancel", end);
+  }
+
   // ================= Traffic controller =================
   function regulatorWidget(root) {
     let pose = "side";
     let facing = "S"; // direction the chest points to
+    let view = "3d";
+    let orbit = 35; // 3D camera angle around the crossing, degrees (0 = from the bottom of the map)
     const box = h(`<div class="widget">
-      <div class="widget-head"><h3>Сигнали на регулировчика</h3><p>Избери положение и завърти регулировчика. Колите показват кой може да мине.</p></div>
+      <div class="widget-head"><h3>Сигнали на регулировчика</h3><p>Избери положение и завърти регулировчика. Колите показват кой може да мине. В 3D можеш да въртиш камерата.</p></div>
+      <div class="view-bar"></div>
       <div class="split">
-        <svg class="stage" viewBox="-34 -34 368 368"></svg>
+        <div class="stage-wrap"><svg class="stage" viewBox="-34 -34 368 368"></svg><label class="orbit"><span>Камера</span><input type="range" min="0" max="359" value="35" aria-label="Ъгъл на камерата"></label></div>
         <div class="readout" aria-live="polite"></div>
       </div>
       <div class="controls"></div>
@@ -354,6 +350,10 @@
     const svg = box.querySelector("svg");
     const readout = box.querySelector(".readout");
     const controls = box.querySelector(".controls");
+    const orbitInput = box.querySelector(".orbit input");
+    box.querySelector(".view-bar").appendChild(segmented([["3d", "3D"], ["2d", "2D отгоре"]], view, (v) => { view = v; draw(); }, "Изглед"));
+    orbitInput.addEventListener("input", () => { orbit = +orbitInput.value; draw(); });
+    dragOrbit(svg, () => view === "3d", (d) => { orbit = (orbit + d + 360) % 360; orbitInput.value = Math.round(orbit); draw(); });
     controls.appendChild(
       segmented([["up", "Ръка нагоре"], ["side", "Ръце встрани"], ["forward", "Дясна ръка напред"]], pose, (v) => { pose = v; draw(); }, "Положение")
     );
@@ -397,7 +397,84 @@
       </g>`;
     }
 
+    // ---- 3D view ----
+    const FVEC = { S: [0, 1], N: [0, -1], E: [1, 0], W: [-1, 0] };
+    const qb = (p0, c, p1, n = 16) => Array.from({ length: n + 1 }, (_, i) => { const t = i / n; return [(1 - t) * (1 - t) * p0[0] + 2 * (1 - t) * t * c[0] + t * t * p1[0], (1 - t) * (1 - t) * p0[1] + 2 * (1 - t) * t * c[1] + t * t * p1[1]]; });
+    const MOVE_PTS = { straight: [[167, 214], [167, 70]], right: qb([167, 214], [167, 168], [230, 168]), left: qb([167, 214], [167, 132], [70, 132]) };
+    function draw3d(rows) {
+      const G = window.BG3D;
+      box.querySelector(".orbit").hidden = false;
+      const a = rad(orbit);
+      const cam = G.camera({ eye: [150 + 230 * Math.sin(a), 150 + 230 * Math.cos(a), 235], target: [150, 150, 14], f: 390, cx: 150, cy: 150 });
+      let s = cam.poly([[-1500, -1500, 0], [1800, -1500, 0], [1800, 1800, 0], [-1500, 1800, 0]], `fill="#bcd5a9"`);
+      s += cam.poly([[112, -1500, 0], [188, -1500, 0], [188, 1800, 0], [112, 1800, 0]], `fill="#4a4f57"`) + cam.poly([[-1500, 112, 0], [1800, 112, 0], [1800, 188, 0], [-1500, 188, 0]], `fill="#4a4f57"`);
+      for (const d of DIRS) {
+        for (let y = 196; y < 420; y += 18) s += cam.poly([[149, y], [151, y], [151, y + 10], [149, y + 10]].map(([x, yy]) => [...rotPt(x, yy, ROT[d]), 0]), `fill="#fff" opacity=".85"`);
+        const st = rows.find((r) => r.d === d).st;
+        st.moves.forEach((m) => {
+          const pts = MOVE_PTS[m].map(([x, y]) => [...rotPt(x, y, ROT[d]), 0.5]);
+          s += cam.line(pts, `stroke="#1aa64b" stroke-width="4" stroke-dasharray="7 5" stroke-linecap="round" marker-end="url(#mk-reg3)"`);
+        });
+      }
+      const items = [];
+      // cars
+      rows.forEach(({ d, st }) => {
+        const [x, y] = rotPt(167, 240, ROT[d]);
+        items.push(G.car(cam, { x, y, yaw: -90 + ROT[d], col: st.ok ? "#1aa64b" : "#d13b2f" }));
+      });
+      // the traffic controller, chest towards `facing`
+      const f = FVEC[facing], r = [-f[1], f[0]];
+      const C0 = [150, 150];
+      const K = 1.6; // figure scale – bigger than life so the arms read clearly
+      const at = (fw, rt, z) => [C0[0] + (f[0] * fw + r[0] * rt) * K, C0[1] + (f[1] * fw + r[1] * rt) * K, z * K];
+      const yawF = deg(Math.atan2(f[1], f[0]));
+      const uni = "#2c3e5c", skin = "#f3c7a1";
+      const part = (s2, p) => items.push({ d: cam.depth(...p), s: s2 });
+      s += cam.poly(window.BG3D.circle(150, 150, 13 * K, 0.3, 20), `fill="rgba(0,0,0,.25)"`);
+      part(cam.seg(at(0, 4, 24), at(0, 4, 0), 6 * K, "#1d2433"), at(0, 4, 12));
+      part(cam.seg(at(0, -4, 24), at(0, -4, 0), 6 * K, "#1d2433"), at(0, -4, 12));
+      const torso = G.box(cam, { x: 150, y: 150, z0: 22 * K, l: 9 * K, w: 17 * K, h: 19 * K, yaw: yawF, col: uni, faces: { front: "#d4ec3a" } });
+      items.push(torso);
+      // reflective strip on the back
+      const sh = 39;
+      const armSeg = (from, to, baton) => {
+        const mid = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2, (from[2] + to[2]) / 2];
+        let s2 = cam.seg(from, to, 5 * K, uni) + cam.ball(to, 3 * K, skin);
+        if (baton) s2 += cam.seg(to, baton, 3 * K, "#fff") + cam.seg(to, baton, 3 * K, "#111", `stroke-dasharray="4 4"`);
+        items.push({ d: cam.depth(...mid) - 0.5, s: s2 });
+      };
+      const RS = at(0, 10, sh), LS = at(0, -10, sh);
+      if (pose === "up") { armSeg(RS, at(0, 11, 62), at(0, 11, 74)); armSeg(LS, at(1, -11, 22)); }
+      if (pose === "side") { armSeg(RS, at(0, 30, sh), at(0, 42, sh)); armSeg(LS, at(0, -30, sh)); }
+      if (pose === "forward") { armSeg(RS, at(22, 8, sh), at(34, 7, sh)); armSeg(LS, at(1, -11, 22)); }
+      // head with a white cap; the peak shows where he looks
+      part(cam.ball(at(0, 0, 47), 6.5 * K, skin) + cam.ball(at(0, 0, 52), 6.8 * K, "#fff") + cam.seg(at(3, 0, 51), at(10, 0, 51), 3.5 * K, "#1d2433"), at(0, 0, 47));
+      s += G.paint(items);
+      // labels: body sides on the ground, status above every car
+      const tag = (p, text, bg, fg = "#fff", fs = 10) => {
+        if (!p) return "";
+        const w = text.length * fs * 0.62 + 12;
+        return `<g><rect x="${(p[0] - w / 2).toFixed(1)}" y="${(p[1] - 10).toFixed(1)}" width="${w.toFixed(1)}" height="20" rx="10" fill="${bg}" opacity=".95"/><text x="${p[0].toFixed(1)}" y="${(p[1] + 0.5).toFixed(1)}" font-size="${fs}" font-weight="700" fill="${fg}" text-anchor="middle" dominant-baseline="central">${text}</text></g>`;
+      };
+      // body markers: "гърди"/"гръб" on whichever side faces the camera, Л/Д on the shoulders
+      const chestSeen = f[0] * (cam.eye[0] - 150) + f[1] * (cam.eye[1] - 150) > 0;
+      s += tag(cam.P(...at(chestSeen ? 5 : -5, 0, 31)), chestSeen ? "гърди" : "гръб", chestSeen ? "rgba(31,41,51,.85)" : "rgba(255,255,255,.92)", chestSeen ? "#fff" : "#1f2933", 9.5);
+      const badge = (p, t) => p ? `<g><circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="9" fill="#fff" stroke="#1f2933" stroke-width="1.5"/><text x="${p[0].toFixed(1)}" y="${(p[1] + 0.5).toFixed(1)}" font-size="10" font-weight="800" fill="#1f2933" text-anchor="middle" dominant-baseline="central">${t}</text></g>` : "";
+      s += badge(cam.P(...at(0, 12, sh + 9)), "Д") + badge(cam.P(...at(0, -12, sh + 9)), "Л");
+      rows.forEach(({ d, st }) => {
+        const [x, y] = rotPt(167, 240, ROT[d]);
+        s += tag(cam.P(x, y, 40), st.short, st.ok ? "#1aa64b" : "#d13b2f");
+      });
+      svg.innerHTML = `<defs><marker id="mk-reg3" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#1aa64b"/></marker></defs><rect x="-34" y="-34" width="368" height="368" fill="#cfe3f5"/>` + s;
+    }
+
     function draw() {
+      const rows = DIRS.map((d) => { const rel = relation(d); return { d, rel, st: status(rel) }; });
+      if (view === "3d") draw3d(rows); else draw2d();
+      readoutFor(rows);
+    }
+    function draw2d() {
+      box.querySelector(".orbit").hidden = true;
       let s = crossroads();
       // zebra crossings to show pedestrian areas
       const ped = [];
@@ -417,7 +494,9 @@
       }
       s += figure();
       svg.innerHTML = `<defs><marker id="mk-reg" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#1aa64b"/></marker></defs>` + s;
-
+      void ped;
+    }
+    function readoutFor(ped) {
       const poseText = {
         up: ["Дясна ръка вдигната вертикално", "„ВНИМАНИЕ, СПРИ!“ за всички. Който вече е в кръстовището, го освобождава. Не спира само този, който е толкова близо, че не може да спре безопасно.", "ЗДвП чл. 10, ал. 2, т. 1"],
         side: ["Ръце протегнати встрани (или спуснати след това)", "Минават водачите срещу лявото и дясното рамо – направо и надясно. Пешеходците пресичат пред гърдите или зад гърба му. Всички останали спират.", "ЗДвП чл. 10, ал. 2, т. 2"],
@@ -479,10 +558,14 @@
     let raf = null;
     let tmo = null;
     const C = 170, RO = 88, RI = 62, OFF = 13;
+    let view = "3d"; // "3d" (overview), "chase" (behind the car) or "2d"
+    let orbit = 0;
+    let lastI = 0;
     const box = h(`<div class="widget">
-      <div class="widget-head"><h3>Път през кръговото</h3><p>Влизаш отдолу. Избери изход и лента, после „Пусни“.</p></div>
+      <div class="widget-head"><h3>Път през кръговото</h3><p>Влизаш отдолу. Избери изход и лента, после „Пусни“. В 3D можеш да въртиш камерата или да караш „зад колата“.</p></div>
+      <div class="view-bar"></div>
       <div class="split">
-        <svg class="stage" viewBox="0 0 340 340"></svg>
+        <div class="stage-wrap"><svg class="stage" viewBox="0 0 340 340"></svg><label class="orbit"><span>Камера</span><input type="range" min="0" max="359" value="0" aria-label="Ъгъл на камерата"></label></div>
         <div class="readout" aria-live="polite"></div>
       </div>
       <div class="controls"></div>
@@ -490,6 +573,10 @@
     const svg = box.querySelector("svg");
     const readout = box.querySelector(".readout");
     const controls = box.querySelector(".controls");
+    const orbitInput = box.querySelector(".orbit input");
+    box.querySelector(".view-bar").appendChild(segmented([["3d", "3D"], ["chase", "3D – зад колата"], ["2d", "2D отгоре"]], view, (v) => { view = v; render(lastI); }, "Изглед"));
+    orbitInput.addEventListener("input", () => { orbit = +orbitInput.value; render(lastI); });
+    dragOrbit(svg, () => view === "3d", (d) => { orbit = (orbit + d + 360) % 360; orbitInput.value = Math.round(orbit); render(lastI); });
     const exitSeg = segmented([[1, "1-ви изход (надясно)"], [2, "2-ри (направо)"], [3, "3-ти (наляво)"], [4, "Обратно"]], exit, (v) => { exit = v; setLane(lane); reset(); }, "Изход");
     controls.appendChild(exitSeg);
     let laneSeg = segmented([["outer", "Външна лента"], ["inner", "Вътрешна лента"]], lane, (v) => { setLane(v); reset(); }, "Лента");
@@ -585,14 +672,64 @@
       exit: ["Излизане", "Излизаш от външната лента – това е завой надясно. Пропусни пешеходците на пътеката."],
     };
     let pts = buildPath();
+    function scene3d(p, heading, blinkOn) {
+      const G = window.BG3D;
+      let cam;
+      if (view === "chase") {
+        const hx = Math.cos(rad(heading)), hy = Math.sin(rad(heading));
+        cam = G.camera({ eye: [p.x - hx * 92, p.y - hy * 92, 62], target: [p.x + hx * 70, p.y + hy * 70, 0], f: 300, cx: 170, cy: 160 });
+      } else {
+        const a = rad(orbit);
+        cam = G.camera({ eye: [C + 270 * Math.sin(a), C + 270 * Math.cos(a), 250], target: [C, C - 6, 0], f: 330, cx: 170, cy: 172 });
+      }
+      let s = `<rect width="340" height="340" fill="#cfe3f5"/>`;
+      s += cam.poly([[-1500, -1500, 0], [1800, -1500, 0], [1800, 1800, 0], [-1500, 1800, 0]], `fill="#bcd5a9"`);
+      s += cam.poly([[144, -1500, 0], [196, -1500, 0], [196, 1800, 0], [144, 1800, 0]], `fill="#4a4f57"`) + cam.poly([[-1500, 144, 0], [1800, 144, 0], [1800, 196, 0], [-1500, 196, 0]], `fill="#4a4f57"`);
+      s += cam.poly(G.circle(C, C, 101, 0, 64), `fill="#4a4f57"`);
+      s += cam.line([...G.circle(C, C, 75, 0.2, 64), [C + 75, C, 0.2]], `stroke="#fff" stroke-width="2" stroke-dasharray="8 7" opacity=".85"`);
+      // arms: centre line, zebra, give-way line (in the frame of the bottom arm, rotated)
+      const R = (x, y, a, z = 0.2) => [...rotPt(x, y, a, C, C), z];
+      const signs = [];
+      for (const a of [0, 90, 180, 270]) {
+        s += cam.poly([R(168.5, 272, a), R(171.5, 272, a), R(171.5, 600, a), R(168.5, 600, a)], `fill="#fff" opacity=".9"`);
+        for (let x = 148; x < 194; x += 8) s += cam.poly([R(x, 292, a), R(x + 5, 292, a), R(x + 5, 308, a), R(x, 308, a)], `fill="#fff"`);
+        for (let x = 172; x < 194; x += 6) s += cam.poly([R(x, 270, a), R(x + 4, 270, a), R(x + 4, 273, a), R(x, 273, a)], `fill="#fff"`);
+        signs.push({ pos: rotPt(207, 280, a, C, C), code: "B1" }, { pos: rotPt(207, 304, a, C, C), code: "G12" });
+      }
+      // route
+      s += cam.line(pts.map((pt) => [pt.x, pt.y, 0.4]), `style="stroke:var(--accent)" stroke-width="3" stroke-dasharray="6 6" opacity=".9" stroke-linejoin="round"`);
+      // raised central island
+      const top = G.circle(C, C, 50, 4, 48);
+      s += cam.poly(G.circle(C, C, 50, 0, 48), `fill="#9aa6b2"`) + cam.poly(top, `fill="#a6c48f" stroke="#fff" stroke-width="2"`);
+      const items = [];
+      // signs as upright billboards
+      signs.forEach(({ pos, code }) => {
+        const base = cam.P(pos[0], pos[1], 0), tp = cam.P(pos[0], pos[1], 30);
+        if (!base || !tp) return;
+        const sz = 13 * cam.scale(pos[0], pos[1], 30);
+        items.push({ d: cam.depth(pos[0], pos[1], 15), s: `<line x1="${base[0].toFixed(1)}" y1="${base[1].toFixed(1)}" x2="${tp[0].toFixed(1)}" y2="${tp[1].toFixed(1)}" stroke="#8b939c" stroke-width="${Math.max(1, 1.6 * cam.scale(pos[0], pos[1], 15)).toFixed(1)}"/>${signAt(code, tp[0] - sz / 2, tp[1] - sz, sz)}` });
+      });
+      items.push(G.car(cam, { x: p.x, y: p.y, yaw: heading, col: "#2b6fe0", blink: blinkOn ? p.blink : null }));
+      s += G.paint(items);
+      // exit numbers
+      [[1, 0], [2, -90], [3, -180]].forEach(([n, a]) => {
+        const [x, y] = P(128, a);
+        const q = cam.P(x + Math.cos(rad(a)) * 0, y, 0);
+        if (q) s += `<g><circle cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="11" style="fill:${n === exit ? "var(--accent)" : "rgba(0,0,0,.55)"}"/><text x="${q[0].toFixed(1)}" y="${(q[1] + 1).toFixed(1)}" font-size="11" font-weight="800" fill="#fff" text-anchor="middle" dominant-baseline="central">${n}</text></g>`;
+      });
+      return s;
+    }
     function render(i) {
+      lastI = i;
+      box.querySelector(".orbit").hidden = view !== "3d";
       const p = pts[Math.min(i, pts.length - 1)];
       const q = pts[Math.min(i + 1, pts.length - 1)];
       const prev = pts[Math.max(i - 1, 0)];
       const ang = deg(Math.atan2(q.y - prev.y, q.x - prev.x)) + 90;
       const d = pts.map((pt, k) => `${k ? "L" : "M"}${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`).join(" ");
       const blinkOn = p.blink && Math.floor(i / 6) % 2 === 0;
-      svg.innerHTML =
+      if (view !== "2d") svg.innerHTML = scene3d(p, ang - 90, blinkOn);
+      else svg.innerHTML =
         scene() +
         `<path d="${d}" fill="none" style="stroke:var(--accent)" stroke-width="3" stroke-dasharray="6 6" opacity=".9"/>` +
         `<g transform="translate(${p.x} ${p.y}) rotate(${ang})"><rect x="-9" y="-16" width="18" height="32" rx="4" fill="#2b6fe0" stroke="rgba(0,0,0,.4)"/><rect x="-7" y="-13" width="14" height="7" rx="2" fill="rgba(255,255,255,.8)"/>
@@ -656,8 +793,8 @@
     const ZONES = [
       { from: 0, to: 15, name: "кръстовище", why: "На кръстовище и на по-малко от 5 м от него престоят и паркирането са забранени.", ref: "ЗДвП чл. 98, ал. 1, т. 6", kind: "both" },
       { from: 25, to: 34, name: "пешеходна пътека", why: "На пешеходна пътека и на по-малко от 5 м преди нея престоят и паркирането са забранени.", ref: "ЗДвП чл. 98, ал. 1, т. 5", kind: "both" },
-      { from: 44, to: 56, name: "спирка", why: "На спирка паркирането е забранено. Престой – само за слизане на пътник и ако не пречиш на автобуса.", ref: "ЗДвП чл. 69; чл. 98, ал. 2, т. 3", kind: "park", stay: "wait" },
-      { from: 61, to: 64, name: "вход на гараж", why: "Пред вход на гараж паркирането е забранено, когато затруднява достъпа. Престоят е разрешен.", ref: "ЗДвП чл. 98, ал. 2, т. 2", kind: "park" },
+      { from: 44, to: 56, name: "спирка", why: "На спирка паркирането е забранено. Престой – само за слизане на пътник и ако не пречиш на автобуса.", ref: "ЗДвП чл. 69; чл. 98, ал. 2, т. 3", kind: "park", stay: { pill: "Само за слизане на пътник", why: "На спирка може само за миг – пътникът слиза и тръгваш. Ако идва автобус, не спирай." } },
+      { from: 61, to: 64, name: "вход на гараж", why: "Пред вход на гараж паркирането е забранено, когато пречи на влизането и излизането.", ref: "ЗДвП чл. 98, ал. 2, т. 1 и 2", kind: "park", stay: { pill: "Само ако не пречиш", why: "Престоят пред гараж не е изрично забранен – но само докато никой не иска да влезе или излезе. Щом блокираш някого, ставаш „пречка за движението“, а там престоят е забранен. Остани в колата и освободи веднага.", ref: "ЗДвП чл. 98, ал. 1, т. 1 и ал. 2, т. 2" } },
       { from: 65, to: 80, name: "кръстовище", why: "На кръстовище и на по-малко от 5 м от него престоят и паркирането са забранени.", ref: "ЗДвП чл. 98, ал. 1, т. 6", kind: "both" },
     ];
     const box = h(`<div class="widget">
@@ -713,7 +850,7 @@
       const a = pos, b = pos + CAR;
       const hits = ZONES.filter((z) => a < z.to && b > z.from);
       const bad = hits.filter((z) => z.kind === "both" || (mode === "park" && z.kind === "park"));
-      const cond = hits.filter((z) => mode === "stay" && z.stay === "wait");
+      const cond = hits.filter((z) => mode === "stay" && z.stay);
       return { bad, cond };
     }
     function draw() {
@@ -729,7 +866,7 @@
       if (bad.length) {
         readout.innerHTML = `<span class="pill stop">${verb} тук е забранен${mode === "park" ? "о" : ""}</span>${bad.map((z) => `<p><b>${z.name[0].toUpperCase() + z.name.slice(1)}.</b> ${z.why}</p><span class="lawref">${z.ref}</span>`).join("")}`;
       } else if (cond.length) {
-        readout.innerHTML = `<span class="pill wait">Само за слизане на пътник</span><p>${cond[0].why}</p><span class="lawref">${cond[0].ref}</span>`;
+        readout.innerHTML = `<span class="pill wait">${cond[0].stay.pill}</span><p><b>${cond[0].name[0].toUpperCase() + cond[0].name.slice(1)}.</b> ${cond[0].stay.why}</p><span class="lawref">${cond[0].stay.ref || cond[0].ref}</span>`;
       } else {
         const toZebraBefore = 30 - (pos + CAR);
         const extra = toZebraBefore > 0 && toZebraBefore < 12 ? ` До пешеходната пътека остават ${toZebraBefore.toFixed(1)} м.` : "";
@@ -752,88 +889,206 @@
 
   // ================= Mirrors and blind spot =================
   function mirrorWidget(root) {
-    const HALF = 9.5;
-    let phi = HALF / 2;
-    let carY = 250;
-    const box = h(`<div class="widget">
-      <div class="widget-head"><h3>Страничните огледала и мъртвата зона</h3><p>Изглед отгоре. Нагласи огледалата и премести колата в лявата лента.</p></div>
-      <div class="split">
-        <svg class="stage" viewBox="0 0 520 600" style="max-height:520px"></svg>
-        <div style="display:grid;gap:14px;min-width:0">
+    // World in metres: x → right, y → backwards (the car drives towards -y), z → up.
+    // Own car: 4.5 × 1.8 m, front bumper at y = 0, left-hand drive.
+    const LANE = 3.5;
+    const EYE = [-0.4, 1.9, 1.15];
+    const M = { L: [-1.02, 1.3, 1.0], R: [1.02, 1.3, 1.0], I: [0, 1.45, 1.32] };
+    const HALF = { L: 9.5, R: 10, I: 11 }; // half field of view of each mirror, degrees
+    let phi = HALF.L / 2; // how far the side mirrors are turned outwards (0 = straight back along the car)
+    let other = 6; // other car: distance of its front bumper behind your eyes, metres (negative = ahead)
+    let side = "L";
+    let view = "both";
+    const box = h(`<div class="widget mirror-w">
+      <div class="widget-head"><h3>Огледалата и мъртвата зона</h3><p>Нагласи страничните огледала и премести колата в съседната лента. Отгоре виждаш какво покрива всяко огледало, а от шофьорското място – какво точно показва.</p></div>
+      <div class="view-bar"></div>
+      <div class="mir-stages">
+        <figure class="mir-top"><svg class="stage" viewBox="0 0 364 560" aria-label="Изглед отгоре"></svg><figcaption>Отгоре</figcaption></figure>
+        <figure class="mir-cab"><svg class="stage" viewBox="0 0 520 330" aria-label="Изглед от шофьорското място"></svg><figcaption>От шофьорското място</figcaption></figure>
+      </div>
+      <div class="split" style="margin-top:12px">
+        <div style="display:grid;gap:12px;min-width:0">
           <div class="controls"></div>
-          <label class="range">Ъгъл на огледалата навън <input type="range" id="mir-angle" min="0" max="24" step="0.5" value="${phi}"><output></output></label>
-          <label class="range">Кола в лявата лента: отпред ↔ отзад <input type="range" id="mir-car" min="40" max="470" step="5" value="${carY}"><output></output></label>
-          <div class="readout" aria-live="polite"></div>
+          <label class="range">Ъгъл на страничните огледала навън <input type="range" min="0" max="24" step="0.5" value="${phi}"><output></output></label>
+          <label class="range">Другата кола: до теб ↔ назад <input type="range" min="-3" max="22" step="0.25" value="${other}"><output></output></label>
         </div>
+        <div class="readout" aria-live="polite"></div>
       </div>
     </div>`);
-    const svg = box.querySelector("svg");
+    const [svgTop, svgCab] = box.querySelectorAll(".mir-stages svg");
     const [rAngle, rCar] = box.querySelectorAll("input");
     const [oAngle, oCar] = box.querySelectorAll("output");
     const readout = box.querySelector(".readout");
     const ctr = box.querySelector(".controls");
+    box.querySelector(".view-bar").appendChild(segmented([["both", "Двата изгледа"], ["top", "Отгоре"], ["cab", "От шофьорското място"]], view, (v) => { view = v; draw(); }, "Изглед"));
+    ctr.appendChild(segmented([["L", "Кола отляво"], ["R", "Кола отдясно"]], side, (v) => { side = v; draw(); }, "Лента на другата кола"));
     const presetClassic = h(`<button type="button" class="btn small">Класическа</button>`);
     const presetWide = h(`<button type="button" class="btn small">Разширена</button>`);
-    presetClassic.addEventListener("click", () => { phi = HALF / 2; draw(); });
-    presetWide.addEventListener("click", () => { phi = HALF + 2; draw(); });
+    presetClassic.addEventListener("click", () => { phi = HALF.L / 2; draw(); });
+    presetWide.addEventListener("click", () => { phi = HALF.L + 2; draw(); });
     ctr.append(presetClassic, presetWide);
 
-    const BODY = { x1: 222, x2: 298, y1: 150, y2: 310 };
-    const ML = [213, 196], MR = [307, 196], MI = [260, 206];
-    const EYE_Y = 220;
-    const LEN = 900;
+    // ---- geometry ----
+    const otherRect = () => { const cx = side === "L" ? -LANE : LANE, front = EYE[1] + other; return { x1: cx - 0.9, x2: cx + 0.9, y1: front, y2: front + 4.5, cx }; };
+    // angle of a point seen from a mirror, measured from "straight back", positive = outwards
+    const outAng = (m, sgn, x, y) => deg(Math.atan2(sgn * (x - m[0]), y - m[1]));
+    function seenIn(key, r) {
+      const m = M[key], sgn = key === "L" ? -1 : key === "R" ? 1 : 1;
+      const lo = key === "I" ? -HALF.I : phi - HALF[key], hi = key === "I" ? HALF.I : phi + HALF[key];
+      const pts = [[r.x1, r.y1], [r.x2, r.y1], [r.x1, r.y2], [r.x2, r.y2]].filter((p) => p[1] > (key === "I" ? 4.6 : m[1] + 0.3));
+      if (!pts.length) return false;
+      const as = pts.map((p) => outAng(m, sgn, p[0], p[1]));
+      return Math.max(...as) >= lo && Math.min(...as) <= hi;
+    }
+    const directly = (r) => r.y1 < EYE[1] - 0.3; // its front is ahead of your shoulder → peripheral vision
+    const ownShare = () => clamp((HALF.L - phi) / (2 * HALF.L), 0, 1);
 
-    function cone(m, side) {
-      // side: -1 = left (outward is -x), +1 = right
-      const a1 = phi - HALF, a2 = phi + HALF;
-      const p = (a) => [m[0] + side * Math.sin(rad(a)) * LEN, m[1] + Math.cos(rad(a)) * LEN];
-      const [x1, y1] = p(a1), [x2, y2] = p(a2);
-      return `<polygon points="${m[0]},${m[1]} ${x1},${y1} ${x2},${y2}"/>`;
+    // ---- top view ----
+    const S = 25, X = (x) => 182 + x * S, Y = (y) => (y + 3.2) * S;
+    const topCar = (cx, cy, col, own) => {
+      const w = 1.8 * S, l = 4.5 * S, x = X(cx) - w / 2, y = Y(cy);
+      return `<g><rect x="${x - 3}" y="${y + 0.12 * l}" width="5" height="${0.2 * l}" rx="2" fill="#1d2126"/><rect x="${x + w - 2}" y="${y + 0.12 * l}" width="5" height="${0.2 * l}" rx="2" fill="#1d2126"/><rect x="${x - 3}" y="${y + 0.68 * l}" width="5" height="${0.2 * l}" rx="2" fill="#1d2126"/><rect x="${x + w - 2}" y="${y + 0.68 * l}" width="5" height="${0.2 * l}" rx="2" fill="#1d2126"/>
+        <rect x="${x}" y="${y}" width="${w}" height="${l}" rx="${w * 0.3}" fill="${col}" stroke="rgba(0,0,0,.35)"/>
+        <rect x="${x + 5}" y="${y + 0.2 * l}" width="${w - 10}" height="${0.17 * l}" rx="5" fill="#cfe6fb"/><rect x="${x + 5}" y="${y + 0.4 * l}" width="${w - 10}" height="${0.3 * l}" rx="5" fill="rgba(0,0,0,.14)"/><rect x="${x + 6}" y="${y + 0.74 * l}" width="${w - 12}" height="${0.12 * l}" rx="4" fill="#cfe6fb"/>
+        <rect x="${x + 4}" y="${y + 1}" width="8" height="4" rx="1.5" fill="#fff6c2"/><rect x="${x + w - 12}" y="${y + 1}" width="8" height="4" rx="1.5" fill="#fff6c2"/><rect x="${x + 4}" y="${y + l - 5}" width="8" height="4" rx="1.5" fill="#e0352b"/><rect x="${x + w - 12}" y="${y + l - 5}" width="8" height="4" rx="1.5" fill="#e0352b"/>
+        ${own ? `<rect x="${X(M.L[0]) - 7}" y="${Y(M.L[1]) - 3}" width="8" height="6" rx="2" fill="#16181b"/><rect x="${X(M.R[0]) - 1}" y="${Y(M.R[1]) - 3}" width="8" height="6" rx="2" fill="#16181b"/><circle cx="${X(EYE[0])}" cy="${Y(EYE[1])}" r="7" fill="#f3c7a1" stroke="#16181b" stroke-width="1.5"/>` : ""}</g>`;
+    };
+    function cone(key, lo, hi, len = 40) {
+      const m = M[key], sgn = key === "L" ? -1 : 1;
+      const p = (a) => [m[0] + sgn * Math.sin(rad(a)) * len, m[1] + Math.cos(rad(a)) * len];
+      const [a, b] = [p(lo), p(hi)];
+      return `${X(m[0])},${Y(m[1])} ${X(a[0])},${Y(a[1])} ${X(b[0])},${Y(b[1])}`;
     }
-    function angleRange(m, side, rect) {
-      const corners = [[rect.x1, rect.y1], [rect.x2, rect.y1], [rect.x1, rect.y2], [rect.x2, rect.y2]];
-      const as = corners.filter((c) => c[1] > m[1]).map((c) => deg(Math.atan2(side * (c[0] - m[0]), c[1] - m[1])));
-      if (!as.length) return null;
-      return [Math.min(...as), Math.max(...as)];
+    // where a whole car in the neighbouring lane can hide: behind your shoulder and before the side mirror's view
+    // reaches the near side of that car (its inner edge runs 0.9 m from the lane centre)
+    function blindZone(key) {
+      const m = M[key], sgn = key === "L" ? -1 : 1, outer = rad(phi + HALF[key]);
+      const yP = EYE[1] - 0.3;
+      const inner = LANE - 0.9; // distance of the other car's inner edge from your car's centre line
+      const yEnd = m[1] + (inner - Math.abs(m[0])) / Math.tan(outer);
+      return { x1: sgn > 0 ? 1.75 : -1.75 - LANE, x2: sgn > 0 ? 1.75 + LANE : -1.75, y1: yP, y2: Math.max(yP, yEnd) };
     }
-    const overlap = (r, a, b) => r && r[1] >= a && r[0] <= b;
+    function drawTop(r, vis) {
+      let s = `<rect width="364" height="560" fill="#4a4f57"/><rect x="0" y="0" width="${X(-5.25 - LANE / 2) + 0}" height="560" fill="#bcd5a9"/>`;
+      s += `<rect x="${X(-5.25)}" y="0" width="${10.5 * S}" height="560" fill="#4a4f57"/><rect x="0" y="0" width="${X(-5.25)}" height="560" fill="#bcd5a9"/><rect x="${X(5.25)}" y="0" width="${364 - X(5.25)}" height="560" fill="#bcd5a9"/>`;
+      s += `<rect x="${X(-5.25) - 1}" y="0" width="3" height="560" fill="#fff"/><rect x="${X(5.25) - 2}" y="0" width="3" height="560" fill="#fff"/>`;
+      for (const x of [-1.75, 1.75]) for (let y = -6; y < 24; y += 4.5) s += `<rect x="${X(x) - 1.5}" y="${Y(y)}" width="3" height="${2.5 * S}" fill="#fff" opacity=".85"/>`;
+      s += `<defs><clipPath id="mir-clipI"><rect x="0" y="${Y(4.5)}" width="364" height="560"/></clipPath><pattern id="mir-hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="8" fill="rgba(224,53,43,.55)"/></pattern></defs>`;
+      // fields of view
+      s += `<polygon points="${cone("L", phi - HALF.L, phi + HALF.L)}" fill="rgba(80,140,255,.26)" stroke="rgba(120,170,255,.95)" stroke-width="1.5"/>`;
+      s += `<polygon points="${cone("R", phi - HALF.R, phi + HALF.R)}" fill="rgba(80,140,255,.26)" stroke="rgba(120,170,255,.95)" stroke-width="1.5"/>`;
+      s += `<g clip-path="url(#mir-clipI)"><polygon points="${cone("I", -HALF.I, HALF.I)}" fill="rgba(62,224,122,.2)" stroke="rgba(62,224,122,.85)" stroke-width="1.5"/></g>`;
+      // blind spots
+      const lbl = (x, y, t, bg, fg = "#fff") => `<g><rect x="${x - t.length * 3.3 - 7}" y="${y - 10}" width="${t.length * 6.6 + 14}" height="20" rx="10" fill="${bg}"/><text x="${x}" y="${y + 0.5}" font-size="11" font-weight="700" fill="${fg}" text-anchor="middle" dominant-baseline="central">${t}</text></g>`;
+      for (const k of ["L", "R"]) {
+        const z = blindZone(k);
+        if (z.y2 - z.y1 < 0.2) continue;
+        s += `<rect x="${X(z.x1)}" y="${Y(z.y1)}" width="${(z.x2 - z.x1) * S}" height="${(z.y2 - z.y1) * S}" fill="url(#mir-hatch)" stroke="#e0352b" stroke-width="2"/>`;
+        s += lbl(X((z.x1 + z.x2) / 2), Y(Math.min(z.y1 + 1.2, (z.y1 + z.y2) / 2)), "мъртва зона", "#e0352b");
+      }
+      s += topCar(0, 0, "#2b6fe0", true);
+      s += topCar(r.cx, r.y1, vis.direct ? "#8b939c" : vis.any ? "#1aa64b" : "#e0352b", false);
+      s += lbl(X(-3.5), Y(17.4), "ляво огледало", "rgba(40,90,200,.9)") + lbl(X(3.5), Y(17.4), "дясно огледало", "rgba(40,90,200,.9)") + lbl(X(0), Y(18.6), "вътрешно", "rgba(20,140,70,.9)");
+      svgTop.innerHTML = s;
+    }
+
+    // ---- driver's view ----
+    const G = () => window.BG3D;
+    function world(cam, own) {
+      let s = cam.poly([[-200, -400, 0], [200, -400, 0], [200, 400, 0], [-200, 400, 0]], `fill="#bcd5a9"`);
+      s += cam.poly([[-5.25, -400, 0], [5.25, -400, 0], [5.25, 400, 0], [-5.25, 400, 0]], `fill="#4a4f57"`);
+      for (const x of [-5.25, 5.25]) s += cam.poly([[x - 0.08, -400, 0.005], [x + 0.08, -400, 0.005], [x + 0.08, 400, 0.005], [x - 0.08, 400, 0.005]], `fill="#fff"`);
+      for (const x of [-1.75, 1.75]) for (let y = -120; y < 120; y += 9) s += cam.poly([[x - 0.07, y, 0.01], [x + 0.07, y, 0.01], [x + 0.07, y + 3, 0.01], [x - 0.07, y + 3, 0.01]], `fill="#fff" opacity=".9"`);
+      const items = [];
+      const r = otherRect();
+      items.push(G().car(cam, { x: r.cx, y: r.y1 + 2.25, yaw: -90, col: "#e8833a", scale: 4.5 / 40 }));
+      // a car further back in your own lane – handy to see in the interior mirror
+      items.push(G().car(cam, { x: 0, y: 17, yaw: -90, col: "#7d4fd6", scale: 4.5 / 40 }));
+      if (own) items.push(G().box(cam, { x: 0, y: 2.6, z0: 0.3, l: 3.9, w: 1.8, h: 0.75, yaw: -90, col: "#2b6fe0" }));
+      return s + G().paint(items);
+    }
+    function mirrorView(key, x, y, w, hgt, shape) {
+      const m = M[key], sgn = key === "L" ? -1 : 1;
+      const a = key === "I" ? 0 : phi;
+      const dir = [sgn * Math.sin(rad(a)), Math.cos(rad(a)), key === "I" ? -0.05 : -0.035];
+      const cam = G().camera({ eye: m, target: [m[0] + dir[0] * 10, m[1] + dir[1] * 10, m[2] + dir[2] * 10], f: w / 2 / Math.tan(rad(HALF[key])), cx: w / 2, cy: hgt * 0.42, near: 0.05, mirror: true });
+      let inner = `<rect width="${w}" height="${hgt}" fill="#cfe3f5"/>` + world(cam, key !== "I");
+      if (key === "I") inner += `<path d="M0 0 H${w} V${hgt} H0 Z M${w * 0.14} ${hgt * 0.16} H${w * 0.86} Q${w * 0.92} ${hgt * 0.16} ${w * 0.9} ${hgt * 0.3} L${w * 0.86} ${hgt * 0.84} H${w * 0.14} L${w * 0.1} ${hgt * 0.3} Q${w * 0.08} ${hgt * 0.16} ${w * 0.14} ${hgt * 0.16} Z" fill="#30353c" fill-rule="evenodd"/><rect x="${w * 0.2}" y="${hgt * 0.7}" width="${w * 0.18}" height="${hgt * 0.3}" rx="6" fill="#3d434b"/><rect x="${w * 0.62}" y="${hgt * 0.7}" width="${w * 0.18}" height="${hgt * 0.3}" rx="6" fill="#3d434b"/>`;
+      const id = "mclip-" + key;
+      return `<g transform="translate(${x} ${y})"><defs><clipPath id="${id}">${shape}</clipPath></defs><g clip-path="url(#${id})"><svg width="${w}" height="${hgt}" viewBox="0 0 ${w} ${hgt}" overflow="hidden">${inner}</svg></g><g fill="none" stroke="#16181b" stroke-width="6">${shape.replace(/<(\w+)/, '<$1 fill="none"')}</g></g>`;
+    }
+    function drawCab(r, vis) {
+      const cam = G().camera({ eye: EYE, target: [EYE[0], -40, 0.75], f: 250, cx: 260, cy: 128, near: 0.05 });
+      let s = `<rect width="520" height="330" fill="#cfe3f5"/>` + world(cam, false);
+      // cabin: roof, pillars, dashboard, wheel
+      s += `<path d="M0 0 H520 V26 Q260 10 0 26 Z" fill="#2b2f36"/>`;
+      s += `<path d="M0 0 H70 L18 236 H0 Z" fill="#23272d"/><path d="M520 0 H470 L512 236 H520 Z" fill="#23272d"/>`;
+      s += `<path d="M0 214 Q260 176 520 214 V330 H0 Z" fill="#2b2f36"/><path d="M0 214 Q260 176 520 214" fill="none" stroke="#3a3f46" stroke-width="4"/>`;
+      s += `<g transform="translate(260 318)"><ellipse rx="96" ry="70" fill="none" stroke="#16181b" stroke-width="15"/><rect x="-26" y="-22" width="52" height="34" rx="12" fill="#16181b"/></g>`;
+      s += `<rect x="352" y="0" width="8" height="30" fill="#16181b"/>`;
+      // mirrors (left mirror is closer to the eye, so it looks bigger)
+      s += mirrorView("L", 4, 186, 124, 78, `<rect x="0" y="0" width="124" height="78" rx="18"/>`);
+      s += mirrorView("R", 418, 196, 98, 64, `<rect x="0" y="0" width="98" height="64" rx="16"/>`);
+      s += mirrorView("I", 286, 24, 148, 48, `<rect x="0" y="0" width="148" height="48" rx="22"/>`);
+      const tag = (x, y, t) => `<g><rect x="${x - t.length * 3 - 7}" y="${y - 9}" width="${t.length * 6 + 14}" height="18" rx="9" fill="rgba(0,0,0,.6)"/><text x="${x}" y="${y + 0.5}" font-size="10" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="central">${t}</text></g>`;
+      s += tag(66, 276, "ляво") + tag(467, 272, "дясно") + tag(360, 84, "вътрешно");
+      if (vis.direct) s += `<g><rect x="${side === "L" ? 8 : 352}" y="120" width="160" height="34" rx="10" fill="rgba(31,41,51,.85)"/><text x="${side === "L" ? 88 : 432}" y="137.5" font-size="11.5" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="central">${side === "L" ? "◀ " : ""}до теб – погледни${side === "R" ? " ▶" : ""}</text></g>`;
+      else if (!vis.any) s += `<g><rect x="${side === "L" ? 8 : 352}" y="120" width="160" height="34" rx="10" fill="rgba(224,53,43,.92)"/><text x="${side === "L" ? 88 : 432}" y="137.5" font-size="11.5" font-weight="800" fill="#fff" text-anchor="middle" dominant-baseline="central">${side === "L" ? "◀ " : ""}В мъртвата зона!${side === "R" ? " ▶" : ""}</text></g>`;
+      svgCab.innerHTML = s;
+    }
 
     function draw() {
-      const other = { x1: 72, x2: 148, y1: carY, y2: carY + 160 };
-      const inLeft = overlap(angleRange(ML, -1, other), phi - HALF, phi + HALF);
-      const inInner = overlap(angleRange(MI, 1, other), -11, 11) && other.y2 > BODY.y2 + 20;
-      const direct = other.y1 < EYE_Y - 30;
-      const share = clamp((HALF - phi) / (2 * HALF), 0, 1);
-      let s = `<rect width="520" height="600" class="r-road"/>`;
-      for (const x of [185, 335]) for (let y = 0; y < 600; y += 40) s += `<rect x="${x - 1.5}" y="${y}" width="3" height="24" class="r-paint" opacity=".8"/>`;
-      s += `<defs><clipPath id="clipL"><rect x="0" y="0" width="${BODY.x1}" height="600"/></clipPath><clipPath id="clipR"><rect x="${BODY.x2}" y="0" width="${520 - BODY.x2}" height="600"/></clipPath><clipPath id="clipI"><rect x="0" y="${BODY.y2}" width="520" height="${600 - BODY.y2}"/></clipPath></defs>`;
-      s += `<g clip-path="url(#clipL)" fill="rgba(122,169,255,.28)" stroke="rgba(122,169,255,.8)">${cone(ML, -1)}</g>`;
-      s += `<g clip-path="url(#clipR)" fill="rgba(122,169,255,.28)" stroke="rgba(122,169,255,.8)">${cone(MR, 1)}</g>`;
-      s += `<g clip-path="url(#clipI)" fill="rgba(62,224,122,.18)" stroke="rgba(62,224,122,.7)"><polygon points="${MI[0]},${MI[1]} ${MI[0] - Math.tan(rad(11)) * LEN},${MI[1] + LEN} ${MI[0] + Math.tan(rad(11)) * LEN},${MI[1] + LEN}"/></g>`;
-      // other car
-      const oc = direct ? "#9aa1a9" : inLeft || inInner ? "#1aa64b" : "#d13b2f";
-      s += `<rect x="${other.x1}" y="${other.y1}" width="76" height="160" rx="14" fill="${oc}" stroke="rgba(0,0,0,.35)"/><rect x="${other.x1 + 8}" y="${other.y1 + 28}" width="60" height="30" rx="6" fill="rgba(255,255,255,.65)"/>`;
-      // own car
-      s += `<rect x="${BODY.x1}" y="${BODY.y1}" width="76" height="160" rx="14" fill="#2b6fe0" stroke="rgba(0,0,0,.4)"/><rect x="${BODY.x1 + 8}" y="${BODY.y1 + 28}" width="60" height="30" rx="6" fill="rgba(255,255,255,.75)"/><rect x="${BODY.x1 + 10}" y="${BODY.y2 - 30}" width="56" height="18" rx="5" fill="rgba(255,255,255,.6)"/>`;
-      s += `<rect x="${ML[0] - 9}" y="${ML[1] - 4}" width="10" height="8" rx="2" fill="#16181b"/><rect x="${MR[0] - 1}" y="${MR[1] - 4}" width="10" height="8" rx="2" fill="#16181b"/>`;
-      s += `<circle cx="245" cy="${EYE_Y}" r="9" fill="#f1c9a5" stroke="#16181b"/>`;
-      svg.innerHTML = s;
+      const r = otherRect();
+      const sideKey = side;
+      const vis = { side: seenIn(sideKey, r), inner: seenIn("I", r), direct: directly(r) };
+      vis.any = vis.side || vis.inner;
+      box.querySelector(".mir-top").hidden = view === "cab";
+      box.querySelector(".mir-cab").hidden = view === "top";
+      box.querySelector(".mir-stages").classList.toggle("one", view !== "both");
+      if (view !== "cab") drawTop(r, vis);
+      if (view !== "top") drawCab(r, vis);
       oAngle.textContent = `${phi.toFixed(1)}°`;
       rAngle.value = phi;
-      oCar.textContent = direct ? "до теб" : `${((other.y1 - EYE_Y) / 42).toFixed(1)} м зад теб`;
-      rCar.value = carY;
-
+      oCar.textContent = other <= 0 ? "до теб / отпред" : `${other.toFixed(1)} м зад теб`;
+      rCar.value = other;
+      const share = ownShare();
       let quality;
       if (share > 0.4) quality = ["stop", "Твърде навътре", "Виждаш предимно собствената си кола. Съседната лента почти не е покрита."];
-      else if (share >= 0.1) quality = ["go", "Класическа настройка", `Около ${Math.round(share * 100)}% от огледалото е твоята кола – добър ориентир. Мъртвата зона е по-голяма – поглед през рамо е задължителен.`];
+      else if (share >= 0.1) quality = ["go", "Класическа настройка", `Около ${Math.round(share * 100)}% от страничното огледало е твоята кола – добър ориентир. Мъртвата зона е по-голяма – поглед през рамо е задължителен.`];
       else if (phi <= 17) quality = ["info", "Разширена настройка", "Колата почти не се вижда, а огледалото поема там, където свършва вътрешното. Мъртвата зона е по-малка, но не изчезва."];
       else quality = ["wait", "Твърде навън", "Губиш връзка със собствената кола и се отваря празнина зад теб, която не покрива нито едно огледало."];
-
-      const where = direct ? "Виждаш я директно, с периферното зрение." : inLeft && inInner ? "Вижда се в лявото и във вътрешното огледало." : inLeft ? "Вижда се в лявото огледало." : inInner ? "Вижда се само във вътрешното огледало." : "<b>Не се вижда в нито едно огледало – тя е в мъртвата зона.</b> Само поглед през рамо ще я покаже.";
-      readout.innerHTML = `<span class="pill ${quality[0]}">${quality[1]}</span><p>${quality[2]}</p><p><b>Колата в лявата лента:</b> ${where}</p><span class="lawref">Поглед през рамо: ЗДвП чл. 25 – „да се убеди“</span>`;
+      const mirName = side === "L" ? "лявото" : "дясното";
+      const where = vis.direct ? "Виждаш я директно, с периферното зрение – тя е до теб или отпред."
+        : vis.side && vis.inner ? `Вижда се в ${mirName} и във вътрешното огледало.`
+        : vis.side ? `Вижда се в ${mirName} огледало.`
+        : vis.inner ? "Вижда се само във вътрешното огледало."
+        : "<b>Не се вижда в нито едно огледало – тя е в мъртвата зона.</b> Само поглед през рамо ще я покаже.";
+      readout.innerHTML = `<span class="pill ${quality[0]}">${quality[1]}</span><p>${quality[2]}</p><p><b>Колата ${side === "L" ? "отляво" : "отдясно"}:</b> ${where}</p><p class="mir-legend"><i style="background:rgba(80,140,255,.6)"></i>странични огледала <i style="background:rgba(62,224,122,.6)"></i>вътрешно <i style="background:#e0352b"></i>мъртва зона</p><span class="lawref">Поглед през рамо: ЗДвП чл. 25 – „да се убеди“</span>`;
     }
     rAngle.addEventListener("input", () => { phi = parseFloat(rAngle.value); draw(); });
-    rCar.addEventListener("input", () => { carY = parseFloat(rCar.value); draw(); });
+    rCar.addEventListener("input", () => { other = parseFloat(rCar.value); draw(); });
+    draw();
+    root.appendChild(box);
+  }
+
+  // ================= Everyday situations =================
+  function situationsWidget(root) {
+    const list = window.BGScenarios || [];
+    const cats = window.BGScenarioCats || {};
+    if (!list.length) return;
+    let cat = "all";
+    const used = Object.keys(cats).filter((k) => list.some((x) => x.cat === k));
+    const box = h(`<div class="sit"><div class="sit-filter"></div><div class="sit-grid"></div></div>`);
+    const grid = box.querySelector(".sit-grid");
+    box.querySelector(".sit-filter").appendChild(segmented([["all", "Всички"], ...used.map((k) => [k, cats[k]])], cat, (v) => { cat = v; draw(); }, "Вид ситуация"));
+    function draw() {
+      grid.innerHTML = "";
+      list.filter((x) => cat === "all" || x.cat === cat).forEach((x) => {
+        let pic = "";
+        try { pic = x.svg(); } catch (e) { pic = ""; }
+        grid.appendChild(h(`<article class="rule has-il sit-card" id="sit-${x.id}"><figure class="rule-il">${pic}</figure><div class="rule-text"><span class="eyebrow">${cats[x.cat] || ""}</span><h4>${x.title}</h4><p class="sit-q">${x.q}</p><ol class="sit-steps">${x.steps.map((t) => `<li>${t}</li>`).join("")}</ol><span class="lawref">${x.ref}</span></div></article>`));
+      });
+    }
     draw();
     root.appendChild(box);
   }
@@ -846,6 +1101,7 @@
       <div class="widget-head"><h3>Контролни лампи</h3><p>Натисни символ, за да видиш какво означава и какво правиш.</p></div>
       <div class="controls"></div>
       <div class="legend-row"><span><i class="dot" style="background:#ff4a3d"></i>Спри безопасно</span><span><i class="dot" style="background:#ffb21a"></i>Провери скоро</span><span><i class="dot" style="background:#3ee07a"></i>Включено</span><span><i class="dot" style="background:#4c8dff"></i>Дълги светлини</span></div>
+      <div class="sx-mnem dash-rule"><span>Как да запомниш цветовете</span><p>Като светофара: <b>червено</b> – спри веднага, <b>жълто</b> – внимание, провери скоро, <b>зелено</b> – просто е включено. <b>Синьо</b> има само една лампа – дългите светлини.</p></div>
       <div class="dash-detail readout" aria-live="polite"></div>
       <div class="dash-grid"></div>
     </div>`);
@@ -857,7 +1113,7 @@
     const word = { red: "Червен", amber: "Жълт", green: "Зелен", blue: "Син" };
     function showDetail() {
       const d = DASH.find((x) => x.id === selected);
-      detail.innerHTML = `<div class="lamp ${d.color}">${ICONS[d.id]}</div><div style="display:grid;gap:6px;min-width:0"><span class="pill ${d.color === "red" ? "stop" : d.color === "amber" ? "wait" : d.color === "blue" ? "info" : "go"}">${word[d.color]}</span><h4>${d.name}</h4><p>${d.what}</p><p><b>Какво правиш:</b> ${d.act}</p></div>`;
+      detail.innerHTML = `<div class="lamp ${d.color}">${ICONS[d.id]}</div><div style="display:grid;gap:6px;min-width:0"><span class="pill ${d.color === "red" ? "stop" : d.color === "amber" ? "wait" : d.color === "blue" ? "info" : "go"}">${word[d.color]}</span><h4>${d.name}</h4><p>${d.what}</p><p><b>Какво правиш:</b> ${d.act}</p>${d.tip ? `<div class="sx-mnem"><span>Как да запомниш</span><p>${d.tip}</p></div>` : ""}</div>`;
     }
     function draw() {
       grid.innerHTML = "";
@@ -927,6 +1183,7 @@
   }
 
   window.BGWidgets = {
+    situacii: situationsWidget,
     znaci: signsWidget,
     markirovka: markingsWidget,
     svetofar: trafficLightWidget,
