@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   id="svg848"
+   version="1.1"
+   viewBox="0 0 452 452"
+   height="452"
+   width="452">
+  <defs
+     id="defs842" />
+  <metadata
+     id="metadata845">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-nc-sa/4.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:prohibits
+           rdf:resource="http://creativecommons.org/ns#CommercialUse" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     style="display:inline;opacity:1;mix-blend-mode:lighten"
+     transform="translate(-99.421509,-71.295349)"
+     id="layer1">
+    <circle
+       r="224.00443"
+       cy="296.29535"
+       cx="324.42151"
+       id="path862"
+       style="fill:#ffffff;stroke:#000000;stroke-width:1.991;stroke-miterlimit:4;stroke-dasharray:none" />
+    <circle
+       r="214.50116"
+       cy="296.79535"
+       cx="324.92151"
+       id="path864"
+       style="fill:#dc2b19;fill-opacity:1;stroke:#800000;stroke-width:0.99768;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <ellipse
+       ry="169.52403"
+       rx="169.52405"
+       cy="296.79535"
+       cx="324.92151"
+       id="path884"
+       style="fill:#ffffff;fill-opacity:1;stroke:#800000;stroke-width:0.951921;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <g
+       aria-label="50"
+       id="text855"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:301.881px;line-height:1.25;font-family:SnvDOTRegCon;-inkscape-font-specification:'SnvDOTRegCon, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:7.54705">
+      <path
+         d="m 245.60782,222.07979 h 66.11194 v -25.96177 h -94.79064 v 102.33766 h 28.6787 c 3.62257,-5.73573 10.26395,-8.75455 18.41474,-8.75455 12.679,0 22.94296,9.35832 22.94296,21.13168 v 41.35769 c 0,12.98089 -9.35832,22.3392 -22.64108,22.3392 -14.49029,0 -23.54672,-10.26396 -23.54672,-26.86741 v -7.54703 h -28.6787 v 7.54703 c 0,13.58464 3.01882,22.64108 10.86772,32.60315 9.96207,12.679 25.35801,20.22603 41.05582,20.22603 15.99969,0 31.09374,-7.54703 41.3577,-20.22603 7.54702,-9.35831 10.26395,-18.41474 10.26395,-32.60315 v -36.82948 c 0,-12.67901 -2.41505,-20.52791 -8.45267,-28.98058 -8.75455,-11.1696 -22.94295,-18.11286 -38.037,-18.11286 -8.45267,0 -13.88653,1.5094 -23.54672,5.73574 z"
+         style="stroke-width:7.54705"
+         id="path857" />
+      <path
+         d="m 348.24694,347.96417 c 0,30.1881 22.03731,52.5273 51.62165,52.5273 29.88622,0 51.92354,-22.3392 51.92354,-52.5273 V 245.62651 c 0,-29.88622 -21.73543,-52.5273 -51.01789,-52.5273 -29.58434,0 -52.5273,22.94296 -52.5273,52.5273 z m 74.86649,0 c 0,15.99969 -9.05643,26.56553 -22.94296,26.56553 -12.37712,0 -23.24483,-10.86772 -23.24483,-23.54672 V 242.6077 c 0,-13.28277 10.26395,-23.54672 23.54672,-23.54672 12.37712,0 22.64107,10.56583 22.64107,23.54672 z"
+         style="stroke-width:7.54705"
+         id="path859" />
+    </g>
+  </g>
+</svg>

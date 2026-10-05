@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>01 · Пътна табела</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sofia+Sans+Condensed:wght@600;800;900&family=Sofia+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="base.css">
+<style>
+/* Concept: the site reads like Bulgarian road furniture — blue direction panels, white inset borders, yellow detour labels. */
+:root {
+  --bg: #e9edf2; --fg: #0d1b2e; --muted: #4c5a6c; --card: #fff; --line: #c9d2dd;
+  --accent: #0d4aa6; --accent-fg: #fff; --accent-2: #ffd200; --mnem-bg: #fff4b8; --mnem-fg: #2d2400;
+  --radius: 6px; --font: "Sofia Sans", system-ui, sans-serif; --font-display: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  --x-grass: #b9c9b2;
+}
+body { font-size: 17px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px 80px; }
+.gantry { background: var(--accent); color: #fff; border: 4px solid #fff; outline: 3px solid var(--accent); border-radius: 10px; margin: 20px 0 30px; padding: 24px 28px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: center; }
+.gantry h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 900; text-transform: uppercase; letter-spacing: .01em; }
+.gantry p { font-size: 1.1rem; opacity: .92; max-width: 52ch; margin-top: 8px; }
+.gantry .km { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; text-align: right; line-height: 1.3; }
+.gantry .km b { display: block; font-size: 3rem; line-height: 1; }
+nav.top { display: flex; gap: 6px; flex-wrap: wrap; padding-top: 16px; }
+nav.top a { font-family: var(--font-display); font-weight: 800; text-transform: uppercase; text-decoration: none; color: var(--accent); padding: 6px 12px; border: 2px solid var(--accent); border-radius: 4px; font-size: .95rem; }
+nav.top a.on { background: var(--accent); color: #fff; }
+.detour { display: inline-flex; align-items: center; gap: 10px; background: var(--accent-2); color: #111; font-family: var(--font-display); font-weight: 900; text-transform: uppercase; font-size: 1.35rem; padding: 6px 16px 6px 12px; border: 3px solid #111; border-radius: 4px; margin: 40px 0 16px; }
+.detour::before { content: ""; width: 0; height: 0; border-left: 14px solid #111; border-top: 9px solid transparent; border-bottom: 9px solid transparent; }
+.chapters { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 10px; }
+.k-ch { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 12px; background: var(--accent); color: #fff; border: 3px solid #fff; outline: 2px solid var(--accent); border-radius: 6px; padding: 10px 14px; }
+.k-ch .k-ch-img { grid-row: 1 / 3; width: 40px; height: 40px; background: #fff; border-radius: 4px; padding: 3px; }
+.k-ch-t { font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; text-transform: uppercase; }
+.k-ch small { opacity: .85; grid-column: 2; }
+.k-ch-bar { grid-column: 3; grid-row: 1 / 3; width: 56px; height: 56px; border-radius: 50%; background: conic-gradient(var(--accent-2) var(--p), rgba(255,255,255,.2) 0); align-self: center; }
+.k-ch-bar::after { display: none; }
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 22px; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.k-shape-tabs button { border-radius: 4px; border: 2px solid var(--accent); }
+.k-shape-tabs button b { font-weight: 900; }
+.k-name { font-weight: 800; font-family: var(--font-display); font-size: 1.5rem; text-transform: uppercase; }
+.k-mnem { border-left: 6px solid #111; border-radius: 4px; }
+.xanim-play, .k-btn { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; border-radius: 4px; }
+@media (max-width: 800px) { .two, .gantry { grid-template-columns: minmax(0, 1fr); } .gantry .km { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a class="on" href="#">Начало</a><a href="#">Знаци</a><a href="#">Предимство</a><a href="#">Паркиране</a><a href="#">Тест</a></nav>
+  <header class="gantry">
+    <div><h1>Шофьорски опреснителен курс</h1><p>Правилата за категория B, обяснени просто. Знаци, предимство, кръгово, паркиране – с анимации и подсказки как да ги запомниш.</p></div>
+    <div class="km">изминати<b>34%</b>от курса</div>
+  </header>
+  <div class="detour">Глави</div>
+  <div class="chapters" data-k-chapters="img"></div>
+  <div class="detour">Пътни знаци по форма</div>
+  <div class="panel" data-k-pattern="shapes"></div>
+  <div class="two">
+    <div><div class="detour">Кой минава първи?</div><div class="panel" data-k-anim="priorityRoad"></div></div>
+    <div><div class="detour">Провери се</div><div class="panel" data-k-quiz></div></div>
+  </div>
+</div>
+<script src="../js/signs-data.js"></script><script src="../js/anim.js"></script><script src="kit.js"></script><script>Kit.auto()</script>
+</body>
+</html>

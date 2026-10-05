@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03 · Табло</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="base.css">
+<style>
+/* Concept: the instrument cluster. Progress is a speedometer, chapters are warning-lamp tiles, cards glow softly. */
+:root {
+  color-scheme: dark;
+  --bg: #07090c; --fg: #e8eef4; --muted: #8995a3; --card: #10151b; --line: #232c36;
+  --accent: #36c8ff; --accent-fg: #00131c; --accent-2: #ffb21a; --ok: #3ee07a; --no: #ff5a4d;
+  --mnem-bg: #1d1607; --mnem-fg: #ffd98a; --radius: 14px; --shadow: 0 0 0 1px #0a0d11, 0 10px 30px rgba(0,0,0,.5);
+  --font: "Exo 2", sans-serif; --font-display: "Exo 2", sans-serif; --font-mono: "JetBrains Mono", monospace;
+  --x-grass: #12181f; --x-road: #232a33; --x-paint: #6a7686;
+}
+body { background: radial-gradient(1200px 500px at 50% -10%, #12202c, transparent), var(--bg); font-size: 16px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 24px 20px 80px; display: grid; gap: 22px; }
+.cluster { display: grid; grid-template-columns: 300px minmax(0, 1fr) 300px; gap: 20px; align-items: center; background: linear-gradient(180deg, #0e141a, #080b0e); border: 1px solid var(--line); border-radius: 40px 40px 18px 18px; padding: 26px; }
+.gauge { width: 100%; max-width: 280px; }
+.gauge text { fill: var(--fg); font-family: var(--font-mono); }
+.center h1 { font-size: clamp(1.8rem, 3.5vw, 2.7rem); font-weight: 800; letter-spacing: .02em; text-align: center; }
+.center p { text-align: center; color: var(--muted); margin-top: 8px; }
+.lamps { display: flex; justify-content: center; gap: 10px; margin-top: 16px; }
+.lamps span { width: 12px; height: 12px; border-radius: 50%; background: #1b232c; }
+.lamps span.g { background: var(--ok); box-shadow: 0 0 10px var(--ok); } .lamps span.a { background: var(--accent-2); box-shadow: 0 0 10px var(--accent-2); }
+.odo { font-family: var(--font-mono); text-align: center; }
+.odo b { display: block; font-size: 2.6rem; color: var(--accent); text-shadow: 0 0 18px rgba(54,200,255,.5); }
+.odo small { color: var(--muted); letter-spacing: .15em; text-transform: uppercase; font-size: .7rem; }
+h2 { font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-top: 10px; }
+.chapters { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 10px; }
+.k-ch { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 6px; }
+.k-ch-img { width: 38px; height: 38px; filter: drop-shadow(0 0 8px rgba(54,200,255,.35)); }
+.k-ch-t { font-weight: 800; }
+.k-ch small { color: var(--muted); }
+.k-ch-bar { background: #1b232c; }
+.k-ch-bar::after { background: linear-gradient(90deg, var(--accent), var(--ok)); box-shadow: 0 0 8px var(--accent); }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 20px; }
+.screen { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px; box-shadow: var(--shadow); }
+.k-car-slide { background: #0b1015; }
+.k-img { background: #fff; border-radius: 12px; padding: 6px; }
+.k-kind { background: #1b232c !important; color: var(--accent) !important; }
+.k-opt { background: #0b1015; }
+@media (max-width: 900px) { .cluster, .grid2 { grid-template-columns: minmax(0, 1fr); } .gauge { margin: 0 auto; display: block; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="cluster">
+    <svg class="gauge" viewBox="0 0 200 140" aria-label="Напредък 34%">
+      <path d="M20 120 A80 80 0 0 1 180 120" fill="none" stroke="#1b232c" stroke-width="14" stroke-linecap="round"/>
+      <path d="M20 120 A80 80 0 0 1 180 120" fill="none" stroke="url(#g)" stroke-width="14" stroke-linecap="round" pathLength="100" stroke-dasharray="34 100"/>
+      <defs><linearGradient id="g"><stop offset="0" stop-color="#3ee07a"/><stop offset="1" stop-color="#36c8ff"/></linearGradient></defs>
+      <line x1="100" y1="120" x2="57" y2="62" stroke="#ff5a4d" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="100" cy="120" r="7" fill="#e8eef4"/>
+      <text x="100" y="104" text-anchor="middle" font-size="24" font-weight="700">34</text>
+      <text x="100" y="136" text-anchor="middle" font-size="9" fill="#8995a3">% ОТ КУРСА</text>
+    </svg>
+    <div class="center"><h1>Шофьорски опреснителен курс</h1><p>Категория B · автоматик · по ЗДвП 2025</p><div class="lamps"><span class="g"></span><span class="g"></span><span class="a"></span><span></span><span></span></div></div>
+    <div class="odo"><small>верни отговора</small><b>041</b><small>от 109</small></div>
+  </section>
+  <h2>Глави</h2>
+  <div class="chapters" data-k-chapters="img"></div>
+  <h2>Пътни знаци</h2>
+  <div class="screen" data-k-pattern="carousel"></div>
+  <div class="grid2">
+    <div><h2>Кой минава първи?</h2><div class="screen" data-k-anim="three"></div></div>
+    <div><h2>Провери се</h2><div class="screen" data-k-quiz></div></div>
+  </div>
+</div>
+<script src="../js/signs-data.js"></script><script src="../js/anim.js"></script><script src="kit.js"></script><script>Kit.auto()</script>
+</body>
+</html>

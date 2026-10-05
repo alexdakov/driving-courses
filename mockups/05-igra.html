@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05 · Игра</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap">
+<link rel="stylesheet" href="base.css">
+<style>
+/* Concept: a learning game. Level path, points and a daily streak; chunky buttons that press down; guess-first learning. */
+:root {
+  --bg: #ffffff; --fg: #3c3c3c; --muted: #8a8f98; --card: #fff; --line: #e5e5e5;
+  --accent: #23b26d; --accent-fg: #fff; --accent-2: #ffc21a; --blue: #1aa3f0; --ok: #23b26d; --no: #ff4b4b;
+  --mnem-bg: #fff6d4; --mnem-fg: #6b4a00; --radius: 18px; --font: "Nunito", sans-serif;
+  --x-car-a: #1aa3f0; --x-car-b: #ff8a1f;
+}
+body { font-size: 17px; font-weight: 600; }
+.bar { position: sticky; top: 0; z-index: 3; background: #fff; border-bottom: 2px solid var(--line); }
+.bar .in { max-width: 980px; margin: 0 auto; padding: 10px 20px; display: flex; gap: 18px; align-items: center; }
+.logo { font-weight: 900; color: var(--accent); font-size: 1.3rem; margin-right: auto; }
+.stat { display: flex; gap: 6px; align-items: center; font-weight: 900; }
+.stat svg { width: 22px; height: 22px; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 24px 20px 90px; display: grid; gap: 26px; }
+.hero { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 20px; align-items: center; }
+.bubble { background: #fff; border: 2px solid var(--line); border-radius: 18px; padding: 18px 22px; position: relative; }
+.bubble::before { content: ""; position: absolute; left: -12px; top: 40px; width: 20px; height: 20px; background: #fff; border-left: 2px solid var(--line); border-bottom: 2px solid var(--line); transform: rotate(45deg); }
+.bubble h1 { font-weight: 900; font-size: clamp(1.6rem, 3.5vw, 2.3rem); color: var(--fg); }
+.bubble p { color: var(--muted); margin-top: 6px; }
+.chunky, .k-btn, .xanim-play, .k-opt { border: 2px solid var(--line); border-bottom-width: 5px; border-radius: 16px; font-weight: 900; transition: transform .05s; }
+.chunky:active, .k-btn:active, .xanim-play:active, .k-opt:active { transform: translateY(3px); border-bottom-width: 2px; }
+.chunky { background: var(--accent); color: #fff; border-color: #17894f; padding: 12px 22px; text-transform: uppercase; letter-spacing: .04em; margin-top: 14px; }
+.xanim-play { background: var(--blue); border-color: #1281bf; color: #fff; }
+.k-btn.k-next { background: var(--accent); color: #fff; border-color: #17894f; }
+.path { display: grid; justify-items: center; gap: 4px; }
+.k-ch { display: grid; justify-items: center; gap: 4px; width: 150px; text-align: center; }
+.k-ch:nth-child(4n+2) { transform: translateX(-90px); } .k-ch:nth-child(4n+4) { transform: translateX(90px); }
+.k-ch-img { width: 78px; height: 78px; border-radius: 50%; background: #fff; padding: 12px; border: 4px solid var(--line); box-shadow: 0 6px 0 var(--line); }
+.k-ch:nth-child(-n+4) .k-ch-img { border-color: var(--accent); box-shadow: 0 6px 0 #17894f; }
+.k-ch:nth-child(5) .k-ch-img { border-color: var(--accent-2); box-shadow: 0 6px 0 #d19c00; animation: bob 1.6s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-6px); } }
+.k-ch-t { font-weight: 900; }
+.k-ch small, .k-ch-bar { display: none; }
+.card { border: 2px solid var(--line); border-radius: 22px; padding: 22px; }
+h2 { font-weight: 900; font-size: 1.5rem; margin-bottom: 14px; }
+.k-guess-q p { font-weight: 900; font-size: 1.2rem; }
+.k-opt { background: #fff; padding: 14px 16px; }
+.k-opt.is-right { background: #d7ffb8; border-color: #58a700; box-shadow: none; }
+.k-opt.is-wrong { background: #ffdfe0; border-color: var(--no); box-shadow: none; }
+.k-verdict { font-size: 1.3rem; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 760px) { .hero, .grid2 { grid-template-columns: minmax(0, 1fr); } .bubble::before { display: none; } .k-ch:nth-child(n) { transform: none; } }
+</style>
+</head>
+<body>
+<div class="bar"><div class="in">
+  <span class="logo">волан</span>
+  <span class="stat" title="Дни подред"><svg viewBox="0 0 24 24"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-6 0 2 1 3 2 3 0-4-1-6 1-9z" fill="#ff9600"/></svg>5</span>
+  <span class="stat" title="Точки"><svg viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z" fill="#ffc21a"/></svg>420</span>
+</div></div>
+<div class="wrap">
+  <section class="hero">
+    <svg viewBox="0 0 160 130" aria-hidden="true"><rect x="18" y="52" width="124" height="48" rx="18" fill="#23b26d"/><path d="M42 54 L58 24 H104 L120 54 Z" fill="#23b26d"/><path d="M56 50 L66 31 H96 L106 50 Z" fill="#dff7ea"/><circle cx="66" cy="42" r="6" fill="#fff"/><circle cx="94" cy="42" r="6" fill="#fff"/><circle cx="67" cy="43" r="3" fill="#333"/><circle cx="95" cy="43" r="3" fill="#333"/><path d="M68 80 Q80 90 92 80" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="44" cy="102" r="15" fill="#333"/><circle cx="116" cy="102" r="15" fill="#333"/><circle cx="44" cy="102" r="6" fill="#bbb"/><circle cx="116" cy="102" r="6" fill="#bbb"/></svg>
+    <div class="bubble"><h1>Здрасти! Да опресним правилата?</h1><p>По 5 минути на ден. Отговаряш, печелиш точки и минаваш към следващото ниво.</p><button class="chunky" type="button">Продължи урока</button></div>
+  </section>
+  <section><h2>Твоят път</h2><div class="path" data-k-chapters="img"></div></section>
+  <section class="card"><h2>Познай знака</h2><div data-k-pattern="guess"></div></section>
+  <div class="grid2">
+    <section class="card"><h2>Кой минава първи?</h2><div data-k-anim="leftTurn"></div></section>
+    <section class="card"><h2>Бърз въпрос</h2><div data-k-quiz></div></section>
+  </div>
+</div>
+<script src="../js/signs-data.js"></script><script src="../js/anim.js"></script><script src="kit.js"></script><script>Kit.auto()</script>
+</body>
+</html>

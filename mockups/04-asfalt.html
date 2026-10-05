@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 · Асфалт</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="base.css">
+<style>
+/* Concept: the road surface itself. Asphalt background, road-paint white and yellow, stencil-like headings painted on the lane. */
+:root {
+  color-scheme: dark;
+  --bg: #24272b; --fg: #f1f1ec; --muted: #a9adb3; --card: #f4f3ee; --card-fg: #1c1d20; --line: #3a3e44;
+  --accent: #ffd400; --accent-fg: #1c1d20; --ok: #49d17d; --no: #ff6a5c; --mnem-bg: #1c1d20; --mnem-fg: #ffd400;
+  --radius: 3px; --font: "Roboto Condensed", sans-serif; --font-display: "Oswald", sans-serif; --font-mono: "Roboto Mono", monospace;
+  --x-grass: #2e3a2f; --x-road: #1b1d20; --x-paint: #f1f1ec;
+}
+body {
+  font-size: 17px;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,.035) 0 1px, transparent 2px) 0 0 / 7px 7px,
+    radial-gradient(circle at 70% 60%, rgba(0,0,0,.25) 0 1px, transparent 2px) 0 0 / 5px 5px,
+    var(--bg);
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px 90px; }
+.edge { height: 10px; background: var(--fg); }
+.center-line { height: 6px; background: repeating-linear-gradient(90deg, var(--accent) 0 60px, transparent 60px 100px); margin: 46px 0 22px; }
+header { padding: 46px 0 10px; display: grid; gap: 14px; }
+header .stencil { font-family: var(--font-display); font-size: clamp(3rem, 9vw, 7rem); line-height: .9; text-transform: uppercase; color: var(--fg); letter-spacing: .02em; }
+header .stencil span { color: var(--accent); }
+header p { max-width: 54ch; color: var(--muted); font-size: 1.15rem; }
+h2 { font-family: var(--font-display); text-transform: uppercase; font-size: 2rem; letter-spacing: .04em; margin-bottom: 16px; display: flex; align-items: center; gap: 14px; }
+h2::before { content: ""; width: 28px; height: 28px; background: var(--accent); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.lanes { display: grid; gap: 0; border-top: 4px solid var(--fg); border-bottom: 4px solid var(--fg); }
+.k-ch { display: grid; grid-template-columns: 50px minmax(0, 1fr) minmax(0, 1fr) 140px; gap: 14px; align-items: center; padding: 14px 6px; border-bottom: 3px dashed rgba(241,241,236,.5); }
+.k-ch:last-child { border-bottom: 0; }
+.k-ch-img { width: 44px; height: 44px; }
+.k-ch-t { font-family: var(--font-display); text-transform: uppercase; font-size: 1.35rem; }
+.k-ch small { color: var(--muted); }
+.k-ch-bar { height: 8px; background: rgba(255,255,255,.12); }
+.k-ch-bar::after { background: var(--accent); }
+.k-road-strip { height: 210px; }
+.k-road-detail, .slab { background: var(--card); color: var(--card-fg); padding: 22px; border-radius: 3px; }
+.slab { box-shadow: 8px 8px 0 #111; }
+.k-road-detail { box-shadow: 8px 8px 0 #111; --muted: #555; }
+.k-name { font-family: var(--font-display); text-transform: uppercase; font-size: 1.6rem; }
+.k-mnem { border-left: 8px solid var(--accent); }
+.k-btn { background: var(--accent); color: #111; border: 0; border-radius: 2px; text-transform: uppercase; font-family: var(--font-display); }
+.xanim-play { border-radius: 2px; text-transform: uppercase; font-family: var(--font-display); letter-spacing: .05em; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.slab .k-opt { background: #fff; }
+.slab { --muted: #555; --line: #d0d0ca; }
+@media (max-width: 820px) { .grid2 { grid-template-columns: minmax(0, 1fr); } .k-ch { grid-template-columns: 44px minmax(0, 1fr); } .k-ch small, .k-ch-bar { grid-column: 2; } }
+</style>
+</head>
+<body>
+<div class="edge"></div>
+<div class="wrap">
+  <header>
+    <div class="stencil">Опресни<br><span>правилата</span></div>
+    <p>Шофьорски опреснителен курс за категория B. Карай напред по пътя и научи всеки знак – с подсказка как да го запомниш.</p>
+  </header>
+  <div class="center-line"></div>
+  <h2>Глави</h2>
+  <div class="lanes" data-k-chapters="img"></div>
+  <div class="center-line"></div>
+  <h2>Знаците по пътя</h2>
+  <div data-k-pattern="roadside"></div>
+  <div class="center-line"></div>
+  <div class="grid2">
+    <div><h2>Кой минава първи?</h2><div class="slab" data-k-anim="tram"></div></div>
+    <div><h2>Провери се</h2><div class="slab" data-k-quiz></div></div>
+  </div>
+</div>
+<script src="../js/signs-data.js"></script><script src="../js/anim.js"></script><script src="kit.js"></script><script>Kit.auto()</script>
+</body>
+</html>

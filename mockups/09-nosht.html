@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>09 · Нощно каране</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Jura:wght@500;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="base.css">
+<style>
+/* Concept: a night drive. Headlight beams, reflective road studs, neon-lit signs; cards flip like a sign catching your lights. */
+:root {
+  color-scheme: dark;
+  --bg: #070b18; --fg: #e9f1ff; --muted: #8b98b8; --card: #0e1530; --line: #23305c;
+  --accent: #2ef2ff; --accent-fg: #021014; --accent-2: #ff3ea5; --ok: #45ffa8; --no: #ff4d79;
+  --mnem-bg: #1a1035; --mnem-fg: #ffc4e5; --radius: 16px; --shadow: 0 0 0 1px rgba(46,242,255,.08), 0 20px 50px rgba(0,0,0,.5);
+  --font: "Jura", sans-serif; --font-display: "Russo One", sans-serif; --font-mono: "JetBrains Mono", monospace;
+  --x-grass: #0a1022; --x-road: #151c33; --x-paint: #2ef2ff; --x-car-a: #2ef2ff; --x-car-b: #ff3ea5; --x-car-c: #ffd84a;
+}
+body { font-size: 17px; font-weight: 500; background: radial-gradient(900px 420px at 50% 0, rgba(46,242,255,.13), transparent 70%), linear-gradient(180deg, #0b1230, var(--bg) 40%); }
+.wrap { max-width: 1140px; margin: 0 auto; padding: 0 20px 90px; }
+.hero { min-height: 420px; display: grid; place-items: center; text-align: center; position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; bottom: -40px; left: 50%; width: 900px; height: 300px; transform: translateX(-50%); background: linear-gradient(180deg, transparent, rgba(46,242,255,.08)); clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%); }
+.studs { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 46px; }
+.studs i { width: 10px; height: 4px; border-radius: 2px; background: #ffd84a; box-shadow: 0 0 10px #ffd84a; }
+.hero h1 { font-size: clamp(2.2rem, 6vw, 4.6rem); text-transform: uppercase; letter-spacing: .04em; text-shadow: 0 0 22px rgba(46,242,255,.6), 0 0 2px #fff; }
+.hero p { color: var(--muted); max-width: 52ch; margin: 14px auto 0; font-size: 1.15rem; }
+h2 { font-size: 1.5rem; text-transform: uppercase; letter-spacing: .06em; margin: 50px 0 18px; color: var(--accent); text-shadow: 0 0 14px rgba(46,242,255,.5); }
+.chapters { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 12px; }
+.k-ch { display: grid; grid-template-columns: 42px minmax(0, 1fr); column-gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; transition: box-shadow .2s, border-color .2s; }
+.k-ch:hover { border-color: var(--accent); box-shadow: 0 0 22px rgba(46,242,255,.25); }
+.k-ch-img { grid-row: 1 / 4; width: 42px; height: 42px; filter: drop-shadow(0 0 10px rgba(255,255,255,.25)); }
+.k-ch-t { font-family: var(--font-display); font-size: 1rem; }
+.k-ch small { color: var(--muted); }
+.k-ch-bar { margin-top: 6px; background: #1a2347; }
+.k-ch-bar::after { background: linear-gradient(90deg, var(--accent), var(--accent-2)); box-shadow: 0 0 10px var(--accent); }
+.k-face { background: linear-gradient(160deg, #111a3b, #0b1128); border-color: var(--line); }
+.k-front .k-img { filter: drop-shadow(0 0 18px rgba(255,255,255,.35)); }
+.k-flip:hover .k-front { border-color: var(--accent); box-shadow: 0 0 26px rgba(46,242,255,.3); }
+.k-kind { background: rgba(46,242,255,.12) !important; color: var(--accent) !important; }
+.k-name { font-family: var(--font-display); font-size: 1.05rem; }
+.k-code { color: var(--accent-2); }
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px; box-shadow: var(--shadow); }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+.xanim-play { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #050814; box-shadow: 0 0 20px rgba(255,62,165,.35); }
+.k-opt { background: #0b1128; }
+@media (max-width: 800px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero"><div><h1>Шофьорски<br>опреснителен курс</h1><p>Категория B. Обърни всеки знак като в светлината на фаровете – отзад е обяснението и подсказка как да го запомниш.</p></div><div class="studs"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></section>
+  <h2>Глави</h2>
+  <div class="chapters" data-k-chapters="img"></div>
+  <h2>Пътни знаци</h2>
+  <div data-k-pattern="flip"></div>
+  <div class="grid2">
+    <div><h2>Кой минава първи?</h2><div class="panel" data-k-anim="three"></div></div>
+    <div><h2>Провери се</h2><div class="panel" data-k-quiz></div></div>
+  </div>
+</div>
+<script src="../js/signs-data.js"></script><script src="../js/anim.js"></script><script src="kit.js"></script><script>Kit.auto()</script>
+</body>
+</html>

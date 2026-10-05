@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07 · Метро карта</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="base.css">
+<style>
+/* Concept: the course as a transit map. Chapters are stations on a coloured line, your position is a marker on it. */
+:root {
+  --bg: #fafaf7; --fg: #15171a; --muted: #6a6f76; --card: #fff; --line: #e1e2de;
+  --accent: #e2242b; --accent-fg: #fff; --l1: #e2242b; --l2: #1f6fd1; --l3: #00a368; --l4: #f2a900;
+  --mnem-bg: #f0f6ff; --mnem-fg: #0d2f5c; --radius: 14px; --font: "Onest", sans-serif; --font-mono: "JetBrains Mono", monospace;
+  --x-car-a: #1f6fd1; --x-car-b: #e2242b; --x-car-c: #00a368;
+}
+body { font-size: 16px; }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 30px 20px 90px; display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 40px; align-items: start; }
+.left { position: sticky; top: 20px; }
+h1 { font-size: 2.1rem; font-weight: 800; letter-spacing: -.02em; }
+.sub { color: var(--muted); margin: 8px 0 22px; }
+.legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: .8rem; margin-bottom: 18px; }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+.legend i { width: 22px; height: 6px; border-radius: 3px; display: inline-block; }
+.map { position: relative; padding-left: 4px; }
+.k-ch { display: grid; grid-template-columns: 40px minmax(0, 1fr); align-items: center; position: relative; padding: 7px 0; }
+.k-ch::before { content: ""; position: absolute; left: 15px; top: 0; bottom: 0; width: 10px; background: var(--seg, var(--l2)); }
+.k-ch:first-child::before { top: 50%; } .k-ch:last-child::before { bottom: 50%; }
+.k-ch:nth-child(-n+3) { --seg: var(--l1); } .k-ch:nth-child(n+4):nth-child(-n+7) { --seg: var(--l2); } .k-ch:nth-child(n+8):nth-child(-n+9) { --seg: var(--l3); } .k-ch:nth-child(n+10) { --seg: var(--l4); }
+.k-ch-n { position: relative; z-index: 1; width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 5px solid var(--fg); margin-left: 6px; font-size: 0; }
+.k-ch:nth-child(3) .k-ch-n, .k-ch:nth-child(7) .k-ch-n, .k-ch:nth-child(9) .k-ch-n { width: 34px; height: 34px; margin-left: 3px; border-width: 6px; }
+.k-ch:nth-child(5) .k-ch-n { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 6px rgba(226,36,43,.18); }
+.k-ch-t { font-weight: 700; font-size: 1rem; }
+.k-ch small { grid-column: 2; color: var(--muted); font-size: .82rem; margin-top: -2px; }
+.k-ch:nth-child(5) .k-ch-t::after { content: "Ти си тук"; margin-left: 8px; font-size: .7rem; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 99px; vertical-align: 2px; }
+.stop { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; margin-bottom: 22px; }
+.stop h2 { font-size: 1.3rem; display: flex; gap: 10px; align-items: center; margin-bottom: 14px; }
+.stop h2 .pill { font-family: var(--font-mono); font-size: .75rem; padding: 3px 9px; border-radius: 99px; color: #fff; }
+.k-exp-tile { border-radius: 14px; }
+.k-exp-tile[aria-expanded="true"] { border-width: 2px; }
+.k-kind { border-radius: 4px; }
+.xanim-play { background: var(--fg); }
+@media (max-width: 900px) { .wrap { grid-template-columns: minmax(0, 1fr); } .left { position: static; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="left">
+    <h1>Шофьорски опреснителен курс</h1>
+    <p class="sub">11 спирки до увереното шофиране. Категория B.</p>
+    <div class="legend"><span><i style="background:var(--l1)"></i>Основи</span><span><i style="background:var(--l2)"></i>Кръстовища</span><span><i style="background:var(--l3)"></i>Паркиране</span><span><i style="background:var(--l4)"></i>Колата и времето</span></div>
+    <nav class="map" data-k-chapters="plain"></nav>
+  </aside>
+  <main>
+    <section class="stop"><h2><span class="pill" style="background:var(--l1)">2</span>Пътни знаци</h2><div data-k-pattern="expand"></div></section>
+    <section class="stop"><h2><span class="pill" style="background:var(--l2)">6</span>Кой минава първи?</h2><div data-k-anim="priorityRoad"></div></section>
+    <section class="stop"><h2><span class="pill" style="background:var(--l3)">8</span>Провери се</h2><div data-k-quiz></div></section>
+  </main>
+</div>
+<script src="../js/signs-data.js"></script><script src="../js/anim.js"></script><script src="kit.js"></script><script>Kit.auto()</script>
+</body>
+</html>

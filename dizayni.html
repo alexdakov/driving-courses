@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Дизайни на курса</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Gallery shell: a picker rail on top, the selected mockup in a full-height frame below. */
+:root {
+  --bg: #eef0f3; --fg: #15181c; --muted: #5f6772; --card: #fff; --line: #d6dbe1; --accent: #1350a6;
+  --font: "Golos Text", system-ui, sans-serif; --mono: "JetBrains Mono", monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #101317; --fg: #e8ebef; --muted: #9aa4b0; --card: #181c21; --line: #2a3139; --accent: #7aa9ff; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #101317; --fg: #e8ebef; --muted: #9aa4b0; --card: #181c21; --line: #2a3139; --accent: #7aa9ff; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); display: grid; grid-template-rows: auto minmax(0, 1fr); }
+header { padding: 14px 16px 10px; display: grid; gap: 10px; border-bottom: 1px solid var(--line); background: var(--card); }
+.row { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; justify-content: space-between; }
+h1 { font-size: 1.1rem; margin: 0; }
+.row p { margin: 0; color: var(--muted); font-size: .88rem; }
+.rail { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.rail button { flex: none; border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 10px; padding: 7px 12px; font: inherit; font-size: .88rem; cursor: pointer; display: grid; gap: 1px; text-align: left; min-width: 150px; }
+.rail button small { color: var(--muted); font-size: .72rem; }
+.rail button b { font-weight: 600; }
+.rail button .n { font-family: var(--mono); font-size: .72rem; color: var(--accent); }
+.rail button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--card); }
+.about { display: flex; gap: 10px 18px; flex-wrap: wrap; align-items: center; font-size: .88rem; }
+.about .what { color: var(--muted); max-width: 80ch; }
+.about a { color: var(--accent); font-weight: 600; }
+main { min-height: 0; }
+iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="row"><h1>10 дизайна за шофьорския курс</h1><p>Във всеки: главите, различен интерактивен начин за учене на знаците, анимирано кръстовище и въпрос.</p></div>
+  <div class="rail" id="rail" role="group" aria-label="Дизайн"></div>
+  <div class="about"><span class="what" id="what"></span><a id="open" href="#" target="_blank" rel="noopener">Отвори на цял екран ↗</a></div>
+</header>
+<main><iframe id="frame" title="Дизайн"></iframe></main>
+<script>
+const D = [
+  ["01-tabela.html", "Пътна табела", "Сини указателни табели, български шрифт Sofia Sans", "Знаци: подредени по форма – избираш триъгълник, кръг или квадрат."],
+  ["02-uchebnik.html", "Учебник", "Редакционен, бележки с червена химикалка в полето", "Знаци: по групи, отваряш групата и после знака."],
+  ["03-tablo.html", "Табло", "Тъмен, като арматурно табло, напредък като скоростомер", "Знаци: въртележка с голям знак и обяснение."],
+  ["04-asfalt.html", "Асфалт", "Асфалт и пътна маркировка, едри надписи", "Знаци: „караш“ по път и минаваш покрай всеки знак."],
+  ["05-igra.html", "Игра", "Весел, с точки, серия и пътека от нива", "Знаци: първо познаваш, после виждаш обяснение и подсказка."],
+  ["06-shveycarski.html", "Швейцарски", "Строга мрежа, черно-бяло и червено", "Знаци: списък вляво, голям детайл вдясно."],
+  ["07-metro.html", "Метро карта", "Главите като спирки по линия", "Знаци: мрежа, в която избраният знак се разгъва."],
+  ["08-kartoteka.html", "Картотека", "Индексни карти и ръкописни бележки", "Знаци: тесте карти – „Знам“ / „Не знам“."],
+  ["09-nosht.html", "Нощно каране", "Тъмно синьо и неонови светлини", "Знаци: карти, които се обръщат."],
+  ["10-prilozhenie.html", "Мобилно приложение", "Като приложение за телефон, с долно меню", "Знаци: игра „намери двойката“."],
+];
+const rail = document.getElementById("rail"), frame = document.getElementById("frame"), what = document.getElementById("what"), open = document.getElementById("open");
+function show(i) {
+  const [f, name, look, signs] = D[i];
+  frame.src = "mockups/" + f;
+  open.href = "mockups/" + f;
+  what.innerHTML = `<b>${name}.</b> ${look}. ${signs}`;
+  rail.querySelectorAll("button").forEach((b, k) => b.setAttribute("aria-pressed", String(k === i)));
+  try { localStorage.setItem("dizayn", i); } catch (e) {}
+}
+D.forEach(([f, name, look], i) => {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.innerHTML = `<span class="n">${String(i + 1).padStart(2, "0")}</span><b>${name}</b><small>${look.split(",")[0]}</small>`;
+  b.onclick = () => show(i);
+  rail.appendChild(b);
+});
+let start = 0;
+try { start = Math.min(9, parseInt(localStorage.getItem("dizayn") || "0", 10) || 0); } catch (e) {}
+show(start);
+</script>
+</body>
+</html>

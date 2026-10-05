@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>08 · Картотека</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&family=Caveat:wght@600;700&family=PT+Mono&display=swap">
+<link rel="stylesheet" href="base.css">
+<style>
+/* Concept: a study desk of index cards. Ruled cards, handwritten notes, tape, a flashcard stack to drill the signs. */
+:root {
+  --bg: #d8dee4; --fg: #1f2a36; --muted: #5d6874; --card: #fffefa; --line: #c9d3dc;
+  --accent: #2b5aa6; --accent-fg: #fff; --hand: #2b5aa6; --pen: #c8382e; --ok: #2c7a45; --no: #c8382e;
+  --mnem-bg: #fff3b0; --mnem-fg: #3a3000; --radius: 3px; --shadow: 0 1px 1px rgba(0,0,0,.08), 0 8px 18px rgba(31,42,54,.16);
+  --font: "PT Serif", Georgia, serif; --font-mono: "PT Mono", monospace;
+}
+body { font-size: 17px; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 36px 20px 90px; display: grid; gap: 34px; }
+.card { background: var(--card) repeating-linear-gradient(180deg, transparent 0 31px, #d6e2f0 31px 32px); background-position: 0 54px; border-radius: 3px; box-shadow: var(--shadow); padding: 18px 26px 26px 64px; position: relative; }
+.card::before { content: ""; position: absolute; left: 46px; top: 0; bottom: 0; width: 2px; background: rgba(200,56,46,.45); }
+.card.tilt { transform: rotate(-.6deg); } .card.tilt2 { transform: rotate(.5deg); }
+.tape { position: absolute; top: -12px; left: 50%; width: 110px; height: 26px; background: rgba(255,240,170,.75); transform: translateX(-50%) rotate(-3deg); box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+.hand { font-family: "Caveat", cursive; color: var(--hand); }
+h1 { font-family: "Caveat", cursive; font-size: clamp(2.6rem, 6vw, 4.2rem); color: var(--fg); font-weight: 700; line-height: 1; }
+.card p.lead { font-size: 1.15rem; line-height: 32px; margin-top: 10px; }
+h2 { font-family: "Caveat", cursive; font-size: 2.1rem; color: var(--pen); margin-bottom: 8px; line-height: 1.1; }
+.tabs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); gap: 12px; }
+.k-ch { background: var(--card); box-shadow: var(--shadow); border-radius: 3px; padding: 26px 14px 12px; position: relative; display: grid; gap: 2px; border-top: 8px solid var(--tab, #8fb1de); }
+.k-ch:nth-child(3n+2) { --tab: #f3c06b; } .k-ch:nth-child(3n) { --tab: #9fd0a8; }
+.k-ch-n { position: absolute; top: 4px; right: 10px; font-family: var(--font-mono); font-size: .75rem; color: var(--muted); }
+.k-ch-t { font-weight: 700; }
+.k-ch small { color: var(--muted); font-style: italic; }
+.k-stack-card { background: var(--card) repeating-linear-gradient(180deg, transparent 0 31px, #d6e2f0 31px 32px); border: 0; box-shadow: var(--shadow), 6px 6px 0 -1px #f4f2ea, 6px 6px 1px 0 rgba(0,0,0,.15), 12px 12px 0 -1px #ece9de, 12px 12px 1px 0 rgba(0,0,0,.15); }
+.k-q { font-family: "Caveat", cursive; font-size: 1.8rem; color: var(--hand); }
+.k-mnem { transform: rotate(-.8deg); box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+.k-mnem-label { font-family: "Caveat", cursive; font-size: 1.25rem; text-transform: none; letter-spacing: 0; }
+.k-btn { font-family: "Caveat", cursive; font-size: 1.35rem; border-radius: 4px; }
+.k-yes { background: #dff1e3; } .k-no { background: #f9e0dd; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 30px; }
+.xanim-play { border-radius: 4px; }
+@media (max-width: 800px) { .grid2 { grid-template-columns: minmax(0, 1fr); } .card { padding-left: 28px; } .card::before { left: 16px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="card tilt"><span class="tape"></span><h1>Шофьорски опреснителен курс</h1><p class="lead">Кратки карти за правилата на пътя – категория B. Обръщай, повтаряй, отбелязвай какво вече знаеш. <span class="hand" style="font-size:1.4rem">← и всеки ден по малко!</span></p></section>
+  <section><h2>Карти по теми</h2><div class="tabs" data-k-chapters="plain"></div></section>
+  <section><h2>Тесте „Пътни знаци“</h2><div data-k-pattern="stack"></div></section>
+  <div class="grid2">
+    <section class="card tilt2"><h2>Кой минава първи?</h2><div data-k-anim="equal"></div></section>
+    <section class="card"><h2>Провери се</h2><div data-k-quiz></div></section>
+  </div>
+</div>
+<script src="../js/signs-data.js"></script><script src="../js/anim.js"></script><script src="kit.js"></script><script>Kit.auto()</script>
+</body>
+</html>

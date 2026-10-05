@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02 · Учебник</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=PT+Sans:wght@400;700&family=Caveat:wght@600&family=PT+Mono&display=swap">
+<link rel="stylesheet" href="base.css">
+<style>
+/* Concept: a modern driving textbook — wide text column, margin notes in red pen, numbered figures, a real table of contents. */
+:root {
+  --bg: #f6f7f9; --fg: #1a2238; --muted: #5d6578; --card: #fff; --line: #d9dde5;
+  --accent: #1a2238; --accent-fg: #fff; --pen: #cf2e2e; --mnem-bg: #eef3fb; --mnem-fg: #1a2238;
+  --radius: 4px; --font: "PT Sans", sans-serif; --font-display: "Literata", Georgia, serif; --font-mono: "PT Mono", monospace;
+}
+body { font-size: 17px; }
+.page { max-width: 1060px; margin: 0 auto; padding: 40px 24px 90px; display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 0 48px; }
+.page > * { grid-column: 1; }
+.margin { grid-column: 2; font-family: "Caveat", cursive; color: var(--pen); font-size: 1.35rem; line-height: 1.2; align-self: start; transform: rotate(-1.5deg); border-left: 2px solid var(--pen); padding-left: 12px; }
+.running { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: .78rem; color: var(--muted); border-bottom: 1px solid var(--fg); padding-bottom: 6px; grid-column: 1 / -1; }
+h1 { font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 700; margin: 34px 0 12px; letter-spacing: -.01em; }
+.lede { font-size: 1.25rem; color: var(--muted); max-width: 58ch; }
+h2 { font-size: 1.7rem; margin: 54px 0 6px; }
+h2 small { display: block; font-family: var(--font-mono); font-size: .75rem; font-weight: 400; color: var(--pen); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+.toc { margin-top: 22px; display: grid; }
+.k-ch { display: grid; grid-template-columns: 36px auto minmax(20px, 1fr) auto; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px dotted var(--line); }
+.k-ch-n { font-family: var(--font-mono); color: var(--pen); }
+.k-ch-t { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; }
+.k-ch small { grid-column: 4; color: var(--muted); font-style: italic; }
+figure { margin: 18px 0 0; background: var(--card); border: 1px solid var(--line); padding: 20px; }
+figcaption { font-family: var(--font-mono); font-size: .78rem; color: var(--muted); margin-top: 12px; border-top: 1px solid var(--line); padding-top: 8px; }
+figcaption b { color: var(--pen); }
+.k-acc-sec { border-radius: 0; border-width: 0 0 1px; padding: 4px 0; background: none; }
+.k-acc-sec > summary b { font-family: var(--font-display); font-size: 1.15rem; }
+.k-name { font-family: var(--font-display); }
+.k-mnem { border-left: 3px solid var(--pen); border-radius: 0; background: none; padding: 4px 0 4px 14px; }
+.k-mnem-label { font-family: "Caveat", cursive; text-transform: none; letter-spacing: 0; font-size: 1.3rem; color: var(--pen); opacity: 1; }
+.xanim-play { border-radius: 2px; }
+@media (max-width: 860px) { .page { grid-template-columns: minmax(0, 1fr); } .margin { grid-column: 1; margin: 10px 0; } }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="running"><span>Шофьорски опреснителен курс · категория B</span><span>ЗДвП, изм. 7.09.2025</span></div>
+  <h1>Шофьорски опреснителен курс</h1>
+  <p class="lede">Правилата, които най-лесно се забравят, разказани ясно. Всяка глава има рисунки, анимации и подсказки как да запомниш.</p>
+  <aside class="margin">Започни от „Предимство“ – там се бъркат най-много!</aside>
+
+  <h2><small>Съдържание</small>Глави</h2>
+  <nav class="toc" data-k-chapters="plain"></nav>
+
+  <h2><small>Глава 2</small>Пътни знаци</h2>
+  <p>Всяка група има собствена форма. Отвори групата и после знака, за да видиш значението и подсказката.</p>
+  <figure><div data-k-pattern="accordion"></div><figcaption><b>Фиг. 2.1</b> Знаците по групи. Отвори знак за обяснение.</figcaption></figure>
+  <aside class="margin">Червено = „не“.<br>Синьо = „трябва“.</aside>
+
+  <h2><small>Глава 6</small>Кой минава първи?</h2>
+  <figure><div data-k-anim="equal"></div><figcaption><b>Фиг. 6.1</b> Равнозначно кръстовище – правилото на дясното.</figcaption></figure>
+  <aside class="margin">Дясното правило: гледай надясно – ако там има кола, тя е първа.</aside>
+
+  <h2><small>Упражнение</small>Провери се</h2>
+  <figure><div data-k-quiz></div></figure>
+</main>
+<script src="../js/signs-data.js"></script><script src="../js/anim.js"></script><script src="kit.js"></script><script>Kit.auto()</script>
+</body>
+</html>
