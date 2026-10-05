@@ -34,18 +34,19 @@
     syncTheme();
   }
   function syncTheme() {
-    const eff = effectiveTheme(), mode = themeMode();
+    const eff = effectiveTheme();
     document.querySelectorAll("[data-theme-toggle]").forEach((b) => {
       b.innerHTML = eff === "dark" ? SUN : MOON;
       const label = eff === "dark" ? "Включи светлата тема" : "Включи тъмната тема";
       b.setAttribute("aria-label", label);
       b.title = label;
     });
-    document.querySelectorAll("[data-theme-seg] button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+    document.querySelectorAll("[data-theme-seg] button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === eff)));
     document.querySelectorAll('meta[name="theme-color"]').forEach((m) => { m.setAttribute("content", eff === "dark" ? "#000000" : "#f2f2f7"); m.removeAttribute("media"); });
   }
   const themeToggle = () => `<button type="button" class="theme-btn" data-theme-toggle></button>`;
-  const themeSeg = () => `<div class="seg" role="group" aria-label="Тема">${[["auto", "Автоматично"], ["light", "Светла"], ["dark", "Тъмна"]].map(([m, l]) => `<button type="button" data-mode="${m}" aria-pressed="false">${l}</button>`).join("")}</div>`;
+  // two icon buttons: light and dark (until one is picked, the theme follows the device)
+  const themeSeg = () => `<div class="theme-icons" role="group" aria-label="Тема">${[["light", SUN, "Светла тема"], ["dark", MOON, "Тъмна тема"]].map(([m, ic, l]) => `<button type="button" data-mode="${m}" aria-pressed="false" aria-label="${l}" title="${l}">${ic}</button>`).join("")}</div>`;
   document.addEventListener("click", (e) => {
     const t = e.target.closest("[data-theme-toggle]");
     if (t) { setTheme(effectiveTheme() === "dark" ? "light" : "dark"); return; }
@@ -53,7 +54,7 @@
     if (m) setTheme(m.dataset.mode);
   });
   if (darkMQ && darkMQ.addEventListener) darkMQ.addEventListener("change", syncTheme);
-  document.querySelectorAll(".side-theme [data-theme-seg]").forEach((el) => (el.innerHTML = themeSeg()));
+  document.querySelectorAll(".side-theme").forEach((el) => (el.innerHTML = themeSeg()));
 
   // ---------- chrome: sidebar, navbar, tab bar ----------
   const nav = document.getElementById("nav");
