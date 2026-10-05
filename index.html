@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Шофьорски опреснителен курс</title>
+<meta name="description" content="Интерактивен опреснителен курс за шофьори, категория B: знаци, маркировка, светофар, регулировчик, предимство, кръгово, паркиране, огледала, табло и времето – по ЗДвП.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Unbounded:wght@500;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <a class="brand" href="#nachalo" aria-label="Начало">
+      <svg viewBox="0 0 100 100" class="sign" aria-hidden="true"><rect x="18" y="18" width="64" height="64" transform="rotate(45 50 50)" fill="#fff" stroke="#16181b" stroke-width="2"/><rect x="28" y="28" width="44" height="44" transform="rotate(45 50 50)" fill="#f7c600"/></svg>
+      <span class="brand-text"><span class="brand-name">Опреснителен курс</span><br><span class="brand-sub">Категория B · автоматик</span></span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Глави"></nav>
+    <div class="side-foot">
+      Напредъкът се пази само в този браузър.<br>
+      <button type="button" id="reset">Изчисти напредъка</button>
+    </div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+<script src="js/signs.js"></script>
+<script src="js/data.js"></script>
+<script src="js/widgets.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
