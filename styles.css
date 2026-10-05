@@ -170,7 +170,7 @@ svg text { font-family: var(--body); }
   .navbar a::before { content: ""; width: 10px; height: 10px; border-left: 2.5px solid currentColor; border-bottom: 2.5px solid currentColor; transform: rotate(45deg); margin-right: 4px; }
   .navbar .nt { font-weight: 600; font-size: .98rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 52vw; }
   .tabbar {
-    display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
     padding: 6px 4px calc(env(safe-area-inset-bottom, 0px) + 6px); background: var(--bar); -webkit-backdrop-filter: saturate(180%) blur(18px); backdrop-filter: saturate(180%) blur(18px);
     border-top: 1px solid var(--line);
   }
@@ -693,9 +693,13 @@ input[type="range"] { accent-color: var(--accent); }
 .view-bar { margin-bottom: 10px; }
 .stage-wrap { display: grid; gap: 6px; min-width: 0; }
 .stage-wrap .stage { touch-action: pan-y; }
-.orbit { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: center; font-size: .85rem; color: var(--muted); }
-.orbit[hidden] { display: none; }
-.orbit input { width: 100%; }
+.stage-wrap { position: relative; }
+.stage.draggable { cursor: grab; }
+.stage.draggable.dragging { cursor: grabbing; }
+.stage.draggable:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.drag-hint { position: absolute; left: 10px; top: 10px; display: inline-flex; gap: 6px; align-items: center; padding: 5px 10px; border-radius: 999px; background: rgb(0 0 0 / 55%); color: #fff; font-size: .78rem; font-weight: 600; pointer-events: none; }
+.drag-hint[hidden] { display: none; }
+.stage-wrap:hover .drag-hint, .stage-wrap:focus-within .drag-hint { opacity: .35; }
 
 /* ---------- Mirror widget ---------- */
 .mir-stages { display: grid; grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr); gap: 12px; align-items: start; }
@@ -716,3 +720,41 @@ input[type="range"] { accent-color: var(--accent); }
 .sit-q { font-weight: 600; }
 .sit-steps { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
 .sit-steps li::marker { color: var(--accent); font-weight: 700; }
+
+/* ---------- Скорости ---------- */
+.sec-link { margin-left: auto; text-transform: none; letter-spacing: 0; color: var(--accent); text-decoration: none; font-size: .85rem; }
+.spd-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 8px; }
+.spd-pick button { display: grid; grid-template-columns: 38px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 10px; align-items: center; text-align: left; padding: 10px 12px; border-radius: 14px; border: 1px solid transparent; background: var(--surface); color: var(--ink); cursor: pointer; font: inherit; min-width: 0; }
+.spd-pick button[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.spd-pick .spd-ic { grid-row: 1 / 3; display: grid; place-items: center; width: 38px; height: 38px; }
+.spd-pick .spd-ic img { width: 36px; height: 36px; object-fit: contain; }
+.spd-pick .spd-w { color: var(--accent); display: grid; place-items: center; }
+.spd-pick .spd-t { font-size: .88rem; font-weight: 600; line-height: 1.2; overflow-wrap: break-word; }
+.spd-pick b { font-size: .8rem; color: var(--muted); font-weight: 600; }
+.spd-main { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 14px; margin-top: 14px; align-items: start; }
+.spd-scene { margin: 0; position: relative; border-radius: var(--radius); overflow: hidden; background: #cfe3f5; }
+.spd-scene svg { display: block; width: 100%; height: auto; }
+.spd-info { display: grid; gap: 12px; background: var(--surface); border-radius: var(--radius); padding: 14px 16px; min-width: 0; }
+.spd-g { display: grid; place-items: center; }
+.spd-gauge { width: min(220px, 70%); height: auto; }
+.spd-text { display: grid; gap: 8px; }
+.spd-text h3 { font-size: 1.15rem; }
+.spd-text .pill, .spd-text .lawref { justify-self: start; }
+.spd-calc { margin-top: 14px; display: grid; gap: 12px; }
+.spd-calc[hidden] { display: none; }
+.spd-note { color: var(--muted); font-size: .88rem; }
+.spd-row { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 10px; align-items: center; }
+.spd-row > span { color: var(--muted); font-size: .88rem; }
+.spd-bar { position: relative; height: 18px; border-radius: 9px; background: var(--surface-2); display: flex; overflow: visible; }
+.spd-bar span { height: 100%; }
+.spd-bar .r { background: #f5b301; border-radius: 9px 0 0 9px; }
+.spd-bar .b { background: #e0352b; }
+.spd-bar i { position: absolute; top: -5px; bottom: -5px; width: 3px; border-radius: 2px; background: var(--ink); transform: translateX(-1.5px); }
+.spd-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; font-size: .82rem; color: var(--muted); }
+.spd-legend span { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: -8px; }
+.spd-legend .r { background: #f5b301; } .spd-legend .b { background: #e0352b; } .spd-legend .v { background: var(--ink); width: 4px; }
+.spd-result { font-size: 1.02rem; }
+.spd-result b { font-size: 1.25rem; color: var(--accent); }
+.spd-sum .spd-sum-row { width: 100%; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+@media (max-width: 860px) { .spd-main { grid-template-columns: minmax(0, 1fr); } .spd-row { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
+@media (max-width: 560px) { .spd-pick { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

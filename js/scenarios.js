@@ -34,10 +34,12 @@
       },
       // smooth turn to (x, y); (kx, ky) is where the two straight directions would meet
       T(x, y, kx, ky, k = 0.55) { return api.C(cx + (kx - cx) * k, cy + (ky - cy) * k, x + (kx - x) * k, y + (ky - y) * k, x, y); },
-      // circular arc around (ox, oy) from the current point to angle a1 (degrees, screen coordinates)
-      A(ox, oy, r, a1) {
+      // circular arc around (ox, oy) from the current point to angle a1 (degrees, screen coordinates);
+      // ccw = visually counter-clockwise (the way traffic flows in a roundabout)
+      A(ox, oy, r, a1, ccw = true) {
         const a0 = (Math.atan2(cy - oy, cx - ox) * 180) / Math.PI;
-        const da = a1 - a0;
+        let da = a1 - a0;
+        if (ccw) { while (da >= 0) da -= 360; while (da < -360) da += 360; } else { while (da <= 0) da += 360; while (da > 360) da -= 360; }
         const ex = ox + r * Math.cos((a1 * Math.PI) / 180), ey = oy + r * Math.sin((a1 * Math.PI) / 180);
         d += ` A${r} ${r} 0 ${Math.abs(da) > 180 ? 1 : 0} ${da > 0 ? 1 : 0} ${fx(ex)} ${fx(ey)}`;
         len += (Math.abs(da) * Math.PI * r) / 180; cx = ex; cy = ey; nodes.push(len); return api;
@@ -104,7 +106,7 @@
     ${txt ? `<g transform="rotate(${-a})">${D.T(0, 0.5, txt, 10, { w: 800 })}</g>` : ""}</g>`;
   const amb = (x, y, a = 0) => D.car(x, y, a, "#fff", 54, 24, { siren: true });
   // side-view deer, feet at (x, y), facing right
-  const deer = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})" fill="#8a5a32" stroke="#8a5a32">
+  const deer = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})" fill="#b97a3f" stroke="#b97a3f">
     <path d="M-13 -20 L-14 0 M-7 -20 L-6 0 M9 -20 L8 0 M14 -20 L15 0" stroke-width="3.2" stroke-linecap="round" fill="none"/>
     <ellipse cx="0" cy="-26" rx="19" ry="9" stroke="none"/><path d="M12 -30 L19 -46 L24 -44 L18 -27 Z" stroke="none"/>
     <ellipse cx="24" cy="-48" rx="7" ry="4.2" stroke="none"/><path d="M-19 -29 L-23 -33" stroke-width="3" stroke-linecap="round"/>
@@ -134,10 +136,10 @@
       q: "Излизаш от второстепенен път със знак Б2, а главният път изглежда почти празен. Какво правиш?",
       steps: [
         "Спираш напълно на стоп-линията – дори пътят да е празен.",
-        "Ако няма стоп-линия, спираш преди кръстовището, там, откъдето виждаш пътя.",
+        "Ако няма стоп-линия, спираш на линията, на която е поставен знакът.",
         "Пропускаш всички по главния път и тръгваш, когато е свободно.",
       ],
-      ref: "ЗДвП чл. 50, ал. 1 (знак Б2)",
+      ref: "ППЗДвП чл. 46, ал. 2; ЗДвП чл. 50",
       svg: () => {
         const C = D.C, dur = 8;
         let b = bg(C.grass) + tree(24, 34, 13) + tree(330, 30, 12) + tree(40, 160, 12) + tree(320, 175, 14);
@@ -174,7 +176,7 @@
         const r = route(202.5, 195).L(202.5, 122).T(140, 97.5, 202.5, 97.5).L(-40, 97.5);
         b += drive(r, [[0, 0], [0.25, r.n(1)], [0.58, r.n(1)], [0.95, r.len()], [1, r.len()]], dur, D.car(0, 0, 0, C.blue, 46, 22, { blinkL: true }), { badge: "Ти" });
         b += D.label(8, 20, "Чакаш в кръстовището с ляв мигач", { size: 11, a: "start" });
-        b += D.label(4, 192, "Насрещната Б минава първа", { size: 10.5, a: "start" });
+        b += D.label(4, 194, "Насрещната Б е първа", { size: 10.5, a: "start" });
         return out(b, "Завой наляво на зелено: насрещните минават първи");
       },
     },
@@ -188,7 +190,7 @@
         "Предимството определят знаците: Б1, Б2, Б3.",
         "Ако няма знаци, пропускаш идващите отдясно.",
       ],
-      ref: "ЗДвП чл. 48, 50",
+      ref: "ППЗДвП чл. 37; ЗДвП чл. 48, 50",
       svg: () => {
         const C = D.C, dur = 8;
         let b = cross() + tree(30, 186, 12) + tree(330, 30, 13);
@@ -204,25 +206,25 @@
       id: "main-road-bends",
       cat: "krastovishta",
       title: "Главният път завива (табела Т13)",
-      q: "Пред теб е знак Б1 с табела Т13 – главният път завива. Отляво идва кола по него. Кой е пръв?",
+      q: "Караш по главния път, който завива надясно (Б3 с табела Т13), и продължаваш направо. Кой е пръв?",
       steps: [
-        "Дебелата линия на табелата показва накъде продължава главният път.",
-        "Колата по главния път минава първа, дори когато завива.",
-        "Ти си на второстепенния път – пропускаш я и тогава продължаваш.",
-        "Колите на главния път се съобразяват помежду си с правилото на дясното.",
+        "Дебелата линия на Т13 показва накъде продължава главният път.",
+        "Колата отдясно също е на главния път – между вас важи правилото на дясното, тя е първа.",
+        "Колата от второстепенния път (знак Б1) чака и двама ви.",
       ],
-      ref: "ЗДвП чл. 50",
+      ref: "ЗДвП чл. 50, ал. 2",
       svg: () => {
-        const C = D.C, dur = 8;
-        let b = cross() + tree(26, 186, 12) + tree(330, 186, 13);
-        b += `<path d="M185 230 V115 H-10" stroke="${C.amber}" stroke-opacity=".28" stroke-width="70" fill="none" stroke-linejoin="round"/>`;
-        b += stopV(226, 81, 114);
-        b += D.S("Б1", 318, 6, 32) + D.S("Т13", 318, 40, 32);
-        const r = route(202.5, 192).L(202.5, 140).T(140, 97.5, 202.5, 97.5).L(-60, 97.5);
-        b += drive(r, [[0, 0], [0.5, r.len()], [1, r.len()]], dur, D.car(0, 0, 0, C.orange, 46, 22, { blinkL: true }), { badge: "Б" });
-        b += mv("0 0;-70 0;-70 0;-390 0;-390 0", "0;.15;.55;.95;1", dur, D.car(318, 97.5, 180, C.blue, 46, 22, { label: "Ти" }));
-        b += D.label(8, 20, "Дебелата линия на Т13 = главният път", { size: 11, a: "start" });
-        b += D.label(8, 46, "Б е на главния път → минава първа", { size: 11, a: "start" });
+        const C = D.C, dur = 10;
+        let b = cross() + tree(330, 30, 12) + tree(330, 190, 12) + tree(26, 120, 11);
+        b += `<path d="M185 230 V140 Q185 115 210 115 H370" stroke="${C.yellow}" stroke-opacity=".75" stroke-width="9" fill="none" stroke-linecap="round"/>`;
+        b += stopH(155, 186, 220) + stopH(75, 150, 184);
+        b += D.S("Б3", 226, 154, 30) + D.S("Т13", 226, 186, 30) + D.S("Б1", 118, 40, 28);
+        const r = route(318, 97.5).L(230, 97.5).T(167.5, 150, 167.5, 97.5).L(167.5, 270);
+        b += drive(r, [[0, 0], [0.4, r.len()], [1, r.len()]], dur, D.car(0, 0, 0, C.orange, 46, 22, { blinkL: true }), { badge: "Б" });
+        b += mv("0 0;0 -18;0 -18;0 -250;0 -250", "0;.12;.42;.72;1", dur, D.car(202.5, 195, -90, C.blue, 46, 22, { label: "Ти" }));
+        b += mv("0 0;0 22;0 22;0 240;0 240", "0;.15;.62;.95;1", dur, D.car(167.5, 30, 90, C.purple, 46, 22, { label: "В" }));
+        b += D.label(8, 20, "Ред: Б → Ти → В", { size: 11.5, a: "start" });
+        b += D.label(4, 198, "Дебелата линия = главен път", { size: 10, a: "start" });
         return out(b, "Главният път променя посоката си – табела Т13");
       },
     },
@@ -244,9 +246,9 @@
         // inset: the regulator seen from the front
         b += `<rect x="8" y="8" width="176" height="86" rx="12" fill="#fff" stroke="rgba(0,0,0,.1)"/>`;
         b += `<g>${D.person(48, 88, 1.08, uni, { l: [-32, -42], r: [32, -42] })}<rect x="${48 - 8.6}" y="${88 - 67.5}" width="17.2" height="6" rx="2" fill="#fff" stroke="${uni}"/></g>`;
-        b += D.T(134, 34, "Гърди или гръб", 11.5, { w: 700 }) + D.T(134, 50, "към теб =", 11.5, { w: 700 }) + D.T(134, 70, "СТОП", 17, { w: 800, c: C.red });
+        b += D.T(138, 30, "Гърди или", 11.5, { w: 700 }) + D.T(138, 45, "гръб към теб", 11.5, { w: 700 }) + D.T(138, 70, "= СТОП", 17, { w: 800, c: C.red });
         // top-down regulator in the middle, chest towards you (south)
-        b += `<g transform="translate(225 135)"><line x1="-24" y1="0" x2="24" y2="0" stroke="${uni}" stroke-width="4" stroke-linecap="round"/><ellipse rx="9" ry="5.5" fill="${uni}"/><circle r="4.6" fill="#fff" stroke="${uni}" stroke-width="1.5"/></g>`;
+        b += `<g transform="translate(225 135)"><circle r="19" fill="#fff" opacity=".28"/><line x1="-27" y1="0" x2="27" y2="0" stroke="${uni}" stroke-width="4.5" stroke-linecap="round"/><circle cx="-27" cy="0" r="2.6" fill="#fff"/><circle cx="27" cy="0" r="2.6" fill="#fff"/><ellipse rx="10" ry="6" fill="${uni}"/><circle r="5" fill="#fff" stroke="${uni}" stroke-width="1.6"/></g>`;
         b += D.car(207.5, 74, 90, C.grey);
         b += mv("0 0;380 0;380 0", "0;.55;1", dur, D.car(40, 152.5, 0, C.orange));
         b += mv("0 0;-400 0;-400 0", "0;.6;1", dur, D.car(330, 117.5, 180, C.purple));
@@ -309,9 +311,9 @@
           `<g>${fade("1;1;0;0", "0;.82;.83;1", dur)}<circle cx="${x - r - 1}" cy="${y}" r="${r}" fill="#ff3b30"><animate attributeName="opacity" values="1;.1;1" dur="1s" repeatCount="indefinite"/></circle><circle cx="${x + r + 1}" cy="${y}" r="${r}" fill="#ff3b30"><animate attributeName="opacity" values=".1;1;.1" dur="1s" repeatCount="indefinite"/></circle></g>`;
         b += rect(221, 180, 3, 30, "#6c737c") + lamps(222.5, 186, 5);
         // inset: side view with the barrier up
-        b += `<rect x="8" y="34" width="122" height="62" rx="10" fill="#fff" stroke="rgba(0,0,0,.1)"/><rect x="38" y="44" width="4" height="46" fill="#6c737c"/>` + lamps(40, 50, 6);
-        b += `<g transform="translate(40 80) rotate(-68)"><rect x="0" y="-3" width="56" height="6" fill="#fff" stroke="${C.red}"/>${[8, 24, 40].map((x) => rect(x, -3, 8, 6, C.red)).join("")}</g>`;
-        b += D.T(96, 58, "бариерата", 10.5, { w: 600 }) + D.T(96, 72, "е вдигната,", 10.5, { w: 600 }) + D.T(96, 86, "но мига", 10.5, { w: 700, c: C.red });
+        b += `<rect x="8" y="34" width="150" height="62" rx="10" fill="#fff" stroke="rgba(0,0,0,.1)"/><rect x="26" y="50" width="4" height="40" fill="#6c737c"/>` + lamps(28, 50, 5.5);
+        b += `<rect x="54" y="78" width="6" height="12" rx="1" fill="#6c737c"/><g transform="translate(57 80) rotate(-80)"><rect x="0" y="-3" width="40" height="6" fill="#fff" stroke="${C.red}"/>${[6, 22].map((x) => rect(x, -3, 8, 6, C.red)).join("")}</g>`;
+        b += D.T(112, 52, "бариерата", 10.5, { w: 600 }) + D.T(112, 66, "е вдигната,", 10.5, { w: 600 }) + D.T(112, 81, "но мига!", 11, { w: 800, c: C.red });
         // train comes from the bottom and runs north
         let train = "";
         for (let i = 0; i < 3; i++) train += `<rect x="253" y="${184 + i * 77}" width="34" height="74" rx="${i ? 4 : 10}" fill="${i ? "#3c6e47" : "#2f5c3a"}" stroke="rgba(0,0,0,.3)"/><rect x="258" y="${192 + i * 77}" width="24" height="58" rx="3" fill="rgba(255,255,255,.18)"/>`;
@@ -387,15 +389,15 @@
       ref: "ЗДвП чл. 119, ал. 2; чл. 43",
       svg: () => {
         const C = D.C, dur = 9;
-        let b = bg(C.grass) + tree(330, 40, 12);
-        b += hRoad(58, 104) + edgeH(61) + D.dashes(110, 0, 232) + D.dashes(110, 276, CW);
-        b += rect(0, 162, CW, 3, C.kerb) + rect(0, 165, CW, 23, C.walk) + houses(188, 32);
-        b += D.zebra(238, 60, 32, 100, 8) + D.S("Д17", 280, 163, 24);
-        b += mv("0 0;0 0;0 -128;0 -128", "0;.15;.78;1", dur, D.walker(254, 184, 0.8, C.orange));
-        b += mv("0 0;0 0;290 0", "0;.82;1", dur, bus(196, 136, 0, "#9aa3ad", 72, 28));
-        b += mv("0 0;166 0;166 0;390 0", "0;.4;.84;1", dur, D.car(40, 84, 0, C.blue, 46, 22, { label: "Ти" }));
-        b += D.label(180, 18, "Спряла кола пред пътеката = може да има пешеходец", { size: 10.5 });
-        b += D.label(180, 44, "Не я подминавай – намали и спри", { size: 11 });
+        let b = bg(C.grass) + tree(330, 46, 12);
+        b += hRoad(68, 102) + edgeH(71) + D.dashes(119, 0, 232) + D.dashes(119, 276, CW);
+        b += rect(0, 170, CW, 3, C.kerb) + rect(0, 173, CW, 25, C.walk) + houses(198, 22);
+        b += D.zebra(238, 70, 32, 100, 8) + D.S("Д17", 280, 172, 24);
+        b += mv("0 0;0 0;0 -128;0 -128", "0;.15;.78;1", dur, D.walker(254, 194, 0.72, C.orange));
+        b += mv("0 0;0 0;290 0", "0;.82;1", dur, bus(196, 145, 0, "#9aa3ad", 72, 28));
+        b += mv("0 0;166 0;166 0;390 0", "0;.4;.84;1", dur, D.car(40, 94, 0, C.blue, 46, 22, { label: "Ти" }));
+        b += D.label(180, 16, "Спряла кола пред пътеката = може да има пешеходец", { size: 10.5 });
+        b += D.label(8, 42, "Не я подминавай – намали и спри", { size: 11, a: "start" });
         return out(b, "Кола е спряла пред пешеходна пътека в съседната лента");
       },
     },
@@ -403,13 +405,13 @@
       id: "school-bus",
       cat: "pesehodci",
       title: "Спрял автобус с деца",
-      q: "Насреща е спрял автобус с деца и с включени аварийни светлини. Какво правиш?",
+      q: "Насреща е спрял автобус с табела „Деца“ и аварийни светлини. Какво правиш?",
       steps: [
-        "Намаляваш и минаваш бавно, готов да спреш.",
+        "Намаляваш и при нужда спираш – законът го изисква при автобус с табела „Деца“, който спира, стои или потегля.",
         "Децата могат да изтичат иззад автобуса – и отпред, и отзад.",
-        "Ако дете излезе на пътя, спираш веднага, дори рязко.",
+        "Продължаваш бавно, едва когато си сигурен, че децата са в безопасност.",
       ],
-      ref: "ЗДвП чл. 116, 117",
+      ref: "ЗДвП чл. 117, 122",
       svg: () => {
         const C = D.C, dur = 9;
         let b = bg(C.grass) + tree(330, 40, 12) + tree(100, 40, 11);
@@ -420,9 +422,9 @@
         [[-55, -16], [-55, 16], [55, -16], [55, 16]].forEach(([x, y]) => (hz += blink(x, y, 3.4)));
         b += `<g transform="translate(158 127)">${bus(0, 0, 0, C.yellow, 110, 32, "ДЕЦА")}${hz}</g>`;
         b += D.person(122, 176, 0.5, C.red) + D.person(140, 176, 0.5, C.green);
-        b += mv("0 0;0 0;0 -116;0 -116", "0;.3;.62;1", dur, D.walker(232, 172, 0.58, C.purple));
+        b += mv("0 0;0 0;0 -110;0 -110", "0;.3;.6;1", dur, D.walker(232, 172, 0.58, C.purple));
         b += mv("0 0;-58 0;-58 0;-400 0", "0;.3;.76;1", dur, D.car(330, 82.5, 180, C.blue, 46, 22, { label: "Ти" }));
-        b += D.label(200, 26, "Автобус с деца → намали, готов да спреш", { size: 11 });
+        b += D.label(200, 19, "Автобус „Деца“ → намали, при нужда спри", { size: 11 });
         b += D.label(260, 200, "Децата изтичат иззад автобуса", { size: 11 });
         return out(b, "Спрял автобус с деца и аварийни светлини");
       },
@@ -503,11 +505,11 @@
         for (let x = 10; x < CW; x += 40) b += rect(x, 145, 3, 8, "#6c737c");
         b += mv("0 0;360 0;-120 0;0 0", "0;.45;.451;1", dur, D.car(60, 98.5, 0, C.orange));
         b += mv("0 0;200 0;-260 0;0 0", "0;.25;.251;1", dur, D.car(200, 63.5, 0, C.purple));
-        b += hazCar(290, 129, 0, C.blue, 44, 20);
+        b += hazCar(290, 129, 0, C.blue, 44, 20) + `<g transform="translate(290 129)">${badge("Ти")}</g>`;
         b += D.dim(112, 164, 266, 164, "поне 100 м", { dy: 12, size: 11 });
         const tri = (x, y, s) => `<polygon points="${x},${y - 9 * s} ${x + 9 * s},${y + 7 * s} ${x - 9 * s},${y + 7 * s}" fill="#fff" stroke="${C.red}" stroke-width="${3 * s}" stroke-linejoin="round"/>`;
         b += `<g opacity="0">${fade("0;0;1;1", "0;.4;.42;1", dur)}${tri(112, 129, 1.1)}</g>`;
-        b += mv("0 0;-148 0;-148 0;-40 56;-40 56", "0;.4;.45;.68;1", dur,
+        b += mv("0 0;-148 0;-148 0;13 56;13 56", "0;.4;.45;.68;1", dur,
           `${D.walker(262, 140, 0.6, vest)}<g>${fade("1;1;0;0", "0;.4;.42;1", dur)}${tri(270, 122, 0.7)}</g>`);
         b += D.person(298, 198, 0.55, C.red) + D.person(318, 198, 0.55, C.green);
         b += D.label(180, 18, "Аварийни, жилетка, триъгълник на 100 м", { size: 11 });
@@ -562,8 +564,8 @@
         b += mv("0 0;-576 0", "0;1", dur, D.dashes(120, 0, CW + 600));
         b += D.car(300, 140, 0, C.orange);
         b += mv("0 0;-40 0;-40 0", "0;.3;1", dur, D.car(210, 140, 0, C.blue, 46, 22, { label: "Ти" }));
-        const r = route(162, 140).C(196, 140, 202, 100, 236, 100).L(380, 100).C(412, 100, 418, 140, 452, 140).L(520, 140);
-        b += mv("0 0;-40 0;-40 0", "0;.3;1", dur, drive(r, [[0, 0], [0.42, 0], [0.95, r.len()], [1, r.len()]], dur, D.car(0, 0, 0, C.red)));
+        const r = route(162, 140).C(186, 140, 190, 100, 226, 100).L(380, 100).C(412, 100, 418, 140, 452, 140).L(520, 140);
+        b += mv("0 0;-56 0;-56 0", "0;.3;1", dur, drive(r, [[0, 0], [0.42, 0], [0.95, r.len()], [1, r.len()]], dur, D.car(0, 0, 0, C.red)));
         b += D.label(180, 22, "Не ускорявай и не спирай рязко", { size: 11 });
         b += D.label(180, 204, "Увеличи дистанцията до колата пред теб", { size: 11 });
         return out(b, "Кола следва плътно зад теб");
@@ -590,7 +592,7 @@
         b += D.S("Д22", 300, 172, 24);
         b += mv("0 0;-400 0;-400 0", "0;.55;1", dur, D.car(330, 59, 180, C.purple));
         b += `<g><rect x="170" y="79" width="140" height="32" rx="8" fill="${C.amber}" stroke="rgba(0,0,0,.3)"/><rect x="178" y="85" width="124" height="20" rx="3" fill="rgba(255,255,255,.3)"/>${[205, 245, 285].map((x) => rect(x - 7, 108, 14, 4, C.ink)).join("")}${D.T(240, 96, "ТРАМВАЙ", 10, { w: 800 })}</g>`;
-        b += mv("0 0;0 0;0 62;0 62", "0;.1;.5;1", dur, D.walker(245, 126, 0.62, C.orange));
+        b += mv("0 0;0 0;0 62;0 62", "0;.1;.5;1", dur, D.walker(205, 126, 0.62, C.orange));
         b += `<g>${fade("1;1;0;0;1", "0;.58;.62;.97;1", dur)}${mv("0 0;0 0;0 -66;0 -66;0 0", "0;.18;.58;.97;1", dur, D.walker(285, 190, 0.62, C.green))}</g>`;
         b += mv("0 0;98 0;98 0;380 0", "0;.25;.78;1", dur, D.car(40, 142, 0, C.blue, 46, 22, { label: "Ти" }));
         b += D.label(180, 15, "Трамвай на спирка без остров → спираш", { size: 11 });
@@ -704,7 +706,6 @@
         const r = route(180, 178).L(180, 157).T(235, 92.5, 180, 92.5).L(440, 92.5);
         b += drive(r, [[0, 0], [0.12, r.n(1)], [0.6, r.n(1)], [0.95, r.len()], [1, r.len()]], dur, D.car(0, 0, 0, C.blue, 46, 22, { blinkR: true }), { badge: "Ти" });
         b += D.label(180, 20, "Излизаш от имот → пропускаш всички", { size: 11 });
-        b += D.label(356, 206, "и пешеходците", { size: 10.5, a: "start" });
         return out(b, "Излизане от паркинг или двор на пътя");
       },
     },
@@ -725,7 +726,7 @@
         b += hRoad(40, 112) + D.dashes(82, 0, CW) + rect(0, 152, CW, 3, C.kerb) + rect(0, 155, CW, 65, C.walk);
         b += `<polygon points="214,121 30,92 30,124" fill="${C.blue}" opacity=".12"/><line x1="214" y1="121" x2="30" y2="108" stroke="${C.blue}" stroke-width="2" stroke-dasharray="5 5" opacity=".6"/>`;
         b += D.car(110, 138, 0, C.grey) + D.car(200, 138, 0, C.blue, 60, 28, { label: "Ти" });
-        b += `<g><animateTransform attributeName="transform" type="rotate" values="0 213 124;0 213 124;55 213 124;55 213 124;0 213 124;0 213 124" keyTimes="0;.55;.62;.82;.9;1" dur="${dur}s" repeatCount="indefinite"/><rect x="190" y="121.5" width="23" height="4" rx="2" fill="#2659b8" stroke="rgba(0,0,0,.3)"/></g>`;
+        b += `<g><animateTransform attributeName="transform" type="rotate" values="0 213 124;0 213 124;55 213 124;55 213 124;0 213 124;0 213 124" keyTimes="0;.55;.62;.82;.9;1" dur="${dur}s" repeatCount="indefinite"/><rect x="190" y="120" width="23" height="6" rx="2.5" fill="#2659b8" stroke="rgba(0,0,0,.35)"/></g>`;
         b += mv("0 0;380 0;380 0", "0;.5;1", dur, cyclist(40, 104, 0, C.green));
         b += mv("0 0;-400 0;-400 0", "0;.6;1", dur, D.car(330, 60, 180, C.orange));
         b += D.label(180, 15, "Огледало и поглед през рамо, после вратата", { size: 11 });
@@ -809,7 +810,7 @@
         b += mv("0 0;0 10;0 10", "0;.25;1", dur, D.car(130, 160, 0, C.green) + D.car(205, 160, 0, C.orange));
         b += mv("0 0;0 15;0 15;0 260", "0;.3;.85;1", dur, D.car(255, 20, 90, C.purple));
         b += mv("0 0;0 0;210 0;400 0;400 0", "0;.28;.56;.85;1", dur, amb(40, 140));
-        b += D.label(8, 20, "Червено: не влизаш в кръстовището", { size: 11, a: "start" });
+        b += D.label(6, 20, "Червено: не влизаш в кръстовището", { size: 10.5, a: "start" });
         b += D.label(4, 200, "Направи място, само ако е безопасно", { size: 10.5, a: "start" });
         return out(b, "Линейка зад теб, докато чакаш на червено");
       },
@@ -831,7 +832,7 @@
       svg: () => {
         const C = D.C, dur = 9, dark = "#5f7d55";
         let b = bg(dark);
-        for (let x = 0; x < CW; x += 34) b += tree(x + 10, 66, 13, "#3f5b3a") + tree(x + 24, 172, 13, "#3f5b3a");
+        for (let x = 0; x < CW; x += 34) b += tree(x + 10, 66, 13, "#3f5b3a") + (x > 190 && x < 300 ? "" : tree(x + 24, 172, 13, "#3f5b3a"));
         b += rect(0, 80, CW, 70, "#3d424a") + edgeH(83) + edgeH(147) + D.dashes(115, 0, CW);
         b += D.S("А22", 8, 8, 34);
         const beam = `<polygon points="23,-8 140,-30 140,30 23,8" fill="#fff6b0" opacity=".32"/>`;

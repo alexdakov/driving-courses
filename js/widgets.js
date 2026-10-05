@@ -322,15 +322,31 @@
     return `<rect x="156" y="216" width="22" height="38" rx="5" fill="${fill}" stroke="rgba(0,0,0,.35)"/><rect x="159" y="220" width="16" height="8" rx="2" fill="rgba(255,255,255,.75)"/>`;
   }
 
-  // drag horizontally on a 3D stage to orbit the camera
-  function dragOrbit(el, active, onDelta) {
+  // drag on a 3D stage: left/right turns the camera around, up/down tilts it; double click resets.
+  // The stage keeps vertical page scrolling on touch screens (touch-action: pan-y).
+  function dragOrbit(el, active, onDrag, onReset) {
     let last = null;
-    el.addEventListener("pointerdown", (e) => { if (!active()) return; last = e.clientX; el.setPointerCapture(e.pointerId); });
-    el.addEventListener("pointermove", (e) => { if (last === null) return; const dx = e.clientX - last; last = e.clientX; if (dx) onDelta(-dx * 0.6); });
-    const end = () => (last = null);
+    el.classList.add("draggable");
+    el.addEventListener("pointerdown", (e) => { if (!active()) return; last = [e.clientX, e.clientY]; el.setPointerCapture(e.pointerId); el.classList.add("dragging"); });
+    el.addEventListener("pointermove", (e) => {
+      if (!last) return;
+      const dx = e.clientX - last[0], dy = e.clientY - last[1];
+      last = [e.clientX, e.clientY];
+      if (dx || dy) onDrag(-dx * 0.5, dy * 0.3);
+    });
+    const end = () => { last = null; el.classList.remove("dragging"); };
     el.addEventListener("pointerup", end);
     el.addEventListener("pointercancel", end);
+    el.addEventListener("dblclick", () => { if (active() && onReset) onReset(); });
+    el.addEventListener("keydown", (e) => {
+      if (!active()) return;
+      const k = { ArrowLeft: [-8, 0], ArrowRight: [8, 0], ArrowUp: [0, -4], ArrowDown: [0, 4] }[e.key];
+      if (k) { e.preventDefault(); onDrag(k[0], k[1]); }
+    });
+    el.setAttribute("tabindex", "0");
   }
+  const dragHint = `<span class="drag-hint" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M8 12H3m0 0 3-3m-3 3 3 3M16 12h5m0 0-3-3m3 3-3 3M12 8V3m0 0-3 3m3-3 3 3M12 16v5m0 0-3-3m3 3 3-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Влачи, за да завъртиш</span>`;
+  const camEye = (cx, cy, R, orbit, tilt) => [cx + R * Math.cos(rad(tilt)) * Math.sin(rad(orbit)), cy + R * Math.cos(rad(tilt)) * Math.cos(rad(orbit)), R * Math.sin(rad(tilt))];
 
   // ================= Traffic controller =================
   function regulatorWidget(root) {
@@ -342,7 +358,7 @@
       <div class="widget-head"><h3>Сигнали на регулировчика</h3><p>Избери положение и завърти регулировчика. Колите показват кой може да мине. В 3D можеш да въртиш камерата.</p></div>
       <div class="view-bar"></div>
       <div class="split">
-        <div class="stage-wrap"><svg class="stage" viewBox="-34 -34 368 368"></svg><label class="orbit"><span>Камера</span><input type="range" min="0" max="359" value="35" aria-label="Ъгъл на камерата"></label></div>
+        <div class="stage-wrap"><svg class="stage" viewBox="-34 -34 368 368" aria-label="Кръстовище с регулировчик. Влачи, за да завъртиш изгледа."></svg>${dragHint}</div>
         <div class="readout" aria-live="polite"></div>
       </div>
       <div class="controls"></div>
@@ -350,10 +366,9 @@
     const svg = box.querySelector("svg");
     const readout = box.querySelector(".readout");
     const controls = box.querySelector(".controls");
-    const orbitInput = box.querySelector(".orbit input");
+    let tilt = 45;
     box.querySelector(".view-bar").appendChild(segmented([["3d", "3D"], ["2d", "2D отгоре"]], view, (v) => { view = v; draw(); }, "Изглед"));
-    orbitInput.addEventListener("input", () => { orbit = +orbitInput.value; draw(); });
-    dragOrbit(svg, () => view === "3d", (d) => { orbit = (orbit + d + 360) % 360; orbitInput.value = Math.round(orbit); draw(); });
+    dragOrbit(svg, () => view === "3d", (dx, dy) => { orbit = (orbit + dx + 360) % 360; tilt = clamp(tilt + dy, 14, 88); draw(); }, () => { orbit = 35; tilt = 45; draw(); });
     controls.appendChild(
       segmented([["up", "Ръка нагоре"], ["side", "Ръце встрани"], ["forward", "Дясна ръка напред"]], pose, (v) => { pose = v; draw(); }, "Положение")
     );
@@ -403,9 +418,8 @@
     const MOVE_PTS = { straight: [[167, 214], [167, 70]], right: qb([167, 214], [167, 168], [230, 168]), left: qb([167, 214], [167, 132], [70, 132]) };
     function draw3d(rows) {
       const G = window.BG3D;
-      box.querySelector(".orbit").hidden = false;
-      const a = rad(orbit);
-      const cam = G.camera({ eye: [150 + 230 * Math.sin(a), 150 + 230 * Math.cos(a), 235], target: [150, 150, 14], f: 390, cx: 150, cy: 150 });
+      box.querySelector(".drag-hint").hidden = false;
+      const cam = G.camera({ eye: camEye(150, 150, 330, orbit, tilt), target: [150, 150, 14], f: 390, cx: 150, cy: 150 });
       let s = cam.poly([[-1500, -1500, 0], [1800, -1500, 0], [1800, 1800, 0], [-1500, 1800, 0]], `fill="#bcd5a9"`);
       s += cam.poly([[112, -1500, 0], [188, -1500, 0], [188, 1800, 0], [112, 1800, 0]], `fill="#4a4f57"`) + cam.poly([[-1500, 112, 0], [1800, 112, 0], [1800, 188, 0], [-1500, 188, 0]], `fill="#4a4f57"`);
       for (const d of DIRS) {
@@ -474,7 +488,7 @@
       readoutFor(rows);
     }
     function draw2d() {
-      box.querySelector(".orbit").hidden = true;
+      box.querySelector(".drag-hint").hidden = true;
       let s = crossroads();
       // zebra crossings to show pedestrian areas
       const ped = [];
@@ -565,7 +579,7 @@
       <div class="widget-head"><h3>Път през кръговото</h3><p>Влизаш отдолу. Избери изход и лента, после „Пусни“. В 3D можеш да въртиш камерата или да караш „зад колата“.</p></div>
       <div class="view-bar"></div>
       <div class="split">
-        <div class="stage-wrap"><svg class="stage" viewBox="0 0 340 340"></svg><label class="orbit"><span>Камера</span><input type="range" min="0" max="359" value="0" aria-label="Ъгъл на камерата"></label></div>
+        <div class="stage-wrap"><svg class="stage" viewBox="0 0 340 340" aria-label="Кръгово кръстовище. Влачи, за да завъртиш изгледа."></svg>${dragHint}</div>
         <div class="readout" aria-live="polite"></div>
       </div>
       <div class="controls"></div>
@@ -573,10 +587,9 @@
     const svg = box.querySelector("svg");
     const readout = box.querySelector(".readout");
     const controls = box.querySelector(".controls");
-    const orbitInput = box.querySelector(".orbit input");
+    let tilt = 43;
     box.querySelector(".view-bar").appendChild(segmented([["3d", "3D"], ["chase", "3D – зад колата"], ["2d", "2D отгоре"]], view, (v) => { view = v; render(lastI); }, "Изглед"));
-    orbitInput.addEventListener("input", () => { orbit = +orbitInput.value; render(lastI); });
-    dragOrbit(svg, () => view === "3d", (d) => { orbit = (orbit + d + 360) % 360; orbitInput.value = Math.round(orbit); render(lastI); });
+    dragOrbit(svg, () => view === "3d", (dx, dy) => { orbit = (orbit + dx + 360) % 360; tilt = clamp(tilt + dy, 14, 88); render(lastI); }, () => { orbit = 0; tilt = 43; render(lastI); });
     const exitSeg = segmented([[1, "1-ви изход (надясно)"], [2, "2-ри (направо)"], [3, "3-ти (наляво)"], [4, "Обратно"]], exit, (v) => { exit = v; setLane(lane); reset(); }, "Изход");
     controls.appendChild(exitSeg);
     let laneSeg = segmented([["outer", "Външна лента"], ["inner", "Вътрешна лента"]], lane, (v) => { setLane(v); reset(); }, "Лента");
@@ -679,8 +692,7 @@
         const hx = Math.cos(rad(heading)), hy = Math.sin(rad(heading));
         cam = G.camera({ eye: [p.x - hx * 92, p.y - hy * 92, 62], target: [p.x + hx * 70, p.y + hy * 70, 0], f: 300, cx: 170, cy: 160 });
       } else {
-        const a = rad(orbit);
-        cam = G.camera({ eye: [C + 270 * Math.sin(a), C + 270 * Math.cos(a), 250], target: [C, C - 6, 0], f: 330, cx: 170, cy: 172 });
+        cam = G.camera({ eye: camEye(C, C, 368, orbit, tilt), target: [C, C - 6, 0], f: 330, cx: 170, cy: 172 });
       }
       let s = `<rect width="340" height="340" fill="#cfe3f5"/>`;
       s += cam.poly([[-1500, -1500, 0], [1800, -1500, 0], [1800, 1800, 0], [-1500, 1800, 0]], `fill="#bcd5a9"`);
@@ -721,7 +733,7 @@
     }
     function render(i) {
       lastI = i;
-      box.querySelector(".orbit").hidden = view !== "3d";
+      box.querySelector(".drag-hint").hidden = view !== "3d";
       const p = pts[Math.min(i, pts.length - 1)];
       const q = pts[Math.min(i + 1, pts.length - 1)];
       const prev = pts[Math.max(i - 1, 0)];

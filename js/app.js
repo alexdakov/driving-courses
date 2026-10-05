@@ -63,9 +63,10 @@
     nachalo: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 2.5 11h2.7v9h5.3v-6h3v6h5.3v-9h2.7z"/></svg>`,
     glavi: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 5h3v3H4zm5 0h11v3H9zM4 10.5h3v3H4zm5 0h11v3H9zM4 16h3v3H4zm5 0h11v3H9z"/></svg>`,
     znaci: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5 22 20.5H2zm0 4.6L5.7 18.5h12.6z"/><rect x="11" y="10" width="2" height="5" rx="1"/><circle cx="12" cy="16.6" r="1.1"/></svg>`,
+    skorosti: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4.5 17a8.5 8.5 0 1 1 15 0"/><path d="M12 14l4-5"/><circle cx="12" cy="14.5" r="1.6" fill="currentColor" stroke="none"/></svg>`,
     nakratko: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 2 5 13.5h5.6L9.5 22 19 9.8h-5.7z"/></svg>`,
   };
-  const TABS = [["nachalo", "Днес"], ["glavi", "Глави"], ["znaci", "Знаци"], ["nakratko", "Накратко"]];
+  const TABS = [["nachalo", "Днес"], ["glavi", "Глави"], ["znaci", "Знаци"], ["skorosti", "Скорости"], ["nakratko", "Накратко"]];
 
   function chapterRow(c, active) {
     const done = isRead(c.id);
@@ -73,12 +74,12 @@
   }
   function renderNav(active) {
     nav.innerHTML = `
-      <div class="list"><a class="row" href="#nachalo" ${active === "nachalo" ? 'aria-current="page"' : ""}><img src="assets/signs/B3.svg" alt=""><span class="t">Днес</span><small>Какво да опресниш сега</small><span class="count"></span></a><a class="row" href="#nakratko" ${active === "nakratko" ? 'aria-current="page"' : ""}><img src="assets/signs/V26-50.svg" alt=""><span class="t">Накратко</span><small>Всички числа на един екран</small><span class="count"></span></a></div>
+      <div class="list"><a class="row" href="#nachalo" ${active === "nachalo" ? 'aria-current="page"' : ""}><img src="assets/signs/B3.svg" alt=""><span class="t">Днес</span><small>Какво да опресниш сега</small><span class="count"></span></a><a class="row" href="#skorosti" ${active === "skorosti" ? 'aria-current="page"' : ""}><img src="assets/signs/V26-50.svg" alt=""><span class="t">Скорости</span><small>Град, магистрала, дъжд, мъгла…</small><span class="count"></span></a><a class="row" href="#nakratko" ${active === "nakratko" ? 'aria-current="page"' : ""}><img src="assets/signs/D5.svg" alt=""><span class="t">Накратко</span><small>Всички числа на един екран</small><span class="count"></span></a></div>
       <p class="list-label">Глави</p>
       <div class="list">${chapters.map((c) => chapterRow(c, active)).join("")}</div>`;
-    const tabOf = ["nachalo", "znaci", "nakratko"].includes(active) ? active : "glavi";
+    const tabOf = ["nachalo", "znaci", "nakratko", "skorosti"].includes(active) ? active : "glavi";
     tabbar.innerHTML = TABS.map(([id, label]) => `<a href="#${id}" ${tabOf === id ? 'aria-current="page"' : ""}>${ICON[id]}<span>${label}</span></a>`).join("");
-    const isRoot = ["nachalo", "glavi", "znaci", "nakratko"].includes(active);
+    const isRoot = ["nachalo", "glavi", "znaci", "nakratko", "skorosti"].includes(active);
     navbar.hidden = isRoot;
     if (!isRoot) {
       const c = CATS.find((x) => x.id === active);
@@ -231,7 +232,7 @@
   function nakratko() {
     return h(`<div>
       <header class="large">${themeToggle()}<span class="eyebrow">Всичко важно на един екран</span><h1>Накратко</h1><p class="lede">Числата и правилата, които най-лесно се забравят. Подробностите са в главите.</p></header>
-      <h2 class="section-title">Скорости · категория B · km/h</h2>
+      <h2 class="section-title">Скорости · категория B · km/h <a href="#skorosti" class="sec-link">Всички ситуации ›</a></h2>
       <div class="speed-strip">${FACTS.speeds.map(([v, t, , sign]) => `<div class="sp">${sign ? signSVG(sign, "") : `<span class="sp-road"></span>`}<b>${v}</b><span>${t}</span></div>`).join("")}</div>
       <h2 class="section-title">Разстояния</h2>${factList(FACTS.distances)}
       <h2 class="section-title">Числа</h2>${factList(FACTS.numbers)}
@@ -300,9 +301,9 @@
   function route() {
     const id = (location.hash || "#nachalo").slice(1);
     const c = CATS.find((x) => x.id === id);
-    current = c ? c.id : ["glavi", "nakratko"].includes(id) ? id : "nachalo";
+    current = c ? c.id : ["glavi", "nakratko", "skorosti"].includes(id) ? id : "nachalo";
     main.innerHTML = "";
-    main.appendChild(current === "glavi" ? chaptersPage() : current === "nakratko" ? nakratko() : !c ? today() : chapter(c));
+    main.appendChild(current === "glavi" ? chaptersPage() : current === "nakratko" ? nakratko() : current === "skorosti" ? window.BGSpeeds.page(themeToggle()) : !c ? today() : chapter(c));
     renderNav(current);
     syncTheme();
     window.scrollTo({ top: 0 });
