@@ -45,6 +45,8 @@
     steer: `<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.2"/><path d="M3.8 11h6M14.2 11h6M12 14.2v6"/>`,
     no: `<circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/>`,
   };
+  // a pictogram placed inside another SVG at (x, y) with the given size
+  const picAt = (k, x, y, size, col) => `<svg x="${x}" y="${y}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${col || "currentColor"}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${PI[k] || ""}</svg>`;
   const pic = (k, col) => `<svg viewBox="0 0 24 24" fill="none" stroke="${col || "currentColor"}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PI[k] || ""}</svg>`;
 
   // ---------------- data ----------------
@@ -55,15 +57,16 @@
     { k: "go", t: "„Гражданска отговорност“", need: "car", valid: "Обикновено 1 година (по полицата)", how: "Проверка онлайн в Гаранционния фонд по номера на колата.", note: "Без валидна ГО колата не трябва да се движи.", ref: "ЗДвП чл. 100, ал. 1, т. 3" },
     { k: "gtp", t: "Технически преглед (ГТП)", need: "online", valid: "По график според възрастта на колата", how: "Проверка онлайн в ИААА по номер на колата.", note: "Без валиден ГТП колата не може да се движи по пътя.", ref: "ЗДвП чл. 147; Наредба № Н-32" },
     { k: "vignette", t: "Е-винетка", need: "online", valid: "Уикенд, седмица, месец, 3 месеца или година", how: "Проверка на bgtoll.bg по номер на колата.", note: "За републиканските пътища извън населените места.", ref: "Закон за пътищата, чл. 10" },
+    { k: "protocol", t: "Двустранен протокол", need: "tip", valid: "Празен формуляр – без срок", how: "Взимаш безплатно от застрахователя си. Дръж 1–2 в жабката.", note: "Попълвате го заедно при ПТП само с щети. Ползва се и за ГО, и за Каско.", ref: "ЗДвП чл. 123; Кодекс за застраховането" },
     { k: "green", t: "„Зелена карта“", need: "abroad", valid: "Колкото и ГО (издава се с нея)", how: "Издава я застрахователят ти.", note: "При пътуване извън България.", ref: "ЗДвП чл. 100, ал. 1, т. 5" },
   ];
-  const NEED = { car: ["Носиш в колата", "go"], online: ["Проверява се онлайн", "info"], abroad: ["Само в чужбина", "wait"] };
+  const NEED = { car: ["Носиш в колата", "go"], online: ["Проверява се онлайн", "info"], abroad: ["Само в чужбина", "wait"], tip: ["Добре е да го имаш", "info"] };
 
   const EQUIP = [
     { id: "triangle", t: "Обезопасителен триъгълник", must: true, at: [104, 120], what: "Слагаш го на поне 30 м зад колата при повреда или ПТП, на магистрала и пътища над 90 km/h – на поне 100 м.", check: "Да е цял, със светлоотразителните ленти и одобрен (знак E).", ref: "ЗДвП чл. 97, чл. 139" },
     { id: "aid", t: "Аптечка", must: true, at: [178, 112], what: "Превръзки, бинтове, ножица, ръкавици, термофолио.", check: "Провери срока на годност на материалите и допълни използваното.", ref: "ЗДвП чл. 139, ал. 2" },
     { id: "vest", t: "Светлоотразителна жилетка", must: true, at: [295, 78], what: "Обличаш я, преди да слезеш на платното. Дръж я в купето – в джоба на вратата, не в багажника.", check: "Да е светлоотразителна и чиста; по една за всеки, който може да слезе – препоръка.", ref: "ЗДвП чл. 101, чл. 139" },
-    { id: "ext", t: "Пожарогасител", must: false, at: [242, 116], what: "От 7.02.2026 г. вече не е задължителен за леки коли, но е полезен.", check: "Ако го имаш – стрелката на манометъра в зеленото, пломбата цяла.", ref: "ЗДвП чл. 139, ал. 2 (изм. 2025)" },
+    { id: "ext", t: "Пожарогасител", must: true, at: [242, 116], what: "Задължителен. Видът му се определя с наредба – за лека кола обикновено прахов, поне 1 кг. Спрейовете не стават.", check: "Стикер от сервиз с датата на следващото обслужване (месец и година) – обикновено веднъж годишно. Манометърът – в зеленото.", ref: "ЗДвП чл. 139, ал. 8 и 11" },
     { id: "spare", t: "Резервна гума или комплект за лепене", must: false, at: [140, 150], what: "Резервна или „патерица“ гума, или спрей/компресор.", check: "Провери налягането на резервната поне веднъж на сезон.", ref: "Добра практика" },
     { id: "jack", t: "Крик и ключ за болтове", must: false, at: [214, 150], what: "За смяна на гума. Провери дали ключът за секретния болт е в колата.", check: "Пробвай веднъж у дома, не за първи път на пътя.", ref: "Добра практика" },
     { id: "rope", t: "Въже за теглене и фенерче", must: false, at: [70, 140], what: "Въже или щанга; фенерче за нощем.", check: "При теглене – до 40 km/h.", ref: "ЗДвП чл. 84" },
@@ -108,8 +111,6 @@
     { t: "Гуми", v: "~6–8 г.", note: "Дори с дълбок протектор – стареят", kind: "tip" },
     { t: "Акумулатор", v: "~4–6 г.", note: "Проверка преди зимата", kind: "tip" },
   ];
-  const MINE = [["go", "„Гражданска отговорност“"], ["gtp", "Технически преглед"], ["vignette", "Е-винетка"], ["licence", "Книжка"], ["aid", "Аптечка"]];
-  const MINE_KEY = "bg-car-deadlines";
 
   // ---------------- widget ----------------
   function widget(root) {
@@ -129,8 +130,44 @@
     root.appendChild(box);
   }
 
+  // which documents have a real-life example in docs.js
+  const REAL = { licence: "licence", reg: "reg", go: "go", protocol: "protocol" };
   function docs(el) {
-    el.appendChild(h(`<div class="doc-grid">${DOCS.map((d) => `<article class="doc-card"><div class="doc-pic">${docSVG(d.k)}</div><div class="doc-txt"><span class="pill ${NEED[d.need][1]}">${NEED[d.need][0]}</span><h4>${d.t}</h4><dl><dt>Валидност</dt><dd>${d.valid}</dd><dt>Как да провериш</dt><dd>${d.how}</dd></dl><p>${d.note}</p><span class="lawref">${d.ref}</span></div></article>`).join("")}</div>`));
+    let sel = "licence";
+    const wrap = h(`<div class="docs2"><div class="doc-pick" role="group" aria-label="Документ">${DOCS.map((d) => `<button type="button" data-k="${d.k}" aria-pressed="${d.k === sel}"><span class="doc-thumb">${docSVG(d.k === "protocol" ? "go" : d.k)}</span><span>${d.t}</span><small class="need-${d.need}">${NEED[d.need][0]}</small></button>`).join("")}</div><div class="doc-view"></div></div>`);
+    const view = wrap.querySelector(".doc-view");
+    function render() {
+      const d = DOCS.find((x) => x.k === sel);
+      view.innerHTML = "";
+      view.appendChild(h(`<div class="doc-facts"><span class="pill ${NEED[d.need][1]}">${NEED[d.need][0]}</span><h4>${d.t}</h4><div class="doc-facts-grid"><div><span>Валидност</span><b>${d.valid}</b></div><div><span>Как да провериш</span><b>${d.how}</b></div></div><p>${d.note}</p><span class="lawref">${d.ref}</span></div>`));
+      if (REAL[d.k] && window.BGDocs) {
+        view.appendChild(h(`<h5 class="doc-sub">Как изглежда – натисни номерата</h5>`));
+        view.appendChild(window.BGDocs.viewer(REAL[d.k]));
+      } else {
+        view.appendChild(h(`<div class="doc-big">${docSVG(d.k)}</div>`));
+      }
+      if (d.k === "protocol") view.appendChild(protocolHowTo());
+    }
+    wrap.querySelectorAll(".doc-pick button").forEach((b) => b.addEventListener("click", () => {
+      sel = b.dataset.k;
+      wrap.querySelectorAll(".doc-pick button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      render();
+    }));
+    el.appendChild(wrap);
+    render();
+  }
+  // how to use the accident statement – steps with pictograms, when to call the police instead
+  function protocolHowTo() {
+    const steps = [["hazard", "Обезопаси мястото: аварийни, жилетка, триъгълник."], ["camera", "Снимай колите, щетите и номерата – преди да ги преместите."], ["form", "Попълвате ЕДИН формуляр заедно – A за единия, B за другия. Копието отдолу се изписва само."], ["car", "Скица (13) и обстоятелства (12) – отметни своите и напиши колко са."], ["eye", "Подпиши само ако си съгласен. После нищо не се поправя."], ["phone", "Всеки взима екземпляр и уведомява застрахователя си."]];
+    return h(`<div class="proto">
+      <h5 class="doc-sub">Как се попълва</h5>
+      <ol class="sos-steps">${steps.map(([ic, t], i) => `<li style="--i:${i}"><span class="sos-ic">${pic(ic)}</span><span class="sos-n">${i + 1}</span><p>${t}</p></li>`).join("")}</ol>
+      <div class="proto-cols">
+        <div class="proto-box ok">${pic("form")}<div><b>Протокол е достатъчен</b><p>Само щети по колите, никой не е ранен, и двамата сте съгласни кой е виновен.</p></div></div>
+        <div class="proto-box no">${pic("police")}<div><b>Звъниш на 112</b><p>Има ранен, несъгласие за вината, водач без книжка или ГО, употреба на алкохол или избягал водач.</p></div></div>
+      </div>
+      <div class="proto-box info">${pic("aid")}<div><b>ГО или Каско?</b><p><b>ГО</b> на виновния плаща щетите на другия. <b>Каско</b> е доброволна застраховка на твоята кола – плаща твоите щети, дори ти да си виновен. Протоколът е един и същ – подаваш го при застрахователя, от когото искаш обезщетение.</p></div></div>
+    </div>`);
   }
 
   function equip(el) {
@@ -235,42 +272,64 @@
     render();
   }
 
+  // renewal ruler: every row is an item renewed at the given ages (years from start)
+  const GTP_AGES = []; // periodic inspection of a car (M1), counted from its first registration – filled in once verified
+  const RULER = [
+    { t: "Книжка", ic: "form", col: "#c2185b", marks: [10], bar: [0, 10], note: "на 10 години" },
+    { t: "„Гражданска отговорност“", ic: "aid", col: "#1f4fbf", marks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], note: "всяка година (обикновено)" },
+    { t: "Технически преглед", ic: "eye", col: "#2ea44f", marks: GTP_AGES.length ? GTP_AGES : [], note: "по възрастта на колата" },
+    { t: "Пожарогасител – обслужване", ic: "fire", col: "#e0352b", marks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], note: "по стикера – обикновено всяка година" },
+  ];
+  const VIGNETTES = [["Уикенд", 3], ["Седмица", 7], ["Месец", 30], ["3 месеца", 91], ["Година", 365]];
+  const SERVICE = [
+    { t: "Масло и филтри", v: "~1 г.", sub: "или по км", at: [262, 84], ic: "water" },
+    { t: "Спирачна течност", v: "~2 г.", sub: "поема влага", at: [232, 62], ic: "brake" },
+    { t: "Чистачки", v: "~1 г.", sub: "при ивици", at: [204, 92], ic: "eye" },
+    { t: "Акумулатор", v: "4–6 г.", sub: "провери преди зимата", at: [298, 108], ic: "key" },
+    { t: "Гуми", v: "6–8 г.", sub: "и при протектор под 4 мм зимата", at: [96, 142], ic: "wheel" },
+  ];
   function times(el) {
-    let mine = {};
-    try { mine = JSON.parse(localStorage.getItem(MINE_KEY) || "{}") || {}; } catch (e) { mine = {}; }
     const months = ["яну", "фев", "мар", "апр", "май", "юни", "юли", "авг", "сеп", "окт", "ное", "дек"];
     const dayOfYear = (m, d) => Math.round((Date.UTC(2026, m, d) - Date.UTC(2026, 0, 1)) / 864e5);
     const now = new Date(), today = dayOfYear(now.getMonth(), now.getDate());
     const pct = (d) => (d / 365) * 100;
+    // 0–10 year ruler
+    const RW = 560, X0 = 250, X1 = 545, yr = (v) => X0 + ((X1 - X0) * v) / 10;
+    let ruler = `<svg viewBox="0 0 ${RW} ${40 + RULER.length * 44}" class="ruler" role="img" aria-label="Кога се подновява">`;
+    for (let v = 0; v <= 10; v++) ruler += `<line x1="${yr(v)}" y1="22" x2="${yr(v)}" y2="${30 + RULER.length * 44}" stroke="currentColor" stroke-opacity=".12"/><text x="${yr(v)}" y="16" font-size="11" text-anchor="middle" fill="currentColor" fill-opacity=".6">${v === 0 ? "сега" : v + " г."}</text>`;
+    RULER.forEach((r, i) => {
+      const y = 44 + i * 44;
+      ruler += `<g><circle cx="20" cy="${y}" r="15" fill="${r.col}"/>${picAt(r.ic, 9, y - 11, 22, "#fff")}<text x="42" y="${y - 2}" font-size="12" font-weight="700" fill="currentColor">${r.t}</text><text x="42" y="${y + 13}" font-size="10" fill="currentColor" fill-opacity=".6">${r.note}</text>`;
+      ruler += `<line x1="${yr(0)}" y1="${y}" x2="${yr(10)}" y2="${y}" stroke="${r.col}" stroke-opacity=".25" stroke-width="8" stroke-linecap="round"/>`;
+      if (r.bar) ruler += `<line class="ruler-bar" x1="${yr(r.bar[0])}" y1="${y}" x2="${yr(r.bar[1])}" y2="${y}" stroke="${r.col}" stroke-width="8" stroke-linecap="round" pathLength="1" stroke-dasharray="1 1"/>`;
+      r.marks.forEach((m, k) => (ruler += `<circle class="ruler-dot" style="animation-delay:${(0.12 * k).toFixed(2)}s" cx="${yr(m)}" cy="${y}" r="7" fill="#fff" stroke="${r.col}" stroke-width="3"/>`));
+      ruler += `</g>`;
+    });
+    ruler += `</svg>`;
+    // vignettes to scale (a year = full width)
+    const vig = VIGNETTES.map(([t, d]) => `<div class="vig"><span>${t}</span><div class="vig-bar"><i style="width:${Math.max(1.2, (d / 365) * 100)}%"></i></div><b>${d === 365 ? "12 месеца" : d === 91 ? "3 месеца" : d === 30 ? "1 месец" : d === 7 ? "7 дни" : "петък–неделя"}</b></div>`).join("");
+    // service car
+    let car = `<svg viewBox="0 0 360 170" class="svc" role="img" aria-label="Поддръжка на колата"><rect width="360" height="170" fill="#eef2f6"/><rect y="150" width="360" height="20" fill="#cfd5dc"/>`;
+    car += `<g transform="translate(40 30)"><path d="M10 96 C6 84 12 76 26 74 L58 68 C72 46 88 38 108 38 L160 38 C178 38 190 46 204 68 L224 74 C234 76 238 84 236 96 L236 104 C236 108 232 112 228 112 L14 112 C10 112 10 106 10 96 Z" fill="#2f6fdc"/><path d="M70 70 C80 52 92 46 108 46 L126 46 L126 70 Z M134 46 L160 46 C174 46 184 54 194 70 L134 70 Z" fill="#cfe6fb"/><circle cx="56" cy="112" r="20" fill="#24282d"/><circle cx="56" cy="112" r="9" fill="#d5dae0"/><circle cx="196" cy="112" r="20" fill="#24282d"/><circle cx="196" cy="112" r="9" fill="#d5dae0"/></g>`;
+    SERVICE.forEach((x, i) => {
+      const [cx, cy] = x.at, lx = i % 2 ? 300 : 300;
+      car += `<g><circle cx="${cx}" cy="${cy}" r="13" fill="#fff" stroke="#1f2933" stroke-width="1.5"/>${picAt(x.ic, cx - 8.5, cy - 8.5, 17, "#1f2933")}</g>`;
+    });
+    car += `</svg>`;
+    const svcList = SERVICE.map((x) => `<div class="svc-row"><span class="svc-ic">${pic(x.ic)}</span><span><b>${x.t}</b><small>${x.sub}</small></span><em>${x.v}</em></div>`).join("");
     const wrap = h(`<div class="times">
       <h4>Зимните гуми през годината</h4>
       <div class="year"><div class="year-band" style="left:0;width:${pct(dayOfYear(2, 1))}%"></div><div class="year-band" style="left:${pct(dayOfYear(10, 15))}%;width:${100 - pct(dayOfYear(10, 15))}%"></div><div class="year-now" style="left:${pct(today)}%"><span>днес</span></div>${months.map((m, i) => `<span class="year-m" style="left:${pct(dayOfYear(i, 1))}%">${m}</span>`).join("")}</div>
-      <p class="times-note">От <b>15 ноември</b> до <b>1 март</b> – зимни гуми или протектор поне 4 мм (ЗДвП чл. 139, ал. 1, т. 4).</p>
-      <h4>Какво изтича и кога</h4>
-      <div class="times-grid">${TIMES.map((x) => `<div class="time ${x.kind}"><b>${x.v}</b><span>${x.t}</span><small>${x.note}</small><i>${x.kind === "law" ? "по закон" : "препоръка"}</i></div>`).join("")}</div>
-      <h4>Моите срокове</h4>
-      <p class="times-note">Въведи датите, на които изтичат – ще видиш колко време остава. Пазят се само на това устройство.</p>
-      <div class="mine"></div>
+      <p class="times-note">Синьото = от <b>15 ноември</b> до <b>1 март</b>: зимни гуми или протектор поне 4 мм (ЗДвП чл. 139, ал. 1, т. 4).</p>
+      <h4>Кога се подновява – по закон</h4>
+      <div class="ruler-wrap">${ruler}</div>
+      <p class="times-note">Всяка точка = подновяване. Техническият преглед се брои от <b>датата на първа регистрация</b> (поле B в талона).</p>
+      <h4>Колко трае винетката</h4>
+      <div class="vigs">${vig}</div>
+      <h4>Поддръжка – препоръки</h4>
+      <div class="svc-wrap">${car}<div class="svc-list">${svcList}</div></div>
+      <p class="times-note">Препоръките не са закон – виж сервизната книжка на колата си.</p>
     </div>`);
-    const mineEl = wrap.querySelector(".mine");
-    function renderMine() {
-      mineEl.innerHTML = MINE.map(([k, t]) => {
-        const v = mine[k] || "";
-        let badge = "";
-        if (v) {
-          const days = Math.ceil((new Date(v + "T00:00:00") - new Date(new Date().toDateString())) / 864e5);
-          const cls = days < 0 ? "stop" : days <= 30 ? "wait" : "go";
-          badge = `<span class="pill ${cls}">${days < 0 ? `изтекло преди ${-days} дни` : days === 0 ? "изтича днес" : `остават ${days} дни`}</span>`;
-        }
-        return `<label class="mine-row"><span>${t}</span><input type="date" data-k="${k}" value="${v}">${badge}</label>`;
-      }).join("");
-      mineEl.querySelectorAll("input").forEach((i) => i.addEventListener("change", () => {
-        if (i.value) mine[i.dataset.k] = i.value; else delete mine[i.dataset.k];
-        try { localStorage.setItem(MINE_KEY, JSON.stringify(mine)); } catch (e) { /* ignore */ }
-        renderMine();
-      }));
-    }
-    renderMine();
     el.appendChild(wrap);
   }
 

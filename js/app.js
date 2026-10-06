@@ -116,7 +116,7 @@
     const installed = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
     if (!phone || installed || dismissed || window.top !== window) return;
     const ios = /iP(hone|ad|od)/.test(navigator.userAgent);
-    const card = h(`<div class="install-card"><img src="assets/app/icon-192.png" alt=""><div><b>Сложи го на телефона като приложение</b><p>${ios ? "В Safari натисни <span class=\"ios-share\" aria-label=\"Сподели\">⬆︎</span> „Сподели“ и после „Добави към началния екран“." : "Работи и без интернет и се отваря на цял екран."}</p><div class="install-btns"><button type="button" class="btn primary small" data-install ${installEvent ? "" : "hidden"}>Инсталирай</button><button type="button" class="btn small" data-close>Не сега</button></div></div></div>`);
+    const card = h(`<div class="install-card"><img src="assets/app/icon-192.png" alt=""><div><b>Сложи го на телефона като приложение</b><p>${ios ? "В Safari натисни <span class=\"ios-share\" aria-label=\"Сподели\">⬆︎</span> „Сподели“ и после „Добави към началния екран“." : "Отваря се на цял екран, като истинско приложение. В Chrome: меню ⋮ → „Инсталиране на приложението“."}</p><div class="install-btns"><button type="button" class="btn primary small" data-install ${installEvent ? "" : "hidden"}>Инсталирай</button><button type="button" class="btn small" data-close>Не сега</button></div></div></div>`);
     card.querySelector("[data-install]").addEventListener("click", async () => { if (!installEvent) return; installEvent.prompt(); await installEvent.userChoice.catch(() => {}); installEvent = null; card.remove(); });
     card.querySelector("[data-close]").addEventListener("click", () => { try { localStorage.setItem(INSTALL_KEY, "1"); } catch (e) { /* ignore */ } card.remove(); });
     page.querySelector(".large").after(card);
@@ -214,7 +214,7 @@
       ["6", "Кръгово: решават знаците на входа – обикновено Б1, пропускаш колите в кръга", "ППЗДвП чл. 46, 52", "Г12"],
     ],
     gear: [
-      ["✓", "Триъгълник, аптечка, светлоотразителна жилетка (пожарогасителят не е задължителен от 7.02.2026)", "ЗДвП чл. 139", ""],
+      ["✓", "Триъгълник, аптечка, светлоотразителна жилетка и пожарогасител с валиден стикер за обслужване", "ЗДвП чл. 139, ал. 2, 8, 11", ""],
       ["✓", "Денем – светлини за движение през деня или къси; в тунел – къси", "ЗДвП чл. 63, 70", ""],
       ["✓", "Телефон – само без ръце или през системата на колата", "ЗДвП чл. 104а", ""],
       ["✓", "Коланът е задължителен на всички седалки", "ЗДвП чл. 137а", ""],
@@ -399,8 +399,9 @@
   window.addEventListener("hashchange", route);
   route();
 
-  // ---------- installable app: offline cache ----------
-  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost") && window.top === window) {
-    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  // no offline mode: remove a service worker left over from an earlier version
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => r.unregister())).catch(() => {});
+    if (window.caches) caches.keys().then((ks) => ks.forEach((k) => caches.delete(k))).catch(() => {});
   }
 })();
