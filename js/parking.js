@@ -413,7 +413,18 @@
       while (lo < hi) { const m = (lo + hi + 1) >> 1; if (frames[m].t <= t) lo = m; else hi = m - 1; }
       return frames[lo];
     }
+    // on a narrow screen the camera shows a 24 m square and follows the car
+    const VIEW = 240;
+    let camX = 0;
+    function camera(f, snap) {
+      if ((stage.clientWidth || window.innerWidth) >= 560) { svg.setAttribute("viewBox", "0 0 400 240"); return; }
+      const cx = (f.x + 1.25 * Math.cos(f.th)) * M;
+      const target = Math.max(0, Math.min(400 - VIEW, cx - VIEW * 0.4));
+      camX = snap ? target : camX + (target - camX) * 0.08;
+      svg.setAttribute("viewBox", `${f1(camX)} 0 ${VIEW} 240`);
+    }
     function render(f, snap) {
+      camera(f, snap);
       carG.setAttribute("transform", `translate(${f1(f.x * M)} ${f1(f.y * M)}) rotate(${f1(f.th / RAD)})`);
       shownSteer = snap ? f.steer : shownSteer + (f.steer - shownSteer) * 0.18;
       fw.forEach((w) => w.setAttribute("transform", `${w.getAttribute("transform").replace(/ rotate\([^)]*\)/, "")} rotate(${f1(shownSteer)})`));
@@ -454,6 +465,7 @@
       box.querySelectorAll(".pk-pick button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
       setup(); start();
     }));
+    window.addEventListener("resize", () => { if (!playing) render(frameAt(Math.min(pos, frames[frames.length - 1].t)), true); });
     // pause while off screen
     if ("IntersectionObserver" in window) {
       let resume = false;
