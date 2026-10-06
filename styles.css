@@ -1116,7 +1116,7 @@ button, .tabbar, .navbar, .row, .seg, .btn { -webkit-user-select: none; user-sel
 .pk-pick button[aria-pressed="true"] svg { color: var(--accent); }
 .pk-main { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 14px; align-items: start; }
 .pk-stage { position: relative; margin: 0; border-radius: 16px; overflow: hidden; background: var(--grass); }
-.pk-stage svg { display: block; width: 100%; height: auto; }
+.pk-stage > svg { display: block; width: 100%; height: auto; }
 .pk-hud { position: absolute; top: 8px; right: 8px; display: flex; align-items: center; gap: 8px; background: rgb(20 24 30 / 72%); color: #fff; border-radius: 12px; padding: 5px 8px; backdrop-filter: blur(6px); }
 .pk-gear { display: flex; gap: 2px; font: 800 .8rem/1 var(--mono, monospace); }
 .pk-gear b { width: 18px; text-align: center; padding: 3px 0; border-radius: 5px; opacity: .45; }
@@ -1173,3 +1173,14 @@ button, .tabbar, .navbar, .row, .seg, .btn { -webkit-user-select: none; user-sel
   .pk-ctl { left: 5px; top: 5px; gap: 4px; }
   .pk-ctl button { width: 26px; height: 26px; font-size: .78rem; }
 }
+/* parking: driver's view */
+.pk-stages { display: grid; gap: 8px; min-width: 0; }
+.pk-figs { position: relative; display: grid; gap: 10px; }
+.pk-figs > .pk-ctl { position: absolute; left: 8px; top: 8px; z-index: 2; }
+.pk-cab { position: relative; margin: 0; border-radius: 16px; overflow: hidden; background: #2b2f36; }
+.pk-cab > svg { display: block; width: 100%; height: auto; }
+
+.pk-stage[hidden], .pk-cab[hidden] { display: none; }
+.pk-glow { animation: pk-glow 1s ease-in-out infinite alternate; }
+@keyframes pk-glow { from { opacity: .35; } }
+@media (max-width: 560px) { .pk-view button { padding: 5px 9px; font-size: .78rem; } }

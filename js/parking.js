@@ -11,14 +11,22 @@
   const M = 10, L = 2.65, LOCK = 33, RAD = Math.PI / 180;
   const f1 = (n) => (Math.round(n * 10) / 10).toString();
   const reduceMotion = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const sign = (code, x, y, s) => (window.BGSigns ? window.BGSigns.signImage(code, x * M, y * M, s * M) : "");
+  // while a scene is drawn, REC collects what the 3D driver's view needs: ground, lines, cars, trees, signs
+  let REC = null;
+  const rec = (o) => { if (REC) REC.push(o); };
+  const sign = (code, x, y, s) => { rec({ k: "sign", code, x: x + s / 2, y: y + s / 2 }); return window.BGSigns ? window.BGSigns.signImage(code, x * M, y * M, s * M) : ""; };
   const FINE = { 50: "50 лв (25,56 €)", 100: "100 лв (51,13 €)", 200: "200 лв (102,26 €)" };
 
   // ---------- drawing helpers (metres in, SVG units out) ----------
-  const rect = (x, y, w, hh, cls, extra = "") => `<rect x="${f1(x * M)}" y="${f1(y * M)}" width="${f1(w * M)}" height="${f1(hh * M)}" class="${cls}" ${extra}/>`;
+  const rect = (x, y, w, hh, cls, extra = "") => (rec({ k: "rect", x, y, w, h: hh, cls }), `<rect x="${f1(x * M)}" y="${f1(y * M)}" width="${f1(w * M)}" height="${f1(hh * M)}" class="${cls}" ${extra}/>`);
   const line = (x1, y1, x2, y2, extra) => `<line x1="${f1(x1 * M)}" y1="${f1(y1 * M)}" x2="${f1(x2 * M)}" y2="${f1(y2 * M)}" ${extra}/>`;
   const text = (x, y, t, extra = "") => `<text x="${f1(x * M)}" y="${f1(y * M)}" font-size="10.5" font-weight="700" text-anchor="middle" dominant-baseline="central" class="pk-t" ${extra}>${t}</text>`;
-  const paint = (x1, y1, x2, y2, w = 0.12) => line(x1, y1, x2, y2, `class="pk-line" stroke-width="${w * M}"`);
+  const paint = (x1, y1, x2, y2, w = 0.12) => (rec({ k: "line", x1, y1, x2, y2, w, c: "#f1f1ec" }), line(x1, y1, x2, y2, `class="pk-line" stroke-width="${w * M}"`));
+  const mline = (x1, y1, x2, y2, c, w) => (rec({ k: "line", x1, y1, x2, y2, w, c }), line(x1, y1, x2, y2, `stroke="${c}" stroke-width="${w * M}"`));
+  // ground patch with an SVG fill (pattern or colour) and its 3D colour key
+  const gfill = (x, y, w, hh, key, fill, extra = "") => (rec({ k: "rect", x, y, w, h: hh, cls: key }), `<rect x="${f1(x * M)}" y="${f1(y * M)}" width="${f1(w * M)}" height="${f1(hh * M)}" fill="${fill}" ${extra}/>`);
+  const gpoly = (pts, cls) => (rec({ k: "poly", pts, cls }), `<polygon points="${pts.map(([x, y]) => `${f1(x * M)},${f1(y * M)}`).join(" ")}" class="${cls}"/>`);
+  const tree = (x, y, r) => (rec({ k: "tree", x, y, r }), `<circle cx="${f1(x * M)}" cy="${f1(y * M)}" r="${f1(r * M)}" class="pk-tree"/>`);
   const dashes = (y, x1, x2) => { let s = ""; for (let x = x1; x < x2; x += 4) s += paint(x, y, x + 2.2, y, 0.14); return s; };
   // dimension arrow with a label in the middle
   const dim = (x1, y1, x2, y2, t) => line(x1, y1, x2, y2, `class="pk-dim" marker-start="url(#pk-ah)" marker-end="url(#pk-ah)"`) + `<g class="pk-tag">${text((x1 + x2) / 2, (y1 + y2) / 2, t)}</g>`;
@@ -46,6 +54,7 @@
   }
   // parked car given by its centre (metres) and heading
   const parked = (cx, cy, th, col) => {
+    rec({ k: "car", cx, cy, th, col });
     const ax = cx - 1.25 * Math.cos(th * RAD), ay = cy - 1.25 * Math.sin(th * RAD);
     return `<g transform="translate(${f1(ax * M)} ${f1(ay * M)}) rotate(${th})">${carBody(col)}</g>`;
   };
@@ -65,9 +74,9 @@
     s += rect(0, 0, 40, 4.6, "pk-house") + rect(0, 4.6, 40, 3.4, "r-walk") + rect(0, 7.9, 40, 0.2, "r-curb");
     s += rect(0, 8, 40, 12, "r-road") + dashes(13.5, 0, 40);
     if (curb) s += rect(0, 20, 40, 4, "r-walk") + rect(0, 19.9, 40, 0.25, "r-curb");
-    else s += `<rect x="0" y="${20 * M}" width="${40 * M}" height="${1.6 * M}" fill="url(#pk-gravel)"/>`;
-    for (let x = 1; x < 40; x += 8) s += `<circle cx="${(x + 3) * M}" cy="${22.6 * M}" r="9" class="pk-tree"/>`;
-    if (blue) for (let x = 3; x <= 37.3; x += 5.7) s += line(x, 18, x, 19.9, `stroke="#2f6fdc" stroke-width="1.6"`) + (x < 37 ? line(x, 18, Math.min(x + 5.7, 37.2), 18, `stroke="#2f6fdc" stroke-width="1.6"`) : "");
+    else s += gfill(0, 20, 40, 1.6, "gravel", "url(#pk-gravel)");
+    for (let x = 1; x < 40; x += 8) s += tree(x + 3, 22.6, 0.9);
+    if (blue) for (let x = 3; x <= 37.3; x += 5.7) s += mline(x, 18, x, 19.9, "#2f6fdc", 0.16) + (x < 37 ? mline(x, 18, Math.min(x + 5.7, 37.2), 18, "#2f6fdc", 0.16) : "");
     return s;
   }
   // parking lot with a row of 90° bays on top (y 3–8) and at the bottom (y 14–19)
@@ -166,7 +175,7 @@
       tips: ["Влизаш само от посоката, накъдето „сочат“ клетките – иначе не можеш да завиеш.", "При излизане: бавно, с поглед през рамо – и сензорите често закъсняват.", "Ако някой чака да излезеш – дай мигач, за да знае."],
       fines: [["Паркиране извън клетката", 50, "ЗДвП чл. 183, ал. 2, т. 1"]],
       scene: () => {
-        let s = rect(0, 0, 40, 24, "r-grass") + rect(0, 1.4, 40, 2.4, "r-walk") + rect(0, 3.8, 40, 6.8, "r-road") + `<polygon points="0,${10.5 * M} ${40 * M},${10.5 * M} ${40 * M},${16.4 * M} 0,${16.4 * M}" class="r-road"/>` + rect(0, 16.4, 40, 2.6, "r-walk");
+        let s = rect(0, 0, 40, 24, "r-grass") + rect(0, 1.4, 40, 2.4, "r-walk") + rect(0, 3.8, 40, 6.8, "r-road") + gpoly([[0, 10.5], [40, 10.5], [40, 16.4], [0, 16.4]], "r-road") + rect(0, 16.4, 40, 2.6, "r-walk");
         const ux = 0.5, uy = 0.866;
         for (let k = -7; k <= 7; k++) { const xe = 22 - 1.385 + 2.77 * k; s += paint(xe, 10.5, xe + 5 * ux, 10.5 + 5 * uy); }
         s += paint(0, 10.5, 40, 10.5, 0.1);
@@ -191,7 +200,7 @@
       scene: () => {
         let s = rect(0, 0, 40, 24, "r-grass") + rect(0, 0, 40, 1, "pk-house") + rect(0, 1, 40, 3, "r-walk") + rect(0, 4, 40, 13, "r-road") + dashes(10.5, 0, 40);
         s += rect(0, 17, 40, 4.6, "r-walk") + rect(0, 16.9, 40, 0.25, "r-curb") + rect(0, 21.6, 40, 2.4, "pk-house");
-        const bl = (x1, y1, x2, y2) => line(x1, y1, x2, y2, 'stroke="#5d6670" stroke-width="1.6"');
+        const bl = (x1, y1, x2, y2) => mline(x1, y1, x2, y2, "#5d6670", 0.16);
         for (const x of [12, 17.7, 23.4, 29.1]) s += bl(x, 17.15, x, 19.35);
         s += bl(12, 19.35, 29.1, 19.35);
         s += parked(26.25, 18.25, 0, col(1)) + parked(30, 7.3, 180, col(3));
@@ -289,7 +298,7 @@
       scene: () => {
         const bays = [[3.4, 5.9], [5.9, 8.4], [8.4, 10.9], [10.9, 13.4], [13.4, 15.9], [15.9, 19.5], [19.5, 22], [22, 24.5], [24.5, 27], [27, 29.5], [29.5, 32], [32, 34.5], [34.5, 37]];
         let s = lot(bays);
-        s += `<rect x="${15.9 * M}" y="${3 * M}" width="${3.6 * M}" height="${5 * M}" fill="#1d5fb4" opacity=".85"/>`;
+        s += gfill(15.9, 3, 3.6, 5, "blue", "#1d5fb4", 'opacity=".85"');
         s += `<g transform="translate(${17.7 * M} ${5.2 * M})" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cy="-11" r="2.4" fill="#fff" stroke="none"/><path d="M0 -8 V2 H7 L10 9"/><path d="M-4 -2 A8 8 0 1 0 6 9"/></g>`;
         bays.forEach(([a, b], i) => { if (i !== 5 && i !== 9) s += parked((a + b) / 2, 5.55, i % 2 ? 90 : -90, col(i)); });
         [0, 1, 3, 5, 7, 8, 10, 12, 13].forEach((i) => { s += parked(0.5 + i * 2.5 + 1.25, 16.45, i % 2 ? 90 : -90, col(i + 2)); });
@@ -309,9 +318,9 @@
       fines: [["Неправилно паркиране на платното", 50, "ЗДвП чл. 183, ал. 2, т. 1"]],
       scene: () => {
         let s = rect(0, 0, 40, 24, "r-grass") + rect(0, 6, 40, 7, "r-road") + dashes(9.5, 0, 40) + paint(0, 6.3, 40, 6.3, 0.15) + paint(0, 12.7, 12, 12.7, 0.15) + paint(34.5, 12.7, 40, 12.7, 0.15);
-        s += `<rect x="0" y="${13 * M}" width="${40 * M}" height="${1.2 * M}" fill="url(#pk-gravel)"/>`;
-        s += `<polygon points="${11 * M},${13 * M} ${17 * M},${14.2 * M} ${17 * M},${17.4 * M} ${31 * M},${17.4 * M} ${31 * M},${14.2 * M} ${36 * M},${13 * M}" class="r-road"/>`;
-        for (let x = 1; x < 40; x += 6) s += `<circle cx="${(x + 1) * M}" cy="${2.6 * M}" r="14" class="pk-tree"/>`;
+        s += gfill(0, 13, 40, 1.2, "gravel", "url(#pk-gravel)");
+        s += gpoly([[11, 13], [17, 14.2], [17, 17.4], [31, 17.4], [31, 14.2], [36, 13]], "r-road");
+        for (let x = 1; x < 40; x += 6) s += tree(x + 1, 2.6, 1.4);
         s += parked(30, 7.9, 180, col(3)) + parked(7, 11.15, 0, col(6));
         s += sign("D19", 31.6, 18, 2.4);
         return s;
@@ -329,9 +338,9 @@
       fines: [["Втори ред в активна лента", 100, "ЗДвП чл. 183, ал. 4, т. 9"], ["На пешеходна пътека, спирка или кръстовище", 100, "ЗДвП чл. 183, ал. 4, т. 8"], ["На място за такси", 100, "ЗДвП чл. 183, ал. 4, т. 13"], ["Друго неправилно паркиране", 50, "ЗДвП чл. 183, ал. 2, т. 1"]],
       scene: () => {
         let s = street();
-        s += rect(4, 20, 3, 4, "pk-drive") + `<rect x="${4 * M}" y="${17.8 * M}" width="${3 * M}" height="${2.1 * M}" fill="url(#pk-hatch)"/>` + `<g class="pk-tag">${text(5.5, 23, "гараж")}</g>`;
+        s += rect(4, 20, 3, 4, "pk-drive") + gfill(4, 17.8, 3, 2.1, "hatch", "url(#pk-hatch)") + `<g class="pk-tag">${text(5.5, 23, "гараж")}</g>`;
         for (let y = 8.4; y < 20; y += 1.6) s += rect(31, y, 3, 0.9, "r-paint");
-        s += `<rect x="${26 * M}" y="${17.8 * M}" width="${5 * M}" height="${2.1 * M}" fill="url(#pk-hatch)"/>` + dim(26, 21.5, 31, 21.5, "5 м");
+        s += gfill(26, 17.8, 5, 2.1, "hatch", "url(#pk-hatch)") + dim(26, 21.5, 31, 21.5, "5 м");
         s += parked(10.4, 19, 0, col(1)) + parked(15.6, 19, 0, col(2)) + parked(20.8, 19, 0, col(4)) + parked(37.5, 19, 0, col(0));
         return s;
       },
@@ -359,17 +368,160 @@
 
   const EVERY = [["Включи P и дръпни ръчната.", "ЗДвП чл. 96"], ["Изключи двигателя – иначе глоба " + FINE[100] + ".", "ЗДвП чл. 181, т. 5"], ["Преди да отвориш вратата – огледало и поглед назад.", "ЗДвП чл. 95, ал. 1"], ["Децата до 12 г. слизат откъм тротоара или банкета.", "ЗДвП чл. 95, ал. 2"], ["При излизане от паркиране – мигач и пропускаш движещите се.", "ЗДвП чл. 25, ал. 1; чл. 26"], ["В жилищна зона – само на обозначените места.", "ЗДвП чл. 62, т. 3"]];
 
+  // ---------- driver's view (3D, from the driver's seat) ----------
+  // colours of the recorded ground in 3D, and the height of raised surfaces
+  const C3 = { "r-grass": "#a9c79a", "r-road": "#4a4f57", "r-walk": "#d3d6dc", "r-curb": "#9aa0a8", "r-paint": "#f1f1ec", "pk-drive": "#bfc3c9", gravel: "#c9b99a", blue: "#1d5fb4", hatch: "rgba(209,59,47,.4)" };
+  const Z3 = { "r-walk": 0.12, "r-curb": 0.14, "pk-drive": 0.12, hatch: 0.13 };
+  const SIGNCOL = { D: "#1d5fb4", V: "#f4f4f4" };
+  // local car frame (rear axle origin, x forward, y right, z up) → world
+  const toWorld = (f, lx, ly, lz) => { const c = Math.cos(f.th), s = Math.sin(f.th); return [f.x + c * lx - s * ly, f.y + s * lx + c * ly, lz]; };
+  function world3d(cam, recs, own) {
+    const G = window.BG3D;
+    let s = "";
+    const items = [];
+    const near = (x, y, r) => { const d = cam.depth(x, y, 0.6); return d > -r && d < 60; };
+    for (const o of recs) {
+      if (o.k === "rect") {
+        if (o.cls === "pk-house" || o.cls === "pk-pillar") {
+          const cx = o.x + o.w / 2, cy = o.y + o.h / 2;
+          if (near(cx, cy, Math.max(o.w, o.h))) items.push(G.box(cam, { x: cx, y: cy, l: o.w, w: o.h, h: o.cls === "pk-house" ? 5 : 2.7, col: o.cls === "pk-house" ? "#cfc8bb" : "#8d939b" }));
+          continue;
+        }
+        const c = C3[o.cls];
+        if (!c) continue;
+        const z = Z3[o.cls] || 0;
+        s += cam.poly([[o.x, o.y, z], [o.x + o.w, o.y, z], [o.x + o.w, o.y + o.h, z], [o.x, o.y + o.h, z]], `fill="${c}"`);
+      } else if (o.k === "poly") {
+        s += cam.poly(o.pts.map(([x, y]) => [x, y, 0]), `fill="${C3[o.cls] || "#4a4f57"}"`);
+      } else if (o.k === "line") {
+        const dx = o.x2 - o.x1, dy = o.y2 - o.y1, l = Math.hypot(dx, dy) || 1, nx = (-dy / l) * o.w / 2, ny = (dx / l) * o.w / 2;
+        const z = o.y1 > 17 && o.y1 < 21.7 && o.c === "#5d6670" ? 0.13 : 0.01;
+        s += cam.poly([[o.x1 + nx, o.y1 + ny, z], [o.x2 + nx, o.y2 + ny, z], [o.x2 - nx, o.y2 - ny, z], [o.x1 - nx, o.y1 - ny, z]], `fill="${o.c}"`);
+      } else if (o.k === "car") {
+        if (near(o.cx, o.cy, 4)) items.push(G.car(cam, { x: o.cx, y: o.cy, yaw: o.th, col: o.col, scale: 0.1 }));
+      } else if (o.k === "tree") {
+        if (!near(o.x, o.y, 3)) continue;
+        const trunk = G.box(cam, { x: o.x, y: o.y, l: 0.3, w: 0.3, h: 2, col: "#6b4a33", stroke: "none" });
+        items.push({ d: trunk.d, s: trunk.s + cam.ball([o.x, o.y, 2.2 + o.r], o.r + 0.6, "#5a9a52") });
+      } else if (o.k === "sign") {
+        if (!near(o.x, o.y, 2)) continue;
+        const pole = G.box(cam, { x: o.x, y: o.y, l: 0.08, w: 0.08, h: 2.2, col: "#9aa1a9", stroke: "none" });
+        const c = SIGNCOL[o.code[0]] || "#f4f4f4";
+        const panel = G.box(cam, { x: o.x, y: o.y, z0: 2, l: 0.06, w: 0.7, h: 0.7, yaw: 0, col: c, faces: { front: c, back: c } });
+        items.push({ d: pole.d, s: pole.s + panel.s });
+      }
+    }
+    if (own) items.push(G.box(cam, { x: own.cx, y: own.cy, z0: 0.3, l: 4.4, w: 1.8, h: 0.8, yaw: own.th / RAD, col: "#2f6fdc" }));
+    return s + G.paint(items);
+  }
+  const SKY = `<defs><linearGradient id="pk-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9cc6ee"/><stop offset="1" stop-color="#e3eef8"/></linearGradient></defs>`;
+  // a camera at a point of the car, looking along a local yaw (deg, 0 = forward, + = right) and pitch (rad, + = down)
+  function carCam(f, lx, ly, lz, yaw, pitch, w, hh, hfov, cy, mirror) {
+    const eye = toWorld(f, lx, ly, lz), a = f.th + yaw * RAD;
+    const target = [eye[0] + Math.cos(a) * 10, eye[1] + Math.sin(a) * 10, eye[2] - Math.tan(pitch) * 10];
+    return window.BG3D.camera({ eye, target, f: w / 2 / Math.tan(hfov * RAD), cx: w / 2, cy, near: 0.05, mirror });
+  }
+  // a small picture (mirror or screen) at (x, y) with rounded corners
+  function inset(id, x, y, w, hh, r, inner, frame = "#16181b", glow = "") {
+    return `<g transform="translate(${x} ${y})"><defs><clipPath id="${id}"><rect width="${w}" height="${hh}" rx="${r}"/></clipPath></defs><g clip-path="url(#${id})"><svg width="${w}" height="${hh}" viewBox="0 0 ${w} ${hh}" overflow="hidden">${inner}</svg></g>${glow ? `<rect x="-3" y="-3" width="${w + 6}" height="${hh + 6}" rx="${r + 3}" fill="none" stroke="${glow}" stroke-width="4" class="pk-glow"/>` : ""}<rect width="${w}" height="${hh}" rx="${r}" fill="none" stroke="${frame}" stroke-width="5"/></g>`;
+  }
+  const ownOf = (f) => ({ cx: f.x + 1.25 * Math.cos(f.th), cy: f.y + 1.25 * Math.sin(f.th), th: f.th });
+  function sideMirror(f, recs, key, w, hh, rev) {
+    const sgn = key === "L" ? -1 : 1;
+    // in reverse the right mirror tips down to show the kerb – many cars do this on their own
+    const cam = carCam(f, 2.05, sgn * 1.02, 1.0, sgn * 166, key === "R" && rev ? 0.2 : 0.05, w, hh, 21, hh * 0.42, true);
+    return `<rect width="${w}" height="${hh}" fill="url(#pk-sky)"/>` + world3d(cam, recs, ownOf(f));
+  }
+  function innerMirror(f, recs, w, hh) {
+    const cam = carCam(f, 1.6, 0, 1.25, 180, 0.04, w, hh, 24, hh * 0.45, true);
+    return `<rect width="${w}" height="${hh}" fill="url(#pk-sky)"/>` + world3d(cam, recs, null) +
+      `<path d="M0 0 H${w} V${hh} H0 Z M${w * 0.16} ${hh * 0.18} H${w * 0.84} L${w * 0.88} ${hh * 0.86} H${w * 0.12} Z" fill="#30353c" fill-rule="evenodd"/><rect x="${w * 0.22}" y="${hh * 0.68}" width="${w * 0.16}" height="${hh * 0.32}" rx="5" fill="#3d434b"/><rect x="${w * 0.62}" y="${hh * 0.68}" width="${w * 0.16}" height="${hh * 0.32}" rx="5" fill="#3d434b"/>`;
+  }
+  // reversing camera with distance lines and the path the rear corners will take with this steering
+  function rearCam(f, recs, w, hh) {
+    const cam = carCam(f, -0.95, 0, 0.95, 180, 0.62, w, hh, 62, hh * 0.32, true);
+    let s = `<rect width="${w}" height="${hh}" fill="url(#pk-sky)"/>` + world3d(cam, recs, null);
+    const k = Math.tan(f.steer * RAD) / L;
+    for (const side of [-0.9, 0.9]) {
+      let x = f.x, y = f.y, th = f.th;
+      const pts = [];
+      for (let d = 0; d <= 3; d += 0.15) {
+        const c = Math.cos(th), sn = Math.sin(th);
+        pts.push([x + c * -0.95 - sn * side, y + sn * -0.95 + c * side, 0.02]);
+        x -= c * 0.15; y -= sn * 0.15; th -= 0.15 * k;
+      }
+      s += cam.line(pts, `stroke="#ffd60a" stroke-width="2.4"`);
+    }
+    [[0.5, "#ff3b30"], [1, "#ffd60a"], [2, "#34c759"]].forEach(([d, c]) => {
+      const a = toWorld(f, -0.95 - d, -0.9, 0.02), b = toWorld(f, -0.95 - d, 0.9, 0.02);
+      s += cam.line([a, b], `stroke="${c}" stroke-width="2.2"`);
+    });
+    s += `<path d="M0 ${hh} Q${w / 2} ${hh - 16} ${w} ${hh} Z" fill="#2f6fdc"/>`;
+    return s;
+  }
+  function wheelArt(cx, cy, rx, ry, ang) {
+    // hands slide round the rim when the wheel turns a lot (hand over hand), so they stay near "10 and 2"
+    const hand = (base) => { const a = ((((ang + base + 45) % 90) + 90) % 90) - 45 + (base < 0 ? -55 : 55); const r = a * RAD; return `<g transform="translate(${f1(cx + Math.sin(r) * rx)} ${f1(cy - Math.cos(r) * ry)}) rotate(${f1(a)})"><rect x="-13" y="-9" width="26" height="22" rx="10" fill="#f3c7a1" stroke="#c99b78" stroke-width="1.5"/><rect x="-11" y="10" width="22" height="30" rx="6" fill="#3a5a8c"/></g>`; };
+    return `<g transform="rotate(${f1(ang)} ${cx} ${cy})"><ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="#16181b" stroke-width="${rx * 0.15}"/><path d="M${cx - rx} ${cy} H${cx + rx} M${cx} ${cy} V${cy + ry}" stroke="#16181b" stroke-width="${rx * 0.13}"/><circle cx="${cx}" cy="${cy}" r="${rx * 0.26}" fill="#16181b"/><circle cx="${cx}" cy="${cy - ry}" r="${rx * 0.06}" fill="#ff9f0a"/></g>` + hand(-1) + hand(1);
+  }
+  function pedals(x, y, f) {
+    const gas = f.g !== "R" && f.v > 1.4, brake = !gas;
+    const hard = f.v === 0 || f.v === undefined;
+    const pedal = (px, w, on, lbl) => `<g transform="translate(${px} 0)"><rect width="${w}" height="34" rx="5" fill="${on ? "#ff9f0a" : "#4b5159"}" ${on ? `transform="translate(0 4)"` : ""}/><text x="${w / 2}" y="48" font-size="9" font-weight="700" fill="#fff" text-anchor="middle">${lbl}</text></g>`;
+    return `<g transform="translate(${x} ${y})"><rect x="-6" y="-6" width="86" height="62" rx="10" fill="rgba(0,0,0,.55)"/>${pedal(0, 42, brake, hard ? "спирачка" : "леко")}${pedal(52, 22, gas, "газ")}</g>`;
+  }
+  function gearBox(x, y, g) {
+    return `<g transform="translate(${x} ${y})"><rect width="30" height="78" rx="8" fill="rgba(0,0,0,.55)"/>${["P", "R", "N", "D"].map((k, i) => `<text x="15" y="${15 + i * 17}" font-size="12" font-weight="800" text-anchor="middle" dominant-baseline="central" fill="${k === g ? "#ff9f0a" : "#8b9199"}">${k}</text>`).join("")}</g>`;
+  }
+  const pill = (x, y, t, bg = "rgba(0,0,0,.66)") => { const w = t.length * 6.3 + 20; return `<g><rect x="${x - w / 2}" y="${y - 11}" width="${w}" height="22" rx="11" fill="${bg}"/><text x="${x}" y="${y + 0.5}" font-size="11.5" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="central">${t}</text></g>`; };
+
+  // the whole cabin picture for one frame; head = how far the driver has turned (deg, + = right)
+  function cabinSVG(f, recs, head, side, steerShown) {
+    const W = 520, H = 300, back = Math.abs(head) > 90;
+    const cam = carCam(f, 1.05, -0.38, 1.2, head, back ? 0.16 : 0.07, W, H, 52, back ? 120 : 112, false);
+    let s = SKY + `<rect width="${W}" height="${H}" fill="url(#pk-sky)"/>` + world3d(cam, recs, null);
+    const blinkOn = f.bl && Math.floor(performance.now() / 380) % 2 === 0;
+    if (!back) {
+      s += `<path d="M0 0 H${W} V24 Q${W / 2} 8 0 24 Z" fill="#2b2f36"/><path d="M0 0 H64 L16 212 H0 Z" fill="#23272d"/><path d="M${W} 0 H${W - 64} L${W - 16} 212 H${W} Z" fill="#23272d"/>`;
+      s += `<path d="M40 214 Q${W / 2} 186 ${W - 40} 214 Z" fill="#2f6fdc"/><path d="M0 214 Q${W / 2} 194 ${W} 214 V${H} H0 Z" fill="#2b2f36"/><path d="M0 214 Q${W / 2} 194 ${W} 214" fill="none" stroke="#3a3f46" stroke-width="4"/>`;
+      s += `<ellipse cx="${W / 2}" cy="246" rx="70" ry="22" fill="#1f2328"/>`;
+      if (blinkOn) s += `<path d="M${W / 2 - 52} 246 l-10 -7 v14 z" fill="${f.bl !== "R" ? "#34c759" : "#2f3439"}"/><path d="M${W / 2 + 52} 246 l10 -7 v14 z" fill="${f.bl !== "L" ? "#34c759" : "#2f3439"}"/>`;
+      s += wheelArt(W / 2, 318, 104, 76, steerShown * 13);
+      const lookL = f.bl === "L" || f.bl === "H", lookR = f.bl === "R" || f.bl === "H";
+      s += inset("pk-mL", 6, 150, 112, 68, 16, sideMirror(f, recs, "L", 112, 68, false), "#16181b", lookL && f.g !== "P" ? "#ffd60a" : "");
+      s += inset("pk-mR", 422, 158, 92, 58, 14, sideMirror(f, recs, "R", 92, 58, false), "#16181b", lookR && f.g !== "P" ? "#ffd60a" : "");
+      s += `<rect x="352" y="0" width="7" height="28" fill="#16181b"/>` + inset("pk-mI", 290, 24, 140, 44, 20, innerMirror(f, recs, 140, 44));
+      s += pedals(18, 236, f) + gearBox(476, 220, f.g);
+    } else {
+      // looking back over the shoulder: rear window, headrests, rear seat
+      s += `<path fill-rule="evenodd" d="M0 0 H${W} V${H} H0 Z M84 44 Q${W / 2} 26 ${W - 84} 44 L${W - 52} 192 Q${W / 2} 206 52 192 Z" fill="#2b2f36"/>`;
+      s += `<rect x="150" y="164" width="76" height="52" rx="18" fill="#3a3f47"/><rect x="294" y="164" width="76" height="52" rx="18" fill="#3a3f47"/><path d="M0 206 Q${W / 2} 192 ${W} 206 V${H} H0 Z" fill="#3a3f47"/><path d="M${W / 2} 200 V${H}" stroke="#2b2f36" stroke-width="3"/>`;
+      s += `<g opacity=".95">${inset("pk-rc", 318, 200, 190, 92, 10, rearCam(f, recs, 190, 92), "#0d0f12")}</g>` + pill(413, 196, "камера");
+      s += `<g transform="translate(0 0)"><rect x="8" y="208" width="128" height="86" rx="12" fill="rgba(0,0,0,.55)"/>${wheelArt(72, 262, 44, 32, steerShown * 13)}</g>`;
+      s += pedals(146, 236, f) + gearBox(244, 214, f.g);
+    }
+    const look = f.g === "R" ? `Гледаш назад през ${side > 0 ? "дясното" : "лявото"} рамо` : f.park ? "Паркиран: P, ръчна, двигателят – изключен" : f.v === 0 ? "Спрял – кракът е на спирачката" : f.bl === "R" || f.bl === "L" ? `Напред + ${f.bl === "R" ? "дясното" : "лявото"} огледало` : "Гледаш напред";
+    s += pill(back ? W / 2 : 150, back ? 16 : 42, look, f.g === "R" ? "rgba(255,159,10,.92)" : "rgba(0,0,0,.66)");
+    return s;
+  }
+
   function parkingTypes(root) {
     let cur = T[0], vr = null, frames = [], t0 = 0, playing = false, raf = 0, shownSteer = 0, lastKey = "";
     const box = h(`<div class="widget pk">
       <div class="widget-head"><h3>Как се паркира – по видове</h3><p>Избери вид паркиране. Колата прави истинската маневра – виж волана, предавката и стъпките.</p></div>
       <div class="pk-pick" role="group" aria-label="Вид паркиране">${T.map((x) => `<button type="button" data-id="${x.id}" aria-pressed="${x === cur}">${icon(x.ic)}<span>${x.t}</span></button>`).join("")}</div>
       <div class="pk-main">
-        <figure class="pk-stage" data-no-play>
-          <svg viewBox="0 0 400 240" role="img"></svg>
-          <div class="pk-hud" aria-hidden="true"><div class="pk-gear">${["P", "R", "N", "D"].map((g) => `<b data-g="${g}">${g}</b>`).join("")}</div><div class="pk-wheel">${wheelSVG}</div></div>
-          <div class="pk-ctl"><button type="button" class="pk-play" aria-label="Пусни">▶</button><button type="button" class="pk-again" aria-label="Отначало">↺</button></div>
-        </figure>
+        <div class="pk-stages">
+          <div class="seg pk-view" role="group" aria-label="Изглед"><button type="button" data-view="both" aria-pressed="true">Двете</button><button type="button" data-view="top" aria-pressed="false">Отгоре</button><button type="button" data-view="cab" aria-pressed="false">От шофьорското място</button></div>
+          <div class="pk-figs">
+            <figure class="pk-stage" data-no-play>
+              <svg viewBox="0 0 400 240" role="img"></svg>
+              <div class="pk-hud" aria-hidden="true"><div class="pk-gear">${["P", "R", "N", "D"].map((g) => `<b data-g="${g}">${g}</b>`).join("")}</div><div class="pk-wheel">${wheelSVG}</div></div>
+            </figure>
+            <figure class="pk-cab" data-no-play><svg viewBox="0 0 520 300" role="img" aria-label="Изглед от шофьорското място: накъде гледаш, огледалата, воланът, педалите и предавката"></svg><figcaption class="visually-hidden">От шофьорското място</figcaption></figure>
+            <div class="pk-ctl"><button type="button" class="pk-play" aria-label="Пусни">▶</button><button type="button" class="pk-again" aria-label="Отначало">↺</button></div>
+          </div>
+        </div>
         <div class="pk-side"><p class="pk-lead"></p><div class="pk-vars"></div><ol class="pk-steps"></ol></div>
       </div>
       <div class="pk-cards"></div>
@@ -380,6 +532,14 @@
     const playBtn = box.querySelector(".pk-play"), wheel = box.querySelector(".pk-wheel svg");
     const gears = [...box.querySelectorAll(".pk-gear b")];
     let carG, overG, fw, blL, blR, tails, parkG;
+    const cabSvg = box.querySelector(".pk-cab svg"), cabFig = box.querySelector(".pk-cab"), figs = box.querySelector(".pk-figs");
+    let recs = [], view = "both", head = 0, side = 1, lastCab = 0;
+    box.querySelectorAll(".pk-view button").forEach((b) => b.addEventListener("click", () => {
+      view = b.dataset.view;
+      box.querySelectorAll(".pk-view button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      stage.hidden = view === "cab"; cabFig.hidden = view === "top";
+      if (!playing) render(frameAt(Math.min(pos, frames[frames.length - 1].t)), true);
+    }));
 
     function setup() {
       const v = vr;
@@ -387,7 +547,13 @@
       const segs = cur.segs || cur.segsBy[v];
       frames = simulate(cur.start, segs);
       svg.setAttribute("aria-label", `${cur.t}: ${steps.join(" ")}`);
-      svg.innerHTML = DEFS + cur.scene(v) + `<g class="pk-car">${carBody("#2f6fdc", true)}</g><g class="pk-over"></g>`;
+      REC = [];
+      const sceneSVG = cur.scene(v);
+      recs = REC; REC = null;
+      const firstR = segs.find((x) => x.g === "R" && x.s);
+      // the driver looks back over the shoulder on the side the car is parking to
+      side = firstR ? (firstR.bl ? (firstR.bl === "L" ? -1 : 1) : Math.sign(firstR.s)) : 1;
+      svg.innerHTML = DEFS + sceneSVG + `<g class="pk-car">${carBody("#2f6fdc", true)}</g><g class="pk-over"></g>`;
       carG = svg.querySelector(".pk-car"); overG = svg.querySelector(".pk-over");
       fw = [...svg.querySelectorAll(".pk-fw")]; blL = svg.querySelector(".pk-bl-L"); blR = svg.querySelector(".pk-bl-R");
       tails = [...svg.querySelectorAll(".pk-car .pk-tail")]; parkG = svg.querySelector(".pk-park");
@@ -437,6 +603,14 @@
       gears.forEach((b) => b.classList.toggle("on", b.dataset.g === f.g));
       const segStart = frames.find((x) => x.si === f.si).t;
       const key = `${f.si}|${Math.floor((f.t - segStart) * 6)}`;
+      // the cabin is heavier to draw, so ~15 times a second is enough
+      const now = performance.now();
+      if (!cabFig.hidden && window.BG3D && (snap || now - lastCab > 66)) {
+        lastCab = now;
+        const target = f.g === "R" ? side * 150 : 0;
+        head = snap ? target : head + (target - head) * 0.28;
+        cabSvg.innerHTML = cabinSVG(f, recs, head, side, shownSteer);
+      }
       if (key !== lastKey) {
         lastKey = key;
         overG.innerHTML = cur.over ? cur.over(f.si, vr, f.t - segStart) : "";
@@ -472,7 +646,7 @@
       new IntersectionObserver((es) => es.forEach((e) => {
         if (!e.isIntersecting && playing) { resume = true; stop(); }
         else if (e.isIntersecting && resume) { resume = false; play(pos); }
-      })).observe(stage);
+      })).observe(figs);
     }
     root.appendChild(h(`<h2 class="section-title">Видове паркиране</h2>`));
     root.appendChild(box);
