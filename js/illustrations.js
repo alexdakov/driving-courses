@@ -118,9 +118,9 @@
       b += `<g><rect x="230" y="40" width="4" height="30" fill="${C.grey}"/><rect x="224" y="34" width="16" height="9" rx="2" fill="${C.amber}"/></g>`;
       b += `<g>${cruise(250, 6)}${car(250, 128, 0, C.orange)}</g>`;
       b += `<g>${cruise(150, 6)}${car(150, 128, 0, C.blue)}</g>`;
-      b += label(180, 172, "Колата пред теб мине стълба → броиш „двадесет и едно, двадесет и две“", { size: 10.5 });
-      b += label(120, 22, "Сух път: поне 2 секунди · мокър: 4 · сняг: още повече", { size: 10.5, a: "start" });
-      return svg(b, "Правилото за 2 секунди дистанция");
+      b += label(180, 164, "Колата пред теб мине стълба → броиш", { size: 10.5 }) + label(180, 188, "„двадесет и едно, двадесет и две“", { size: 10.5 });
+      b += label(120, 22, "Добра практика: сух път – 2 с · мокър – 4 с · сняг – повече", { size: 10.5, a: "start" });
+      return svg(b, "Добра практика: 2 секунди дистанция");
     },
     alcohol() {
       let b = `<rect width="${W}" height="${H}" fill="#eef2f6"/>`;
@@ -183,7 +183,7 @@
       b += `<rect y="142.5" width="${W}" height="19.5" fill="${C.roadD}"/>`;
       b += `<g>${cruise(90, 5)}${car(90, 60, 0, C.blue)}</g><g>${cruise(200, 4)}${car(200, 95, 0, C.orange)}</g><g>${cruise(40, 7)}${car(40, 127, 0, C.purple)}</g>`;
       b += car(250, 152, 0, C.grey, 40, 18) + `<circle cx="270" cy="143" r="3" fill="${C.amber}"><animate attributeName="opacity" values="1;0;1" dur="0.9s" repeatCount="indefinite"/></circle>`;
-      b += label(120, 182, "Лента за принудително спиране – само при повреда", { size: 10.5 });
+      b += label(120, 182, "Лента за принудително спиране – повреда или неразположение", { size: 10.5 });
       return svg(b, "Автомагистрала и лентата за принудително спиране");
     },
     overtaking() {
@@ -192,7 +192,7 @@
       b += `<g>${loop("0 0; 110 0; 110 0; 240 0", 8, 'keyTimes="0;.3;.8;1"')}${car(110, 128, 0, C.orange)}</g>`;
       b += `<g>${loop("0 0; 70 0; 70 0; 190 0", 8, 'keyTimes="0;.34;.85;1"')}${car(60, 128, 0, C.blue)}</g>`;
       b += `<path d="M84 128 C120 128 120 92 170 92 L215 92" stroke="${C.red}" stroke-width="4" stroke-dasharray="7 6" fill="none"/><g><animate attributeName="opacity" values="1;.25;1" dur="1s" repeatCount="indefinite"/><line x1="185" y1="78" x2="215" y2="106" stroke="${C.red}" stroke-width="5"/><line x1="215" y1="78" x2="185" y2="106" stroke="${C.red}" stroke-width="5"/></g>`;
-      b += label(180, 176, "Не изпреварвай преди пешеходна пътека, на кръстовище и прелез", { size: 10.5 });
+      b += label(180, 164, "Не изпреварвай пред пешеходна пътека,", { size: 10.5 }) + label(180, 188, "на равнозначно кръстовище и на прелез без бариери", { size: 10.5 });
       b += S("В24", 300, 4, 30);
       return svg(b, "Къде изпреварването е забранено");
     },
@@ -278,7 +278,7 @@
       b += `<g transform="translate(108 140)"><rect width="16" height="44" rx="4" fill="#15181b"/><circle cx="8" cy="9" r="5" fill="#ff3b30"/><circle cx="8" cy="22" r="5" fill="#3a3f45"/><circle cx="8" cy="35" r="5" fill="#3a3f45"/><rect x="18" y="28" width="16" height="16" rx="4" fill="#15181b"/><path d="M21 36 H29 M26 32 L30 36 L26 40" stroke="#22d36b" stroke-width="2.6" fill="none"><animate attributeName="opacity" values="1;.35;1" dur="1.2s" repeatCount="indefinite"/></path></g>`;
       b += `<g>${loop("0 0; 0 0; 0 -50; 190 -50", 7, 'keyTimes="0;.35;.6;1"')}${car(195, 175, -90, C.blue, 46, 22, { blinkR: true })}</g>`;
       b += `<g>${loop("0 0; 0 -110; 0 -110", 7, 'keyTimes="0;.35;1"')}${walker(228, 175, 0.75, C.orange)}</g>`;
-      b += label(270, 30, "Стрелка: завиваш, като пропуснеш пешеходците", { size: 10.5 });
+      b += label(270, 30, "Стрелка: завиваш, като пропуснеш пешеходците и колите", { size: 10.5 });
       return svg(b, "Зелена стрелка в допълнителната секция");
     },
     railCrossing() {
@@ -289,7 +289,7 @@
       b += `<g transform="translate(176 52)"><rect x="-2" y="0" width="4" height="78" fill="#6c737c"/><rect x="-22" y="8" width="44" height="16" rx="8" fill="#15181b"/><circle cx="-11" cy="16" r="6" fill="#ff3b30"><animate attributeName="opacity" values="1;.15;1;.15" dur="1s" repeatCount="indefinite"/></circle><circle cx="11" cy="16" r="6" fill="#ff3b30"><animate attributeName="opacity" values=".15;1;.15;1" dur="1s" repeatCount="indefinite"/></circle></g>`;
       b += `<g transform="translate(176 92)"><g><animateTransform attributeName="transform" type="rotate" values="-80;-80;0;0;-80" keyTimes="0;.2;.35;.85;1" dur="8s" repeatCount="indefinite"/><rect x="0" y="-3" width="110" height="6" fill="#fff" stroke="${C.red}"/>${[10, 34, 58, 82].map((xx) => `<rect x="${xx}" y="-3" width="12" height="6" fill="${C.red}"/>`).join("")}</g></g>`;
       b += sideCar(100, 165, 0.6, C.blue);
-      b += label(90, 30, "Мигаща червена = стоп, дори бариерата да е вдигната", { size: 10.5 }) + label(100, 188, "Без бариери: спри на 2 м пред релсата", { size: 10.5 });
+      b += label(90, 30, "Мигаща червена = стоп, дори бариерата да е вдигната", { size: 10.5 }) + label(100, 188, "Без бариери: спри поне на 2 м пред релсата", { size: 10.5 });
       return svg(b, "Железопътен прелез");
     },
     laneLights() {
@@ -328,7 +328,7 @@
       b += `<path d="M192 210 V176 A74 74 0 0 0 254 112 H380" stroke="${C.green}" stroke-width="4" fill="none" stroke-dasharray="7 6"/>${T(300, 140, "1-ви изход", 11, { w: 700, c: "#1f6b34" })}`;
       b += `<path d="M196 210 V180 A47 47 0 0 0 180 53 A47 47 0 0 0 134 112 A74 74 0 0 0 106 112 H-20" stroke="${C.orange}" stroke-width="4" fill="none" stroke-dasharray="7 6"/>`;
       b += `<g><animateMotion dur="7s" repeatCount="indefinite" rotate="auto" keyPoints="0.07;1" keyTimes="0;1" calcMode="linear" path="M196 210 V180 A47 47 0 0 0 180 53 A47 47 0 0 0 134 100 A74 74 0 0 0 106 112 H-20"/>${car(0, 0, 0, C.blue, 30, 15)}</g>`;
-      b += label(70, 30, "Далечен изход: вътрешна лента,", { size: 10 }) + label(70, 52, "но излизаш от външната", { size: 10 });
+      b += label(70, 30, "Добра практика: далечен изход – вътрешна лента,", { size: 10 }) + label(70, 52, "но излизаш от външната", { size: 10 });
       b += S("Б1", 214, 170, 24);
       return svg(b, "Ленти в кръговото движение");
     },
