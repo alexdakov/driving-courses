@@ -1218,7 +1218,7 @@
     regulirovchik: regulatorWidget,
     predimstvo: priorityWidget,
     krugovo: roundaboutWidget,
-    parkirane: parkingWidget,
+    parkirane: (root) => { parkingWidget(root); if (window.BGParking) window.BGParking(root); },
     ogledala: mirrorWidget,
     tablo: dashboardWidget,
     vreme: stoppingWidget,
