@@ -39,5 +39,10 @@
   });
   new MutationObserver((list) => list.forEach((m) => m.addedNodes.forEach((n) => n.nodeType === 1 && (n.tagName.toLowerCase() === "svg" ? attach(n) : scan(n))))).observe(document.documentElement, { childList: true, subtree: true });
   scan(document);
-  window.BGPlay = { attach, scan };
+  // bring the ▶ / ⏸ button in line after something else paused or started the SVG
+  function sync(svg) {
+    const btn = svg.parentElement && svg.parentElement.querySelector(":scope > .play-btn");
+    if (btn) setState(btn, svg, !svg.animationsPaused());
+  }
+  window.BGPlay = { attach, scan, sync };
 })();

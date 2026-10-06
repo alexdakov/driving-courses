@@ -1184,3 +1184,20 @@ button, .tabbar, .navbar, .row, .seg, .btn { -webkit-user-select: none; user-sel
 .pk-glow { animation: pk-glow 1s ease-in-out infinite alternate; }
 @keyframes pk-glow { from { opacity: .35; } }
 @media (max-width: 560px) { .pk-view button { padding: 5px 9px; font-size: .78rem; } }
+/* parking: step by step */
+.pk-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: space-between; }
+.pk-stepbar { display: flex; align-items: center; gap: 8px; background: var(--surface); border-radius: 14px; padding: 8px 10px; }
+.pk-stepbar[hidden] { display: none; }
+.pk-stepno { flex: 1; text-align: center; font-weight: 700; font-size: .9rem; }
+.pk-stepbar .btn { margin: 0; }
+.pk-stepbar .btn:disabled { opacity: .4; cursor: default; }
+.pk-ctl[hidden] { display: none; }
+.pk-steps li { cursor: pointer; }
+.pk-steps li:hover { box-shadow: inset 0 0 0 1px var(--line); }
+/* situations: step by step */
+.sit-stepbar { display: flex; align-items: center; gap: 8px; margin: 8px 0 6px; }
+.sit-stepbar .btn { margin: 0; min-width: 40px; }
+.sit-stepbar .btn:disabled { opacity: .4; cursor: default; }
+.sit-stepno { font-size: .84rem; font-weight: 700; color: var(--muted); }
+.sit-steps.stepable li { cursor: pointer; border-radius: 8px; transition: background .2s; }
+.sit-steps.stepable li.on { background: var(--accent-soft); box-shadow: -6px 0 0 var(--accent-soft), 6px 0 0 var(--accent-soft); }

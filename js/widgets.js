@@ -1101,11 +1101,43 @@
       list.filter((x) => cat === "all" || x.cat === cat).forEach((x) => {
         let pic = "";
         try { pic = x.svg(); } catch (e) { pic = ""; }
-        grid.appendChild(h(`<article class="rule has-il sit-card" id="sit-${x.id}"><figure class="rule-il">${pic}</figure><div class="rule-text"><span class="eyebrow">${cats[x.cat] || ""}</span><h4>${x.title}</h4><p class="sit-q">${x.q}</p><ol class="sit-steps">${x.steps.map((t) => `<li>${t}</li>`).join("")}</ol><span class="lawref">${x.ref}</span></div></article>`));
+        const stepper = x.marks ? `<div class="sit-stepbar"><button type="button" class="btn small sit-prev" aria-label="Предишна стъпка">◀</button><span class="sit-stepno">Стъпка по стъпка</span><button type="button" class="btn small sit-next" aria-label="Следваща стъпка">▶</button></div>` : "";
+        const card = h(`<article class="rule has-il sit-card" id="sit-${x.id}"><figure class="rule-il">${pic}</figure><div class="rule-text"><span class="eyebrow">${cats[x.cat] || ""}</span><h4>${x.title}</h4><p class="sit-q">${x.q}</p><ol class="sit-steps${x.marks ? " stepable" : ""}">${x.steps.map((t, i) => `<li data-n="${i}">${t}</li>`).join("")}</ol>${stepper}<span class="lawref">${x.ref}</span></div></article>`);
+        if (x.marks) stepThrough(card, x.marks);
+        grid.appendChild(card);
       });
     }
     draw();
     root.appendChild(box);
+  }
+  // play one step of a situation: jump to where the step starts, play to where the next one starts, pause
+  function stepThrough(card, marks) {
+    const fig = card.querySelector("figure"), svg = fig.querySelector("svg");
+    const lis = [...card.querySelectorAll(".sit-steps li")], no = card.querySelector(".sit-stepno");
+    let cur = -1, timer = 0;
+    const mark = (n) => lis.forEach((li, i) => li.classList.toggle("on", i === n));
+    function show(n) {
+      if (!svg || !svg.setCurrentTime) return;
+      cur = Math.max(0, Math.min(lis.length - 1, n));
+      clearTimeout(timer);
+      mark(cur);
+      no.textContent = `Стъпка ${cur + 1} от ${lis.length}`;
+      card.querySelector(".sit-prev").disabled = cur === 0;
+      card.querySelector(".sit-next").disabled = cur === lis.length - 1;
+      const a = marks[cur], b = marks[cur + 1];
+      svg.setCurrentTime(a);
+      if (reduceMotion()) { svg.setCurrentTime(Math.max(a, b - 0.05)); svg.pauseAnimations(); }
+      else {
+        svg.unpauseAnimations();
+        timer = setTimeout(() => { svg.pauseAnimations(); svg.setCurrentTime(Math.max(a, b - 0.05)); if (window.BGPlay) window.BGPlay.sync(svg); }, (b - a) * 1000);
+      }
+      if (window.BGPlay) window.BGPlay.sync(svg);
+    }
+    card.querySelector(".sit-prev").addEventListener("click", () => show(cur < 0 ? 0 : cur - 1));
+    card.querySelector(".sit-next").addEventListener("click", () => show(cur + 1));
+    lis.forEach((li, i) => li.addEventListener("click", () => show(i)));
+    // the normal ▶ button plays the whole loop again
+    fig.addEventListener("click", (e) => { if (e.target.closest(".play-btn")) { clearTimeout(timer); mark(-1); cur = -1; no.textContent = "Стъпка по стъпка"; } }, true);
   }
 
   // ================= Dashboard =================

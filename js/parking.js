@@ -501,7 +501,7 @@
       s += pedals(146, 236, f) + gearBox(244, 214, f.g);
     }
     const look = f.g === "R" ? `Гледаш назад през ${side > 0 ? "дясното" : "лявото"} рамо` : f.park ? "Паркиран: P, ръчна, двигателят – изключен" : f.v === 0 ? "Спрял – кракът е на спирачката" : f.bl === "R" || f.bl === "L" ? `Напред + ${f.bl === "R" ? "дясното" : "лявото"} огледало` : "Гледаш напред";
-    s += pill(back ? W / 2 : 150, back ? 16 : 42, look, f.g === "R" ? "rgba(255,159,10,.92)" : "rgba(0,0,0,.66)");
+    s += pill(back ? W / 2 : 168, back ? 16 : 42, look, f.g === "R" ? "rgba(255,159,10,.92)" : "rgba(0,0,0,.66)");
     return s;
   }
 
@@ -512,7 +512,8 @@
       <div class="pk-pick" role="group" aria-label="Вид паркиране">${T.map((x) => `<button type="button" data-id="${x.id}" aria-pressed="${x === cur}">${icon(x.ic)}<span>${x.t}</span></button>`).join("")}</div>
       <div class="pk-main">
         <div class="pk-stages">
-          <div class="seg pk-view" role="group" aria-label="Изглед"><button type="button" data-view="both" aria-pressed="true">Двете</button><button type="button" data-view="top" aria-pressed="false">Отгоре</button><button type="button" data-view="cab" aria-pressed="false">От шофьорското място</button></div>
+          <div class="pk-bar"><div class="seg pk-mode" role="group" aria-label="Пускане"><button type="button" data-mode="all" aria-pressed="true">Непрекъснато</button><button type="button" data-mode="step" aria-pressed="false">Стъпка по стъпка</button></div>
+          <div class="seg pk-view" role="group" aria-label="Изглед"><button type="button" data-view="both" aria-pressed="true">Двете</button><button type="button" data-view="top" aria-pressed="false">Отгоре</button><button type="button" data-view="cab" aria-pressed="false">От шофьорското място</button></div></div>
           <div class="pk-figs">
             <figure class="pk-stage" data-no-play>
               <svg viewBox="0 0 400 240" role="img"></svg>
@@ -521,6 +522,7 @@
             <figure class="pk-cab" data-no-play><svg viewBox="0 0 520 300" role="img" aria-label="Изглед от шофьорското място: накъде гледаш, огледалата, воланът, педалите и предавката"></svg><figcaption class="visually-hidden">От шофьорското място</figcaption></figure>
             <div class="pk-ctl"><button type="button" class="pk-play" aria-label="Пусни">▶</button><button type="button" class="pk-again" aria-label="Отначало">↺</button></div>
           </div>
+          <div class="pk-stepbar" hidden><button type="button" class="btn small pk-prev">◀ Назад</button><span class="pk-stepno" aria-live="polite"></span><button type="button" class="btn small pk-rep" aria-label="Покажи стъпката пак">↺</button><button type="button" class="btn small pk-next">Напред ▶</button></div>
         </div>
         <div class="pk-side"><p class="pk-lead"></p><div class="pk-vars"></div><ol class="pk-steps"></ol></div>
       </div>
@@ -570,7 +572,11 @@
       cards.innerHTML = `<section class="pk-card law"><h5>Законът</h5><ul>${cur.law.map(([t, r]) => `<li>${t} <span class="lawref">${r}</span></li>`).join("")}</ul></section>
         <section class="pk-card tip"><h5>Добра практика</h5><ul>${tips.map((t) => `<li>${t}</li>`).join("")}</ul></section>
         <section class="pk-card fine"><h5>Ако сгрешиш</h5><ul class="pk-fines">${fines}</ul></section>`;
-      lastKey = ""; pos = 0;
+      // time range of each step on the timeline (a step that is only advice has no frames)
+      ranges = [];
+      frames.forEach((f) => { const n = f.n || 0; if (!ranges[n]) ranges[n] = [f.t, f.t]; ranges[n][1] = f.t; });
+      stepsEl.querySelectorAll("li").forEach((li) => li.addEventListener("click", () => { setMode("step"); playStep(+li.dataset.n); }));
+      lastKey = ""; pos = 0; stopAt = null;
       render(reduceMotion() ? frames[frames.length - 1] : frames[0], true);
     }
 
@@ -583,7 +589,7 @@
     const VIEW = 240;
     let camX = 0;
     function camera(f, snap) {
-      if ((stage.clientWidth || window.innerWidth) >= 560) { svg.setAttribute("viewBox", "0 0 400 240"); return; }
+      if ((stage.clientWidth || window.innerWidth) >= 480) { svg.setAttribute("viewBox", "0 0 400 240"); return; }
       const cx = (f.x + 1.25 * Math.cos(f.th)) * M;
       const target = Math.max(0, Math.min(400 - VIEW, cx - VIEW * 0.4));
       camX = snap ? target : camX + (target - camX) * 0.08;
@@ -621,6 +627,8 @@
     function tick(now) {
       const end = frames[frames.length - 1].t;
       pos = (now - t0) / 1000;
+      // step by step: stop at the end of the current step
+      if (stopAt !== null && pos >= stopAt) { pos = stopAt; render(frameAt(pos)); stop(); return; }
       if (pos > end + 1.2) { t0 = now; pos = 0; }
       render(frameAt(Math.min(pos, end)));
       if (playing) raf = requestAnimationFrame(tick);
@@ -631,9 +639,44 @@
     }
     function stop() { playing = false; cancelAnimationFrame(raf); playBtn.textContent = "▶"; playBtn.setAttribute("aria-label", "Пусни"); }
     // with reduced motion the final position is shown and nothing moves until ▶ is pressed
-    function start() { if (reduceMotion()) stop(); else play(0); }
+    function start() { if (stepMode) playStep(0); else if (reduceMotion()) stop(); else { stopAt = null; play(0); } }
+    // ---- step by step ----
+    let stepMode = false, curStep = 0, stopAt = null, ranges = [];
+    const stepBar = box.querySelector(".pk-stepbar"), stepNo = box.querySelector(".pk-stepno"), ctl = box.querySelector(".pk-ctl");
+    function stepCount() { return stepsEl.querySelectorAll("li").length; }
+    function playStep(n) {
+      const total = stepCount();
+      curStep = Math.max(0, Math.min(total - 1, n));
+      stepNo.textContent = `Стъпка ${curStep + 1} от ${total}`;
+      box.querySelector(".pk-prev").disabled = curStep === 0;
+      box.querySelector(".pk-next").disabled = curStep === total - 1;
+      const r = ranges[curStep];
+      if (!r) {
+        // advice only – show where the car ended up
+        stop(); stopAt = null; pos = frames[frames.length - 1].t;
+        render(frames[frames.length - 1], true); lastKey = "";
+        stepsEl.querySelectorAll("li").forEach((li) => li.classList.toggle("on", +li.dataset.n === curStep));
+        return;
+      }
+      stopAt = r[1];
+      render(frameAt(r[0]), true);
+      if (reduceMotion()) { stop(); pos = r[1]; render(frameAt(r[1]), true); return; }
+      play(r[0]);
+    }
+    function setMode(m) {
+      stepMode = m === "step";
+      box.querySelectorAll(".pk-mode button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.mode === m)));
+      stepBar.hidden = !stepMode; ctl.hidden = stepMode;
+    }
+    box.querySelectorAll(".pk-mode button").forEach((b) => b.addEventListener("click", () => {
+      setMode(b.dataset.mode);
+      if (stepMode) playStep(0); else { stopAt = null; play(0); }
+    }));
+    box.querySelector(".pk-prev").addEventListener("click", () => playStep(curStep - 1));
+    box.querySelector(".pk-next").addEventListener("click", () => playStep(curStep + 1));
+    box.querySelector(".pk-rep").addEventListener("click", () => playStep(curStep));
     playBtn.addEventListener("click", () => (playing ? stop() : play(pos > frames[frames.length - 1].t ? 0 : pos)));
-    box.querySelector(".pk-again").addEventListener("click", () => play(0));
+    box.querySelector(".pk-again").addEventListener("click", () => { stopAt = null; play(0); });
     box.querySelectorAll(".pk-pick button").forEach((b) => b.addEventListener("click", () => {
       cur = T.find((x) => x.id === b.dataset.id); vr = cur.vars ? cur.vars[0][0] : null;
       box.querySelectorAll(".pk-pick button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
