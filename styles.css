@@ -112,7 +112,7 @@ svg text { font-family: var(--body); }
 .lede { color: var(--muted); }
 .lawref {
   display: inline-block; font-family: var(--mono); font-size: .7rem; color: var(--accent); background: var(--accent-soft);
-  border-radius: 6px; padding: 2px 7px; white-space: nowrap; font-variant-numeric: tabular-nums;
+  border-radius: 6px; padding: 2px 7px; max-width: 100%; overflow-wrap: anywhere; font-variant-numeric: tabular-nums;
 }
 .note { background: var(--surface); border-radius: var(--radius); padding: 14px 16px; font-size: .88rem; color: var(--muted); }
 .note b { color: var(--ink); }
@@ -1073,3 +1073,36 @@ button, .tabbar, .navbar, .row, .seg, .btn { -webkit-user-select: none; user-sel
 @keyframes ruler-pop { from { transform: scale(0); } to { transform: scale(1); } }
 @keyframes ruler-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 .svc { max-width: 520px; }
+
+/* ГО vs Каско */
+.ins { display: grid; gap: 12px; }
+.ins-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+.ins-card { border-radius: 16px; padding: 14px 16px; display: grid; gap: 8px; border: 2px solid transparent; }
+.ins-card.go { background: #e8f0ff; border-color: #b8ccf5; color: #0b2f6b; }
+.ins-card.kasko { background: #f3e9fb; border-color: #d9c2ef; color: #3f1a5c; }
+.ins-head { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 10px; align-items: center; }
+.ins-head svg { width: 36px; height: 36px; }
+.ins-head b { display: block; font-size: 1.02rem; }
+.ins-head span { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; opacity: .75; }
+.ins-card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; font-size: .92rem; }
+.ins-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+.ins-pick button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 7px 12px; font: inherit; font-size: .86rem; cursor: pointer; }
+.ins-pick button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.ins-case { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 12px; align-items: center; background: var(--surface-2); border-radius: 16px; padding: 12px; }
+.ins-case figure { margin: 0; }
+.ins-case svg { width: 100%; height: auto; display: block; border-radius: 12px; }
+.ins-pays { display: grid; gap: 8px; }
+.ins-pay { display: grid; gap: 4px; justify-items: start; background: var(--surface); border-radius: 12px; padding: 10px 12px; }
+.ins-badge { color: #fff; font-size: .76rem; font-weight: 800; border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+.ins-pay p { font-size: .88rem; color: var(--muted); }
+:root[data-theme="dark"] .ins-card.go { background: #10234a; border-color: #23427a; color: #cfe0ff; }
+:root[data-theme="dark"] .ins-card.kasko { background: #2a1640; border-color: #4a2a6b; color: #ead8ff; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ins-card.go { background: #10234a; border-color: #23427a; color: #cfe0ff; }
+  :root:not([data-theme="light"]) .ins-card.kasko { background: #2a1640; border-color: #4a2a6b; color: #ead8ff; }
+}
+@media (max-width: 760px) { .ins-case { grid-template-columns: minmax(0, 1fr); } }
+
+/* keep the phone tab strip inside its card */
+.car-w { grid-template-columns: minmax(0, 1fr); }
+.car-tabs { min-width: 0; }
