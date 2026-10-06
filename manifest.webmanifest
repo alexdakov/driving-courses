@@ -1,0 +1,23 @@
+{
+  "name": "Как да врум-врум",
+  "short_name": "Врум-врум",
+  "description": "Опреснителен курс за шофьори, категория B: знаци, правила, скорости и ситуации от пътя.",
+  "lang": "bg",
+  "start_url": "./#nachalo",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f2f2f7",
+  "theme_color": "#f2f2f7",
+  "categories": ["education", "travel"],
+  "icons": [
+    { "src": "assets/app/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/app/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/app/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Скорости", "url": "./#skorosti", "icons": [{ "src": "assets/app/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Пътни знаци", "url": "./#znaci", "icons": [{ "src": "assets/app/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Накратко", "url": "./#nakratko", "icons": [{ "src": "assets/app/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

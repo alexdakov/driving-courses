@@ -850,3 +850,49 @@ input[type="range"] { accent-color: var(--accent); }
 .sidebar .row .tico svg { width: 18px; height: 18px; }
 .sidebar #nav { display: grid; gap: 12px; }
 @media (min-width: 900px) { .large .theme-btn { display: none; } .large .eyebrow { padding-right: 0; } }
+
+/* ---------- Phone: feels like an installed app ---------- */
+html { -webkit-tap-highlight-color: transparent; }
+button, .tabbar, .navbar, .row, .seg, .btn { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+@media (max-width: 899px) {
+  body { overscroll-behavior-y: none; }
+  /* top bar: transparent at the top, frosted once you scroll; the title fades in when the large title is gone */
+  .navbar:not([hidden]) { display: grid; min-height: 44px; }
+  .navbar { transition: background-color .2s, border-color .2s; }
+  .navbar.root:not(.scrolled), .navbar:not(.scrolled) { background: var(--bg); border-bottom-color: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .navbar .nt { opacity: 0; transform: translateY(4px); transition: opacity .18s, transform .18s; }
+  .navbar.titled .nt { opacity: 1; transform: none; }
+  .navbar.root { padding-top: calc(env(safe-area-inset-top, 0px) + 6px); padding-bottom: 6px; min-height: 32px; }
+  .content { padding-top: 0; }
+  .large { padding-top: 4px; }
+  /* tap feedback */
+  .row:active, .tabbar a:active, .spd-pick button:active, .tl-pick button:active, .dash-btn:active, .sx-groups button:active, .opt:active { opacity: .6; }
+  .btn:active, .play-btn:active, .theme-btn:active { transform: scale(.96); }
+  .tabbar a { -webkit-tap-highlight-color: transparent; }
+  /* screen transitions */
+  @media (prefers-reduced-motion: no-preference) {
+    #main.enter-push { animation: app-push .28s cubic-bezier(.2, .8, .2, 1); }
+    #main.enter-pop { animation: app-pop .28s cubic-bezier(.2, .8, .2, 1); }
+    #main.enter-fade { animation: app-fade .2s ease-out; }
+  }
+  /* install card */
+  .install-card { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 12px; align-items: start; background: var(--surface); border-radius: 18px; padding: 14px; margin: 4px 0 14px; box-shadow: 0 1px 3px rgb(0 0 0 / 8%); }
+  .install-card img { width: 52px; height: 52px; border-radius: 12px; }
+  .install-card b { display: block; font-size: 1rem; }
+  .install-card p { color: var(--muted); font-size: .88rem; margin-top: 2px; }
+  .install-btns { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .ios-share { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 5px; background: var(--surface-2); color: var(--accent); font-size: .8rem; }
+}
+@keyframes app-push { from { transform: translateX(30%); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes app-pop { from { transform: translateX(-24%); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes app-fade { from { opacity: 0; } to { opacity: 1; } }
+/* installed app: no browser bar above, so respect the notch/status bar */
+.standalone .tabbar { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4px); }
+.install-btns [hidden] { display: none; }
+/* phone: the theme switch lives in the top bar, not in each page header */
+@media (max-width: 899px) {
+  .large .theme-btn { display: none; }
+  .large .eyebrow { padding-right: 0; }
+  .navbar .theme-btn { position: static; justify-self: end; width: 34px; height: 34px; box-shadow: none; background: transparent; }
+  .navbar .theme-btn svg { width: 20px; height: 20px; }
+}

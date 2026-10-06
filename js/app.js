@@ -80,6 +80,8 @@
   };
   const topicIcon = (id) => { const t = TOPIC[id]; return t ? `<span class="tico" style="--c:${t[0]};color:${t[2] || "#fff"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${t[1]}</svg></span>` : ""; };
 
+  const ROOTS = ["nachalo", "glavi", "znaci", "nakratko", "skorosti"];
+  const ROOT_TITLE = { nachalo: "Днес", glavi: "Глави", znaci: "Пътни знаци", nakratko: "Накратко", skorosti: "Скорости" };
   const TABS = [["nachalo", "Днес"], ["glavi", "Глави"], ["znaci", "Знаци"], ["skorosti", "Скорости"], ["nakratko", "Накратко"]];
 
   function chapterRow(c, active) {
@@ -91,12 +93,32 @@
       <div class="list">${chapters.map((c) => chapterRow(c, active)).join("")}</div>`;
     const tabOf = ["nachalo", "znaci", "nakratko", "skorosti"].includes(active) ? active : "glavi";
     tabbar.innerHTML = TABS.map(([id, label]) => `<a href="#${id}" ${tabOf === id ? 'aria-current="page"' : ""}>${ICON[id]}<span>${label}</span></a>`).join("");
-    const isRoot = ["nachalo", "glavi", "znaci", "nakratko", "skorosti"].includes(active);
-    navbar.hidden = isRoot;
-    if (!isRoot) {
-      const c = CATS.find((x) => x.id === active);
-      navbar.innerHTML = `<a href="#glavi">Глави</a><span class="nt">${c ? c.title : ""}</span><span></span>`;
-    }
+    // phone: an app-style top bar. Root tabs show only the title once the large title scrolls away;
+    // chapters get a back button. (Hidden on desktop by CSS.)
+    const isRoot = ROOTS.includes(active);
+    const c = CATS.find((x) => x.id === active);
+    navbar.hidden = false;
+    navbar.classList.toggle("root", isRoot);
+    navbar.innerHTML = isRoot
+      ? `<span></span><span class="nt">${ROOT_TITLE[active] || ""}</span>${themeToggle()}`
+      : `<a href="#glavi" class="back">Глави</a><span class="nt">${c ? c.title : ""}</span>${themeToggle()}`;
+  }
+
+  // ---------- "install the app" card (phones, not yet installed) ----------
+  let installEvent = null;
+  window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvent = e; document.querySelectorAll(".install-card [data-install]").forEach((b) => (b.hidden = false)); });
+  const INSTALL_KEY = "bg-install-dismissed";
+  function installCard(page) {
+    let dismissed = false;
+    try { dismissed = localStorage.getItem(INSTALL_KEY) === "1"; } catch (e) { /* ignore */ }
+    const phone = window.matchMedia("(max-width: 899px)").matches;
+    const installed = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+    if (!phone || installed || dismissed || window.top !== window) return;
+    const ios = /iP(hone|ad|od)/.test(navigator.userAgent);
+    const card = h(`<div class="install-card"><img src="assets/app/icon-192.png" alt=""><div><b>Сложи го на телефона като приложение</b><p>${ios ? "В Safari натисни <span class=\"ios-share\" aria-label=\"Сподели\">⬆︎</span> „Сподели“ и после „Добави към началния екран“." : "Работи и без интернет и се отваря на цял екран."}</p><div class="install-btns"><button type="button" class="btn primary small" data-install ${installEvent ? "" : "hidden"}>Инсталирай</button><button type="button" class="btn small" data-close>Не сега</button></div></div></div>`);
+    card.querySelector("[data-install]").addEventListener("click", async () => { if (!installEvent) return; installEvent.prompt(); await installEvent.userChoice.catch(() => {}); installEvent = null; card.remove(); });
+    card.querySelector("[data-close]").addEventListener("click", () => { try { localStorage.setItem(INSTALL_KEY, "1"); } catch (e) { /* ignore */ } card.remove(); });
+    page.querySelector(".large").after(card);
   }
 
   // ---------- Today ----------
@@ -210,7 +232,7 @@
     const dateStr = new Date().toLocaleDateString("bg-BG", { weekday: "long", day: "numeric", month: "long" });
 
     const page = h(`<div class="today">
-      <header class="large">${themeToggle()}<span class="eyebrow">${dateStr}</span><h1>Днес</h1><p class="lede">Шофьорски опреснителен курс · категория B · по ЗДвП 2025</p></header>
+      <header class="large">${themeToggle()}<span class="eyebrow">${dateStr}</span><h1>Днес</h1><p class="lede">Как да врум-врум · категория B · по ЗДвП 2025</p></header>
       <div class="hero-card">${signSVG((last || nextCh).sign, "")}<div>${last
         ? `<b>Последно отвори „${last.title}“</b><p>Следваща глава: „${nextCh.title}“ – ${nextCh.short.toLowerCase()}.</p><div class="hero-btns"><a class="btn primary small" href="#${nextCh.id}">Към „${nextCh.title}“</a><a class="btn small" href="#${last.id}">Обратно към „${last.title}“</a></div>`
         : `<b>Започни с „${nextCh.title}“</b><p>${nextCh.short}</p><a class="btn primary small" href="#${nextCh.id}">Започни</a>`}</div></div>
@@ -226,6 +248,7 @@
       <h2 class="section-title">Глави</h2>
       <div class="list">${chapters.map((c) => chapterRow(c, "")).join("")}</div>
     </div>`);
+    installCard(page);
     matchGame(page.querySelector(".t-match"));
     const sits = window.BGScenarios || [];
     if (sits.length) {
@@ -298,17 +321,85 @@
   // ---------- router ----------
   const main = document.getElementById("main");
   let current = "nachalo";
+  // ---------- app feel on phones: transitions, remembered scroll, collapsing title, swipe back ----------
+  const isPhone = () => window.matchMedia("(max-width: 899px)").matches;
+  const standalone = () => window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  if (standalone()) root.classList.add("standalone");
+  const depth = (id) => (ROOTS.includes(id) ? 0 : 1);
+  const scrollMemo = {};
+  let titleObserver = null;
+  function watchTitle() {
+    if (titleObserver) titleObserver.disconnect();
+    navbar.classList.remove("titled");
+    const h1 = main.querySelector(".large h1");
+    if (!h1 || !("IntersectionObserver" in window)) { navbar.classList.add("titled"); return; }
+    titleObserver = new IntersectionObserver(([e]) => navbar.classList.toggle("titled", !e.isIntersecting && e.boundingClientRect.top < 80), { rootMargin: "-56px 0px 0px 0px" });
+    titleObserver.observe(h1);
+  }
+  const onScroll = () => navbar.classList.toggle("scrolled", window.scrollY > 4);
+  window.addEventListener("scroll", onScroll, { passive: true });
+
   function route() {
+    const prev = current;
+    if (prev) scrollMemo[prev] = window.scrollY;
     const id = (location.hash || "#nachalo").slice(1);
     const c = CATS.find((x) => x.id === id);
-    current = c ? c.id : ["glavi", "nakratko", "skorosti"].includes(id) ? id : "nachalo";
+    current = c ? c.id : ["glavi", "nakratko", "skorosti", "znaci"].includes(id) ? id : "nachalo";
     main.innerHTML = "";
     main.appendChild(current === "glavi" ? chaptersPage() : current === "nakratko" ? nakratko() : current === "skorosti" ? window.BGSpeeds.page(themeToggle()) : !c ? today() : chapter(c));
     renderNav(current);
     syncTheme();
-    window.scrollTo({ top: 0 });
+    // push (deeper), pop (back) or a tab switch
+    const dir = !routed ? "" : depth(current) > depth(prev) ? "push" : depth(current) < depth(prev) ? "pop" : current === prev ? "" : "fade";
+    const keep = (dir === "pop" || dir === "fade") && scrollMemo[current] != null;
+    window.scrollTo({ top: keep ? scrollMemo[current] : 0 });
+    if (dir && isPhone()) {
+      main.classList.remove("enter-push", "enter-pop", "enter-fade");
+      void main.offsetWidth;
+      main.classList.add("enter-" + dir);
+    }
+    routed = true;
+    onScroll();
+    watchTitle();
   }
+  let routed = false;
+  main.addEventListener("animationend", () => main.classList.remove("enter-push", "enter-pop", "enter-fade"));
+  // tapping the tab you are on scrolls to the top, like in native apps
+  tabbar.addEventListener("click", (e) => {
+    const a = e.target.closest("a");
+    if (a && a.getAttribute("href") === "#" + current) { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+  });
+  // swipe from the left edge to go back (installed app only – browsers already have this gesture)
+  let swipe = null;
+  document.addEventListener("touchstart", (e) => {
+    if (!standalone() || depth(current) === 0 || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    if (t.clientX < 24) swipe = { x: t.clientX, y: t.clientY, dx: 0 };
+  }, { passive: true });
+  document.addEventListener("touchmove", (e) => {
+    if (!swipe) return;
+    const t = e.touches[0];
+    swipe.dx = Math.max(0, t.clientX - swipe.x);
+    if (Math.abs(t.clientY - swipe.y) > 60 && swipe.dx < 30) { main.style.transform = ""; swipe = null; return; }
+    main.style.transform = `translateX(${swipe.dx}px)`;
+  }, { passive: true });
+  document.addEventListener("touchend", () => {
+    if (!swipe) return;
+    const go = swipe.dx > 90;
+    main.style.transition = "transform .2s ease";
+    main.style.transform = go ? "translateX(100%)" : "";
+    setTimeout(() => {
+      main.style.transition = ""; main.style.transform = "";
+      if (go) { if (history.length > 1) history.back(); else location.hash = "#glavi"; }
+    }, 200);
+    swipe = null;
+  });
 
   window.addEventListener("hashchange", route);
   route();
+
+  // ---------- installable app: offline cache ----------
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost") && window.top === window) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  }
 })();
