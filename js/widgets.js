@@ -600,6 +600,31 @@
     const playBtn = h(`<button type="button" class="btn small primary">▶ Пусни</button>`);
     playBtn.addEventListener("click", play);
     controls.appendChild(playBtn);
+    // step by step: drive to the next phase (enter, in the ring, lane change, indicator, exit) and stop
+    const stepBtn = h(`<button type="button" class="btn small">⏭ Стъпка по стъпка</button>`);
+    let stepK = 0;
+    const phaseKeys = () => [0, ...pts.map((p, i) => (i && p.phase !== pts[i - 1].phase ? i : -1)).filter((i) => i > 0), pts.length - 1];
+    stepBtn.addEventListener("click", () => {
+      stopAnim();
+      playBtn.textContent = "▶ Пусни";
+      const keys = phaseKeys();
+      if (stepK >= keys.length - 1) { stepK = 0; render(0); }
+      const a = keys[stepK], last = stepK + 1 === keys.length - 1;
+      // stop on the last point of this phase, so the text still describes it
+      const b = last ? keys[stepK + 1] : keys[stepK + 1] - 1;
+      stepK++;
+      const n = keys.length - 1;
+      stepBtn.textContent = stepK >= n ? "↺ Стъпките отначало" : `⏭ Стъпка ${stepK + 1} от ${n}`;
+      if (reduceMotion()) { render(b); return; }
+      const t0 = performance.now(), dur = 600 + (b - a) * 18;
+      const tick = (t) => {
+        const f = clamp((t - t0) / dur, 0, 1);
+        render(Math.round(a + f * (b - a)));
+        if (f < 1) raf = requestAnimationFrame(tick); else raf = null;
+      };
+      raf = requestAnimationFrame(tick);
+    });
+    controls.appendChild(stepBtn);
 
     function setLane(v) {
       lane = exit <= 2 ? "outer" : v;
@@ -765,9 +790,13 @@
       pts = buildPath();
       render(0);
       playBtn.textContent = "▶ Пусни";
+      stepK = 0;
+      stepBtn.textContent = "⏭ Стъпка по стъпка";
     }
     function play() {
       if (raf || tmo) { reset(); return; }
+      stepK = 0;
+      stepBtn.textContent = "⏭ Стъпка по стъпка";
       pts = buildPath();
       if (reduceMotion()) {
         // step through key moments instead of animating
@@ -1102,7 +1131,7 @@
         let pic = "";
         try { pic = x.svg(); } catch (e) { pic = ""; }
         const stepper = x.marks ? `<div class="sit-stepbar"><button type="button" class="btn small sit-prev" aria-label="Предишна стъпка">◀</button><span class="sit-stepno">Стъпка по стъпка</span><button type="button" class="btn small sit-next" aria-label="Следваща стъпка">▶</button></div>` : "";
-        const card = h(`<article class="rule has-il sit-card" id="sit-${x.id}"><figure class="rule-il">${pic}</figure><div class="rule-text"><span class="eyebrow">${cats[x.cat] || ""}</span><h4>${x.title}</h4><p class="sit-q">${x.q}</p><ol class="sit-steps${x.marks ? " stepable" : ""}">${x.steps.map((t, i) => `<li data-n="${i}">${t}</li>`).join("")}</ol>${stepper}<span class="lawref">${x.ref}</span></div></article>`);
+        const card = h(`<article class="rule has-il sit-card" id="sit-${x.id}"><figure class="rule-il"${x.marks ? " data-own-steps" : ""}>${pic}</figure><div class="rule-text"><span class="eyebrow">${cats[x.cat] || ""}</span><h4>${x.title}</h4><p class="sit-q">${x.q}</p><ol class="sit-steps${x.marks ? " stepable" : ""}">${x.steps.map((t, i) => `<li data-n="${i}">${t}</li>`).join("")}</ol>${stepper}<span class="lawref">${x.ref}</span></div></article>`);
         if (x.marks) stepThrough(card, x.marks);
         grid.appendChild(card);
       });

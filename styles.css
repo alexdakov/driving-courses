@@ -1201,3 +1201,20 @@ button, .tabbar, .navbar, .row, .seg, .btn { -webkit-user-select: none; user-sel
 .sit-stepno { font-size: .84rem; font-weight: 700; color: var(--muted); }
 .sit-steps.stepable li { cursor: pointer; border-radius: 8px; transition: background .2s; }
 .sit-steps.stepable li.on { background: var(--accent-soft); box-shadow: -6px 0 0 var(--accent-soft), 6px 0 0 var(--accent-soft); }
+/* step-by-step controls on every animated picture */
+.step-ctl { position: absolute; left: 52px; bottom: 12px; z-index: 2; display: flex; align-items: center; gap: 2px; background: rgb(20 24 30 / 72%); color: #fff; border-radius: 999px; padding: 2px; box-shadow: 0 2px 8px rgb(0 0 0 / 22%); }
+.step-ctl button { width: 28px; height: 28px; border: 0; border-radius: 50%; background: transparent; color: #fff; font-size: .78rem; cursor: pointer; display: grid; place-items: center; }
+.step-ctl button:hover { background: rgb(255 255 255 / 16%); }
+.step-ctl button:focus-visible { outline: 2px solid var(--accent, #0a84ff); }
+.step-no { min-width: 30px; text-align: center; font: 700 .74rem/1 var(--mono, monospace); font-variant-numeric: tabular-nums; }
+.mark-card.has-play .step-ctl { left: 44px; bottom: auto; top: 9px; }
+/* the ▶ and step buttons sit in a strip under the picture, so they never cover it */
+.has-steps { padding-bottom: 46px !important; }
+.has-steps > .play-btn { bottom: 5px; }
+.has-steps > .step-ctl { bottom: 9px; }
+.mark-card.has-steps { padding-bottom: 46px !important; }
+.mark-card.has-steps .play-btn { top: auto; bottom: 6px; left: 12px; width: 32px; height: 32px; }
+.mark-card.has-steps .step-ctl { top: auto; bottom: 8px; left: 50px; }
+.xanim-controls { gap: 8px; flex-wrap: wrap; }
+.xanim-stepbtn { background: var(--surface-2); color: var(--ink); }
+.xanim-stepbtn:disabled { opacity: .5; cursor: default; }

@@ -103,6 +103,11 @@
     playBtn.className = "xanim-play";
     playBtn.textContent = opts.playLabel || "▶ Пусни";
     controls.appendChild(playBtn);
+    // step by step: one car per press
+    const stepBtn = document.createElement("button");
+    stepBtn.type = "button";
+    stepBtn.className = "xanim-play xanim-stepbtn";
+    controls.appendChild(stepBtn);
     host.appendChild(controls);
 
     // static scene
@@ -159,10 +164,14 @@
       car.body.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${ang.toFixed(1)})`);
       car.badge.setAttribute("transform", `rotate(${-ang.toFixed(1)} 0 6)`);
     }
+    let stepI = 0;
     function reset() {
       cars.forEach((c) => place(c, c.start));
       caption.innerHTML = `<b>${sc.title}.</b> Кой минава първи? Натисни бутона, за да видиш реда.`;
       playBtn.textContent = opts.playLabel || "▶ Пусни";
+      stepI = 0;
+      stepBtn.textContent = "⏭ Стъпка по стъпка";
+      stepBtn.disabled = false;
     }
     let raf = null, timers = [], runId = 0;
     function stop() {
@@ -205,6 +214,19 @@
       caption.innerHTML += ` <span class="xanim-ref">${sc.ref}</span>`;
       playBtn.textContent = "↺ Пусни пак";
     }
+    stepBtn.addEventListener("click", async () => {
+      if (running || stepI >= sc.order.length) { runId++; running = false; stop(); reset(); }
+      const my = (runId = runId + 1);
+      const i = stepI++;
+      const car = cars.find((c) => c.id === sc.order[i]);
+      caption.innerHTML = `<span class="xanim-step">${i + 1}</span> ${sc.steps[i]}`;
+      stepBtn.disabled = true;
+      if (reduce()) place(car, car.len); else await drive(car, car.tram ? 2600 : 2100);
+      if (my !== runId) return;
+      stepBtn.disabled = false;
+      if (stepI >= sc.order.length) { caption.innerHTML += ` <span class="xanim-ref">${sc.ref}</span>`; stepBtn.textContent = "↺ Стъпките отначало"; }
+      else stepBtn.textContent = `⏭ Стъпка ${stepI + 1} от ${sc.order.length}`;
+    });
     playBtn.addEventListener("click", () => {
       if (running) { runId++; running = false; stop(); reset(); } else play();
     });
