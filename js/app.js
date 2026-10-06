@@ -76,6 +76,7 @@
     ogledala: ["#af52de", `<path d="M4 9.5C4 7.5 5.6 6 8 6h9c2 0 3.2 1.6 3.2 3.6v2.6c0 2-1.5 3.6-3.6 3.6H8c-2.4 0-4-1.6-4-3.6z"/><path d="M8.5 15.8 7 20.5"/><path d="M9 10.5h7" opacity=".6"/>`],
     tablo: ["#ff9f0a", `<circle cx="12" cy="12" r="5.6"/><path d="M12 9.2v3.4"/><circle cx="12" cy="14.9" r=".5" fill="currentColor"/><path d="M4.6 7.4a9 9 0 0 0 0 9.2M19.4 7.4a9 9 0 0 1 0 9.2"/>`],
     vreme: ["#5ac8fa", `<path d="M7 15a4 4 0 1 1 .9-7.9A5.2 5.2 0 0 1 17.6 9a3 3 0 0 1-.2 6z"/><path d="M8.5 18l-1 2.5M12.5 18l-1 2.5M16.5 18l-1 2.5"/>`],
+    kola: ["#00a37a", `<rect x="5" y="3.5" width="14" height="17.5" rx="2"/><path d="M9 3.5V2.5h6v1"/><path d="M8.5 9.5l1.5 1.5 3-3M8.5 15l1.5 1.5 3-3"/><path d="M15 10h1.5M15 15.5h1.5"/>`],
     situacii: ["#ff2d55", `<path d="M5.5 15.5v-4l2-5h9l2 5v4"/><path d="M4 11.5h16v4.5H4z"/><circle cx="7.6" cy="13.8" r=".9" fill="currentColor"/><circle cx="16.4" cy="13.8" r=".9" fill="currentColor"/><path d="M6.5 16v2.5M17.5 16v2.5"/>`],
   };
   const topicIcon = (id) => { const t = TOPIC[id]; return t ? `<span class="tico" style="--c:${t[0]};color:${t[2] || "#fff"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${t[1]}</svg></span>` : ""; };
@@ -213,7 +214,7 @@
       ["6", "Кръгово: решават знаците на входа – обикновено Б1, пропускаш колите в кръга", "ППЗДвП чл. 46, 52", "Г12"],
     ],
     gear: [
-      ["✓", "Триъгълник, аптечка, светлоотразителна жилетка, пожарогасител", "ЗДвП чл. 139", ""],
+      ["✓", "Триъгълник, аптечка, светлоотразителна жилетка (пожарогасителят не е задължителен от 7.02.2026)", "ЗДвП чл. 139", ""],
       ["✓", "Денем – светлини за движение през деня или къси; в тунел – къси", "ЗДвП чл. 63, 70", ""],
       ["✓", "Телефон – само без ръце или през системата на колата", "ЗДвП чл. 104а", ""],
       ["✓", "Коланът е задължителен на всички седалки", "ЗДвП чл. 137а", ""],
@@ -289,7 +290,7 @@
   function chapter(c) {
     const n = CATS.indexOf(c);
     const page = h(`<div>
-      <header class="large">${themeToggle()}<span class="eyebrow">Глава ${n + 1} от ${chapters.length}${c.law ? ` · ${c.law}` : ""}</span><div class="row-h">${signSVG(c.sign, "")}<h1>${c.title}</h1></div><p class="lede">${c.lede}</p></header>
+      <header class="large">${themeToggle()}<span class="eyebrow">Глава ${n + 1} от ${chapters.length}${c.law ? ` · ${c.law}` : ""}</span><div class="row-h">${c.icon ? topicIcon(c.id) : signSVG(c.sign, "")}<h1>${c.title}</h1></div><p class="lede">${c.lede}</p></header>
       <div class="w-slot"></div>
       <div class="r-slot"></div>
       <nav class="pager" aria-label="Съседни глави"></nav>
