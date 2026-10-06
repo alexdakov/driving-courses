@@ -243,20 +243,23 @@
   };
   function trafficLightWidget(root) {
     let state = "red";
-    const box = h(`<div class="widget">
+    const order = [["red", "Червено"], ["ry", "Червено + жълто"], ["green", "Зелено"], ["yellow", "Жълто"], ["flash", "Мигащо жълто"], ["arrow", "Зелена стрелка"], ["gblink", "Мигащо зелено"]];
+    // tiny three-lamp icon for each choice
+    const mini = (k) => { const L = TL_STATES[k].l; const c = (on, col) => (on ? col : "#3a3f45"); return `<svg viewBox="0 0 16 40" aria-hidden="true"><rect width="16" height="40" rx="4" fill="#15181b"/><circle cx="8" cy="8" r="4.6" fill="${c(L.r, "#ff3b30")}"/><circle cx="8" cy="20" r="4.6" fill="${c(L.y, "#ffc400")}"/><circle cx="8" cy="32" r="4.6" fill="${c(L.g || L.a, "#22d36b")}"/></svg>`; };
+    const box = h(`<div class="widget tl-w">
       <div class="widget-head"><h3>Светофар</h3><p>Избери сигнал, за да видиш какво означава.</p></div>
-      <div class="split">
-        <div style="display:grid;gap:14px;justify-items:center"><svg class="stage tl-svg" viewBox="0 0 220 300" style="max-width:260px"></svg></div>
-        <div class="readout" aria-live="polite"></div>
+      <div class="tl-body">
+        <div class="tl-stage"><svg class="stage tl-svg" viewBox="0 0 220 300" role="img" aria-label="Светофар"></svg></div>
+        <div class="tl-side">
+          <div class="tl-pick" role="group" aria-label="Сигнал на светофара">${order.map(([k, t]) => `<button type="button" data-k="${k}" aria-pressed="${k === state}">${mini(k)}<span>${t}</span></button>`).join("")}</div>
+          <div class="readout" aria-live="polite"></div>
+        </div>
       </div>
-      <div class="controls"></div>
     </div>`);
     const svg = box.querySelector(".tl-svg");
     const readout = box.querySelector(".readout");
-    const controls = box.querySelector(".controls");
-    const order = [["red", "Червено"], ["ry", "Червено + жълто"], ["green", "Зелено"], ["yellow", "Жълто"], ["flash", "Мигащо жълто"], ["arrow", "Зелена стрелка"], ["gblink", "Мигащо зелено"]];
-    const seg = segmented(order, state, (v) => set(v), "Сигнал на светофара");
-    controls.appendChild(seg);
+    const seg = box.querySelector(".tl-pick");
+    seg.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => set(b.dataset.k)));
 
     function lamp(cx, cy, color, on) {
       const cls = on === "blink" ? "blink" : "";
@@ -285,8 +288,8 @@
     draw();
     root.appendChild(box);
     const otherSignals = h(`<div class="rules" style="margin-top:12px">
-      <div class="rule"><h4>Пешеходен светофар</h4><div class="body"><p>Две полета: червен стоящ и зелен вървящ човек. Пешеходците, заварени на платното от червеното, трябва да го освободят – дай им време.</p></div></div>
-      <div class="rule"><h4>Светофар на градския транспорт</h4><div class="body"><p>Бели светлини – хоризонтална линия, стрелки. Отнася се само за автобуси, тролеи и трамваи – ти го игнорираш.</p></div><span class="lawref">ППЗДвП чл. 34</span></div>
+      <div class="rule"><div class="rule-text"><h4>Пешеходен светофар</h4><div class="body"><p>Две полета: червен стоящ и зелен вървящ човек. Пешеходците, заварени на платното от червеното, трябва да го освободят – дай им време.</p></div></div></div>
+      <div class="rule"><div class="rule-text"><h4>Светофар на градския транспорт</h4><div class="body"><p>Бели светлини – хоризонтална линия, стрелки. Отнася се само за автобуси, тролеи и трамваи – ти го игнорираш.</p></div><span class="lawref">ППЗДвП чл. 34</span></div></div>
     </div>`);
     root.appendChild(otherSignals);
   }

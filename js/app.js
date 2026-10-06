@@ -61,15 +61,33 @@
     skorosti: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4.5 17a8.5 8.5 0 1 1 15 0"/><path d="M12 14l4-5"/><circle cx="12" cy="14.5" r="1.6" fill="currentColor" stroke="none"/></svg>`,
     nakratko: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 2 5 13.5h5.6L9.5 22 19 9.8h-5.7z"/></svg>`,
   };
+  // menu icons: one per topic, drawn as white line icons on a coloured tile (dark ink on yellow)
+  const TOPIC = {
+    skorosti: ["#007aff", `<path d="M3.5 17.5a8.5 8.5 0 1 1 17 0"/><path d="M12 15l4.5-5"/><circle cx="12" cy="15.5" r="1.3" fill="currentColor"/>`],
+    nakratko: ["#ff9500", `<path d="M13 2.5 4.8 13.5H11l-1 8 8.2-11H12z" fill="currentColor" stroke="none"/>`],
+    osnovni: ["#5856d6", `<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7.5h6M9 11h4"/>`],
+    znaci: ["#ff3b30", `<path d="M12 3.2 20.5 17H3.5z"/><path d="M12 8.5v4"/><circle cx="12" cy="14.6" r=".4" fill="currentColor"/><path d="M12 17v4"/>`],
+    markirovka: ["#636366", `<path d="M8.5 3 4 21M15.5 3 20 21"/><path d="M12 3.5v3M12 10v3.5M12 17v3.5"/>`],
+    svetofar: ["#34c759", `<rect x="8" y="2.5" width="8" height="16" rx="2.5"/><circle cx="12" cy="6.6" r="1.4" fill="currentColor"/><circle cx="12" cy="10.5" r="1.4" fill="currentColor"/><circle cx="12" cy="14.4" r="1.4" fill="currentColor"/><path d="M12 18.5V22"/>`],
+    regulirovchik: ["#1d3f72", `<circle cx="12" cy="6.4" r="2.1"/><path d="M9.3 3.9h5.4"/><path d="M12 8.8v6.2M12 15l-2.4 6M12 15l2.4 6M12 10.2l5.5-5.2M12 10.2 7.2 13"/>`],
+    predimstvo: ["#ffcc00", `<path d="M12 2.8 21.2 12 12 21.2 2.8 12z"/><path d="M12 7.5 16.5 12 12 16.5 7.5 12z" fill="currentColor"/>`, "#3a2f00"],
+    krugovo: ["#30b0c7", `<path d="M19 9.5A7.5 7.5 0 0 0 6 6.8"/><path d="M5 14.5a7.5 7.5 0 0 0 13 2.7"/><path d="M6.5 3v4h4M17.5 21v-4h-4"/>`],
+    parkirane: ["#0a84ff", `<path d="M8 21V3.5h5.5a4.8 4.8 0 0 1 0 9.6H8"/>`],
+    ogledala: ["#af52de", `<path d="M4 9.5C4 7.5 5.6 6 8 6h9c2 0 3.2 1.6 3.2 3.6v2.6c0 2-1.5 3.6-3.6 3.6H8c-2.4 0-4-1.6-4-3.6z"/><path d="M8.5 15.8 7 20.5"/><path d="M9 10.5h7" opacity=".6"/>`],
+    tablo: ["#ff9f0a", `<circle cx="12" cy="12" r="5.6"/><path d="M12 9.2v3.4"/><circle cx="12" cy="14.9" r=".5" fill="currentColor"/><path d="M4.6 7.4a9 9 0 0 0 0 9.2M19.4 7.4a9 9 0 0 1 0 9.2"/>`],
+    vreme: ["#5ac8fa", `<path d="M7 15a4 4 0 1 1 .9-7.9A5.2 5.2 0 0 1 17.6 9a3 3 0 0 1-.2 6z"/><path d="M8.5 18l-1 2.5M12.5 18l-1 2.5M16.5 18l-1 2.5"/>`],
+    situacii: ["#ff2d55", `<path d="M5.5 15.5v-4l2-5h9l2 5v4"/><path d="M4 11.5h16v4.5H4z"/><circle cx="7.6" cy="13.8" r=".9" fill="currentColor"/><circle cx="16.4" cy="13.8" r=".9" fill="currentColor"/><path d="M6.5 16v2.5M17.5 16v2.5"/>`],
+  };
+  const topicIcon = (id) => { const t = TOPIC[id]; return t ? `<span class="tico" style="--c:${t[0]};color:${t[2] || "#fff"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${t[1]}</svg></span>` : ""; };
+
   const TABS = [["nachalo", "Днес"], ["glavi", "Глави"], ["znaci", "Знаци"], ["skorosti", "Скорости"], ["nakratko", "Накратко"]];
 
   function chapterRow(c, active) {
-    return `<a class="row" href="#${c.id}" ${active === c.id ? 'aria-current="page"' : ""}>${signSVG(c.sign, "")}<span class="t">${c.title}</span><small>${c.short}</small><span class="count"></span></a>`;
+    return `<a class="row" href="#${c.id}" ${active === c.id ? 'aria-current="page"' : ""}>${topicIcon(c.id) || signSVG(c.sign, "")}<span class="t">${c.title}</span><small>${c.short}</small><span class="count"></span></a>`;
   }
   function renderNav(active) {
     nav.innerHTML = `
-      <div class="list"><a class="row" href="#nachalo" ${active === "nachalo" ? 'aria-current="page"' : ""}><img src="assets/signs/B3.svg" alt=""><span class="t">Днес</span><small>Какво да опресниш сега</small><span class="count"></span></a><a class="row" href="#skorosti" ${active === "skorosti" ? 'aria-current="page"' : ""}><img src="assets/signs/V26-50.svg" alt=""><span class="t">Скорости</span><small>Град, магистрала, дъжд, мъгла…</small><span class="count"></span></a><a class="row" href="#nakratko" ${active === "nakratko" ? 'aria-current="page"' : ""}><img src="assets/signs/D5.svg" alt=""><span class="t">Накратко</span><small>Всички числа на един екран</small><span class="count"></span></a></div>
-      <p class="list-label">Глави</p>
+      <div class="list"><a class="row" href="#skorosti" ${active === "skorosti" ? 'aria-current="page"' : ""}>${topicIcon("skorosti")}<span class="t">Скорости</span><small>Град, магистрала, дъжд, мъгла…</small><span class="count"></span></a><a class="row" href="#nakratko" ${active === "nakratko" ? 'aria-current="page"' : ""}>${topicIcon("nakratko")}<span class="t">Накратко</span><small>Всички числа на един екран</small><span class="count"></span></a></div>
       <div class="list">${chapters.map((c) => chapterRow(c, active)).join("")}</div>`;
     const tabOf = ["nachalo", "znaci", "nakratko", "skorosti"].includes(active) ? active : "glavi";
     tabbar.innerHTML = TABS.map(([id, label]) => `<a href="#${id}" ${tabOf === id ? 'aria-current="page"' : ""}>${ICON[id]}<span>${label}</span></a>`).join("");

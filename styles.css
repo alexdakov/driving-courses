@@ -816,3 +816,37 @@ input[type="range"] { accent-color: var(--accent); }
   .dash-w .dash-detail { position: static; order: -1; }
   .dash-filter { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* ---------- Traffic light widget ---------- */
+.tl-body { display: grid; grid-template-columns: minmax(150px, 240px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.tl-stage { background: var(--surface-2); border-radius: 16px; padding: 14px; display: grid; place-items: center; }
+.tl-stage .tl-svg { width: 100%; max-width: 200px; height: auto; }
+.tl-side { display: grid; gap: 14px; min-width: 0; }
+.tl-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.tl-pick button { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 10px; align-items: center; text-align: left; padding: 8px 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: .9rem; font-weight: 500; cursor: pointer; }
+.tl-pick button svg { width: 14px; height: 35px; }
+.tl-pick button[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; font-weight: 700; }
+.tl-w .readout { margin: 0; }
+@media (max-width: 640px) { .tl-body { grid-template-columns: minmax(0, 1fr); } .tl-stage .tl-svg { max-width: 150px; } .tl-pick { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ---------- Comfortable width on very large screens ---------- */
+@media (min-width: 900px) {
+  .content { max-width: 1440px; margin: 0 auto; }
+  .split { grid-template-columns: minmax(0, 560px) minmax(0, 1fr); }
+}
+@media (min-width: 1500px) {
+  .rule-il svg.il { max-height: 300px; }
+}
+
+/* ---------- Sidebar: brand + theme on top, topic icons ---------- */
+.side-top { display: grid; gap: 10px; padding-bottom: 4px; }
+.brand-mark { width: 40px; height: 40px; border-radius: 11px; background: linear-gradient(135deg, #0a84ff, #5856d6); color: #fff; display: grid; place-items: center; flex: none; }
+.brand-mark svg { width: 26px; height: 26px; }
+.side-top .side-theme { margin-top: 0; padding: 0 6px; }
+.tico { width: 30px; height: 30px; border-radius: 8px; background: var(--c); display: grid; place-items: center; flex: none; justify-self: center; }
+.tico svg { width: 19px; height: 19px; }
+.row .tico { grid-column: 1; grid-row: 1 / span 2; }
+.sidebar .row .tico { width: 28px; height: 28px; border-radius: 7px; }
+.sidebar .row .tico svg { width: 18px; height: 18px; }
+.sidebar #nav { display: grid; gap: 12px; }
+@media (min-width: 900px) { .large .theme-btn { display: none; } .large .eyebrow { padding-right: 0; } }
