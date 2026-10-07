@@ -44,7 +44,7 @@
   }
   function signsWidget(root) {
     const ALL = SIGNDATA.SIGNS;
-    let group = "Б", mode = "learn", query = "", current = ALL.find((s) => s.c === "Б1");
+    let group = "Б", query = "", current = ALL.find((s) => s.c === "Б1");
     // opened from the search: show that sign
     const wanted = window.BGOpenSign && ALL.find((s) => s.c === window.BGOpenSign);
     window.BGOpenSign = null;
@@ -52,8 +52,7 @@
     const box = h(`<div class="widget sx">
       <div class="sx-groups" role="tablist" aria-label="Групи знаци"></div>
       <p class="sx-hook"></p>
-      <div class="controls" style="align-items:center;justify-content:space-between">
-        <div class="sx-modes"></div>
+      <div class="controls" style="align-items:center;justify-content:flex-end">
         <label class="sx-search"><span class="visually-hidden">Търси знак</span><input type="search" id="sx-q" placeholder="Търси: паркиране, Б2, деца…" autocomplete="off"></label>
       </div>
       <div class="sx-stage"></div>
@@ -67,10 +66,14 @@
       b.addEventListener("click", () => { group = g.g; query = ""; input.value = ""; current = ALL.find((s) => s.g === group); draw(); });
       groupsEl.appendChild(b);
     });
-    box.querySelector(".sx-modes").appendChild(
-      segmented([["learn", "Разгледай"], ["guess", "Познай"], ["deck", "Тесте карти"]], mode, (v) => { mode = v; draw(); }, "Режим")
-    );
-    input.addEventListener("input", () => { query = input.value.trim().toLowerCase(); mode = "learn"; box.querySelectorAll(".sx-modes button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === 0))); draw(); });
+    // one more category: signs that are easy to mix up (content in js/more/podobni.js, drawn by js/extras.js)
+    if (window.BGPodobni) {
+      const g1 = ALL.find((s) => s.c === "Г1"), d4 = ALL.find((s) => s.c === "Д4");
+      const b = h(`<button type="button" role="tab" data-g="podobni" class="sx-pod"><span class="sx-pair"><img src="${g1.f}" alt=""><img src="${d4.f}" alt=""></span><span><b>≈</b> Подобни знаци</span><small>как да не ги бъркаш</small></button>`);
+      b.addEventListener("click", () => { group = "podobni"; query = ""; input.value = ""; draw(); });
+      groupsEl.appendChild(b);
+    }
+    input.addEventListener("input", () => { query = input.value.trim().toLowerCase(); if (group === "podobni" && query) group = current.g; draw(); });
 
     const list = () => (query ? ALL.filter((s) => (s.c + " " + s.n + " " + s.d).toLowerCase().includes(query)) : ALL.filter((s) => s.g === group));
 
@@ -88,58 +91,17 @@
       det.innerHTML = signDetail(current);
     }
 
-    let gScore = 0, gTotal = 0;
-    function drawGuess() {
-      const pool = list();
-      const s = pool[Math.floor(Math.random() * pool.length)];
-      const others = ALL.filter((x) => x.g === s.g && x.c !== s.c && x.k !== "end").sort(() => Math.random() - 0.5).slice(0, 2);
-      const opts = [s, ...others].sort(() => Math.random() - 0.5);
-      stage.innerHTML = `<div class="sx-guess"><div class="sx-guess-img"><img src="${s.f}" alt="Знак за познаване"><p>Какво означава този знак?</p><span class="quiz-count">Познати: ${gScore} от ${gTotal}</span></div><div class="opts"></div><div class="sx-out"></div></div>`;
-      const o = stage.querySelector(".opts");
-      opts.forEach((x, i) => {
-        const b = h(`<button type="button" class="opt"><span class="k">${i + 1}</span><span>${x.n}</span></button>`);
-        b.addEventListener("click", () => {
-          gTotal++;
-          const ok = x === s;
-          if (ok) gScore++;
-          o.querySelectorAll(".opt").forEach((y, k) => { y.disabled = true; if (opts[k] === s) y.classList.add("right"); });
-          if (!ok) b.classList.add("wrong");
-          const out = stage.querySelector(".sx-out");
-          out.innerHTML = `<div class="explain"><span class="verdict ${ok ? "ok" : "no"}">${ok ? "Точно така." : "Не е това."}</span><span><b>${s.c} ${s.n}.</b> ${s.d}</span><div class="sx-mnem"><span>Как да запомниш</span><p>${s.m}</p></div></div>`;
-          const n = h(`<button type="button" class="btn primary small" style="justify-self:start">Следващ знак →</button>`);
-          n.addEventListener("click", drawGuess);
-          out.appendChild(n);
-          n.focus({ preventScroll: true });
-        });
-        o.appendChild(b);
-      });
-    }
-
-    let deck = [], known = 0, open = false;
-    function drawDeck(reset) {
-      if (reset || !deck.length && !known) { deck = list().slice().sort(() => Math.random() - 0.5); known = 0; open = false; }
-      if (!deck.length) {
-        stage.innerHTML = `<div class="sx-deck"><div class="sx-card"><b>Тестето свърши – знаеш всички ${known}.</b><button type="button" class="btn primary small sx-again">Отначало</button></div></div>`;
-        stage.querySelector(".sx-again").onclick = () => drawDeck(true);
-        return;
-      }
-      const s = deck[0];
-      stage.innerHTML = `<div class="sx-deck"><div class="sx-card ${open ? "open" : ""}"><img src="${s.f}" alt="Знак">${open ? `<div class="sx-card-body"><h3>${s.c} ${s.n}</h3><p>${s.d}</p><div class="sx-mnem"><span>Как да запомниш</span><p>${s.m}</p></div></div>` : `<p class="sx-card-q">Сети ли се какво означава?</p>`}</div>
-        <div class="controls" style="justify-content:center">${open ? `<button type="button" class="btn sx-no">Не го знаех</button><button type="button" class="btn primary sx-yes">Знаех го</button>` : `<button type="button" class="btn primary sx-show">Обърни картата</button>`}</div>
-        <p class="quiz-count" style="text-align:center">В тестето: ${deck.length} · знаеш: ${known}</p></div>`;
-      const q = (c) => stage.querySelector(c);
-      if (q(".sx-show")) q(".sx-show").onclick = () => { open = true; drawDeck(); };
-      if (q(".sx-yes")) q(".sx-yes").onclick = () => { known++; deck.shift(); open = false; drawDeck(); };
-      if (q(".sx-no")) q(".sx-no").onclick = () => { deck.push(deck.shift()); open = false; drawDeck(); };
-    }
-
     function draw() {
       groupsEl.querySelectorAll("button").forEach((b) => { const on = !query && b.dataset.g === group; b.setAttribute("aria-selected", String(on)); });
+      if (group === "podobni" && !query) {
+        hook.innerHTML = `<b>Знаци, които си приличат.</b> Една стрелка, една черта или един цвят сменят значението. Първо формата и цветът, после символът.`;
+        stage.innerHTML = "";
+        window.BGPodobni(stage);
+        return;
+      }
       const g = SIGNDATA.GROUPS.find((x) => x.g === group);
       hook.innerHTML = query ? `Резултати за „${query}“ във всички групи.` : `<b>${g.shape}.</b> ${g.hook} <span class="sx-what">${g.what}</span>`;
-      if (mode === "learn") drawLearn();
-      else if (mode === "guess") drawGuess();
-      else drawDeck(true);
+      drawLearn();
     }
     draw();
     root.appendChild(box);
@@ -538,36 +500,22 @@
     const keys = Object.keys(window.BGAnim.SCENARIOS);
     let idx = 0;
     const box = h(`<div class="widget">
-      <div class="widget-head"><h3>Кой минава първи?</h3><p class="sc-count"></p></div>
+      <div class="widget-head"><h3>Кой минава пръв – и защо</h3><p class="sc-count"></p></div>
       <div class="split">
         <div class="sc-anim"></div>
         <div class="readout" aria-live="polite"></div>
       </div>
+      <div class="controls sc-nav"><button type="button" class="btn small sc-prev">← Предишна</button><button type="button" class="btn small sc-next">Следваща →</button></div>
     </div>`);
     const animEl = box.querySelector(".sc-anim"), readout = box.querySelector(".readout"), count = box.querySelector(".sc-count");
     function draw() {
-      const key = keys[idx];
-      const api = window.BGAnim.mount(animEl, key, { base: "", playLabel: "▶ Покажи реда" });
+      const api = window.BGAnim.mount(animEl, keys[idx], { base: "", playLabel: "▶ Покажи реда" });
       const sc = api.scenario;
       count.textContent = `Ситуация ${idx + 1} от ${keys.length}`;
-      readout.innerHTML = `<h4>${sc.title}</h4><p>Погледни знаците и посоките. Кой тръгва пръв?</p><div class="opts"></div><div class="sc-explain"></div>`;
-      const opts = readout.querySelector(".opts");
-      sc.cars.forEach((c, i) => {
-        const b = h(`<button type="button" class="opt"><span class="k">${i + 1}</span><span>${c.tram ? "Трамваят" : "Колата"} <b>${c.id}</b></span></button>`);
-        b.addEventListener("click", () => {
-          const ok = c.id === sc.order[0];
-          opts.querySelectorAll(".opt").forEach((x, k) => { x.disabled = true; if (sc.cars[k].id === sc.order[0]) x.classList.add("right"); });
-          if (!ok) b.classList.add("wrong");
-          const ex = readout.querySelector(".sc-explain");
-          ex.innerHTML = `<div class="explain"><span class="verdict ${ok ? "ok" : "no"}">${ok ? "Вярно." : "Не съвсем."}</span><span>Редът е: <b>${sc.order.join(" → ")}</b>. Гледай анимацията.</span><span class="lawref">${sc.ref}</span></div>`;
-          const next = h(`<button type="button" class="btn small" style="justify-self:start">${idx + 1 < keys.length ? "Следваща ситуация →" : "Започни отначало"}</button>`);
-          next.addEventListener("click", () => { idx = (idx + 1) % keys.length; draw(); });
-          ex.appendChild(next);
-          api.play();
-        });
-        opts.appendChild(b);
-      });
+      readout.innerHTML = `<h4>${sc.title}</h4><p>Редът е: <b>${sc.order.join(" → ")}</b></p><ol class="sc-order">${sc.steps.map((t) => `<li>${t}</li>`).join("")}</ol><span class="lawref">${sc.ref}</span>`;
     }
+    box.querySelector(".sc-prev").addEventListener("click", () => { idx = (idx - 1 + keys.length) % keys.length; draw(); });
+    box.querySelector(".sc-next").addEventListener("click", () => { idx = (idx + 1) % keys.length; draw(); });
     draw();
     root.appendChild(box);
   }

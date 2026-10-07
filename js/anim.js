@@ -167,7 +167,7 @@
     let stepI = 0;
     function reset() {
       cars.forEach((c) => place(c, c.start));
-      caption.innerHTML = `<b>${sc.title}.</b> Кой минава първи? Натисни бутона, за да видиш реда.`;
+      caption.innerHTML = `<b>${sc.title}.</b> Натисни бутона, за да видиш реда.`;
       playBtn.textContent = opts.playLabel || "▶ Пусни";
       stepI = 0;
       stepBtn.textContent = "⏭ Стъпка по стъпка";

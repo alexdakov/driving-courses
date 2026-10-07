@@ -17,7 +17,7 @@
       sign: "B2",
       short: "Групи А, Б, В, Г, Д и Т – форма, цвят, значение",
       law: "ППЗДвП чл. 38–61, ЗДвП чл. 7; Наредба № 18/2001 за пътните знаци",
-      lede: "Формата и цветът казват групата още преди да прочетеш символа. Избери група и знак: ще видиш какво означава с прости думи и подсказка как да го запомниш. После се пробвай в „Познай“ или с тестето карти.",
+      lede: "Формата и цветът казват групата още преди да прочетеш символа. Избери група и знак: ще видиш какво означава с прости думи и подсказка как да го запомниш. В „Подобни знаци“ са тези, които най-лесно се бъркат – една до друга, с разликата и как да я запомниш.",
     },
     {
       id: "markirovka",
@@ -603,10 +603,12 @@
   ];
 
   // chapters that live in their own files (js/more/*.js) join here, in this order
-  const ORDER = ["osnovni", "novo", "znaci", "podobni", "markirovka", "svetofar", "regulirovchik", "predimstvo", "krugovo", "magistrala", "kolela", "parkirane", "ogledala", "avtomat", "tablo", "vreme", "kola", "pomosht", "globi", "chuzhbina", "situacii"];
+  const ORDER = ["osnovni", "novo", "znaci", "markirovka", "svetofar", "regulirovchik", "predimstvo", "krugovo", "magistrala", "kolela", "parkirane", "ogledala", "avtomat", "tablo", "vreme", "kola", "pomosht", "globi", "chuzhbina", "situacii"];
   const MORE = {};
   (window.BGMore || []).forEach((m) => {
     if (CATS.some((c) => c.id === m.cat.id)) return;
+    // content that belongs to an existing chapter: its rules join that chapter, its data stays reachable
+    if (m.cat.into) { RULES[m.cat.into] = [...(RULES[m.cat.into] || []), ...(m.rules || [])]; MORE[m.cat.id] = m.data || {}; return; }
     CATS.push({ sign: "E5", ...m.cat, icon: true });
     RULES[m.cat.id] = m.rules || [];
     MORE[m.cat.id] = m.data || {};

@@ -404,36 +404,21 @@
     if (d.shapes) {
       root.appendChild(h(`<div class="widget"><div class="widget-head"><h3>Формата и цветът казват вида</h3><p>Преди да гледаш символа, виж формата.</p></div><div class="pd-shapes">${d.shapes.map((x) => `<div class="pd-shape">${sign(x.c)}<b>${x.t}</b><span>${x.s}</span></div>`).join("")}</div></div>`));
     }
-    (d.groups || []).forEach((g, gi) => {
+    (d.groups || []).forEach((g) => {
       const box = h(`<section class="widget pd-group"><div class="widget-head"><h3>${g.t}</h3></div>
         <div class="pd-items">${g.items.map((x) => `<div class="pd-item">${sign(x.c)}<span class="pd-code">${x.c}</span><p>${x.s}</p></div>`).join("")}</div>
         <div class="pd-mem"><span>Как да запомниш</span><p>${g.mem}</p></div>
         ${g.ref ? `<span class="lawref">${g.ref}</span>` : ""}
-        <div class="pd-quiz"><button type="button" class="btn small pd-q">Провери се</button></div></section>`);
-      const quiz = box.querySelector(".pd-quiz");
-      const ask = () => {
-        const x = g.items[Math.floor(Math.random() * g.items.length)];
-        const opts = g.items.map((y) => y.c).sort(() => Math.random() - 0.5);
-        quiz.innerHTML = `<div class="pd-ask">${sign(x.c)}<p>Кой е този знак? Избери описанието.</p></div><div class="pd-opts">${opts.map((c) => `<button type="button" class="opt" data-c="${c}">${g.items.find((y) => y.c === c).s.replace(/<[^>]+>/g, "")}</button>`).join("")}</div>`;
-        quiz.querySelectorAll(".opt").forEach((b) => b.addEventListener("click", () => {
-          const ok = b.dataset.c === x.c;
-          quiz.querySelectorAll(".opt").forEach((o) => { o.disabled = true; if (o.dataset.c === x.c) o.classList.add("right"); });
-          if (!ok) b.classList.add("wrong");
-          const again = h(`<button type="button" class="btn small">${ok ? "Вярно – още един" : "Опитай пак"}</button>`);
-          again.addEventListener("click", ask);
-          quiz.appendChild(again);
-        }));
-      };
-      box.querySelector(".pd-q").addEventListener("click", ask);
+</section>`);
       root.appendChild(box);
-      void gi;
     });
   }
 
+  // „Подобни знаци“ is a category inside „Пътни знаци“
+  window.BGPodobni = podobniWidget;
   const Wd = window.BGWidgets || (window.BGWidgets = {});
   Object.assign(Wd, {
     avtomat: avtomatWidget,
-    podobni: podobniWidget,
     novo: novoWidget,
     globi: globiWidget,
     kolela: factsWidget("kolela", ["cyclist-overtake", "door-open", "right-turn-pedestrians"]),

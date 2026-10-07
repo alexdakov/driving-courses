@@ -134,58 +134,6 @@
   // ---------- Today ----------
   const dayIndex = () => Math.floor(Date.now() / 86400000);
 
-  function matchGame(root) {
-    const pool = SIGNDATA.SIGNS.filter((s) => "АБВГД".includes(s.g) && s.k !== "end");
-    const items = shuffle(pool).slice(0, 3);
-    const box = h(`<div class="match"><div class="match-signs"></div><div class="match-names"></div><p class="match-out" aria-live="polite">Избери знак, после значението му.</p><button type="button" class="btn small" style="justify-self:start">Нови знаци</button></div>`);
-    const left = box.querySelector(".match-signs"), right = box.querySelector(".match-names"), out = box.querySelector(".match-out");
-    let pick = null, done = 0;
-    items.forEach((s) => left.appendChild(h(`<button type="button" class="m-sign" data-c="${s.c}" aria-label="Знак ${s.c}"><img src="${s.f}" alt=""></button>`)));
-    shuffle(items).forEach((s) => right.appendChild(h(`<button type="button" class="m-name" data-c="${s.c}">${s.n}</button>`)));
-    left.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
-      if (b.classList.contains("done")) return;
-      left.querySelectorAll("button").forEach((x) => x.classList.remove("pick"));
-      b.classList.add("pick"); pick = b.dataset.c;
-    }));
-    right.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
-      if (b.classList.contains("done")) return;
-      if (!pick) { out.textContent = "Първо избери знак отгоре."; return; }
-      const s = items.find((x) => x.c === pick);
-      if (b.dataset.c === pick) {
-        b.classList.add("done");
-        const lb = left.querySelector(`[data-c="${pick}"]`); lb.classList.remove("pick"); lb.classList.add("done");
-        done++; pick = null;
-        out.innerHTML = done === items.length ? "<b>Всички двойки са намерени.</b>" : `<b>Вярно.</b> ${s.m}`;
-      } else {
-        b.classList.add("bad"); setTimeout(() => b.classList.remove("bad"), 600);
-        out.innerHTML = `Не съвпада. Подсказка: ${s.m}`;
-      }
-    }));
-    box.querySelector(".btn").addEventListener("click", () => { root.innerHTML = ""; matchGame(root); });
-    root.appendChild(box);
-  }
-
-  function miniIntersection(root) {
-    const keys = Object.keys(window.BGAnim.SCENARIOS);
-    const key = keys[dayIndex() % keys.length];
-    const wrap = h(`<div style="display:grid;gap:12px"><div class="mi-anim"></div><div class="opts"></div><div class="mi-out"></div></div>`);
-    root.appendChild(wrap);
-    const api = window.BGAnim.mount(wrap.querySelector(".mi-anim"), key, { base: "", playLabel: "▶ Покажи реда" });
-    const sc = api.scenario;
-    const opts = wrap.querySelector(".opts");
-    sc.cars.forEach((c, i) => {
-      const b = h(`<button type="button" class="opt"><span class="k">${i + 1}</span><span>${c.tram ? "Трамваят" : "Колата"} <b>${c.id}</b> минава първа</span></button>`);
-      b.addEventListener("click", () => {
-        const ok = c.id === sc.order[0];
-        opts.querySelectorAll(".opt").forEach((x, k) => { x.disabled = true; if (sc.cars[k].id === sc.order[0]) x.classList.add("right"); });
-        if (!ok) b.classList.add("wrong");
-        wrap.querySelector(".mi-out").innerHTML = `<div class="explain"><span class="verdict ${ok ? "ok" : "no"}">${ok ? "Вярно." : "Не съвсем."}</span><span>Редът е <b>${sc.order.join(" → ")}</b>. Гледай анимацията. Още ситуации има в <a href="#predimstvo">„Предимство“</a>.</span></div>`;
-        api.play();
-      });
-      opts.appendChild(b);
-    });
-  }
-
   // Key facts for the cheat sheet and Today. v = value, t = what it means, ref = law, sign = optional sign code.
   const FACTS = {
     speeds: [
@@ -250,16 +198,11 @@
         <div><h2 class="section-title">Знак на деня</h2><div class="card"><div class="sotd"><img src="${sotd.f}" alt="${sotd.c}"><div style="display:grid;gap:6px"><h3>${sotd.c} · ${sotd.n}</h3><p>${sotd.d}</p></div></div><div class="sx-mnem"><span>Как да запомниш</span><p>${sotd.m}</p></div><a class="btn small" href="#znaci" style="justify-self:start">Всички знаци</a></div></div>
         <div><h2 class="section-title">Числа за помнене</h2>${factList(dayFacts)}<a class="btn small" href="#nakratko" style="margin-top:10px">Всички на един екран</a></div>
       </div>
-      <div class="tiles">
-        <div><h2 class="section-title">Кой минава първи?</h2><div class="card t-inter"></div></div>
-        <div><h2 class="section-title">Намери двойката</h2><div class="card t-match"></div></div>
-      </div>
       <div class="t-sit"></div>
       <h2 class="section-title">Глави</h2>
       <div class="list">${chapters.map((c) => chapterRow(c, "")).join("")}</div>
     </div>`);
     installCard(page);
-    matchGame(page.querySelector(".t-match"));
     const sits = window.BGScenarios || [];
     if (sits.length) {
       const x = sits[(dayIndex() * 7) % sits.length];
@@ -267,7 +210,6 @@
       try { pic = x.svg(); } catch (e) { pic = ""; }
       page.querySelector(".t-sit").appendChild(h(`<div><h2 class="section-title">Ситуация на деня</h2><article class="rule has-il sit-card"><figure class="rule-il">${pic}</figure><div class="rule-text"><h4>${x.title}</h4><p class="sit-q">${x.q}</p><ol class="sit-steps">${x.steps.map((t) => `<li>${t}</li>`).join("")}</ol><span class="lawref">${x.ref}</span><a class="btn small" href="#situacii" style="align-self:flex-start;margin-top:4px">Всички ситуации</a></div></article></div>`));
     }
-    miniIntersection(page.querySelector(".t-inter"));
     return page;
   }
 
