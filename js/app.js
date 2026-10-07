@@ -35,20 +35,15 @@
       b.setAttribute("aria-label", label);
       b.title = label;
     });
-    document.querySelectorAll("[data-theme-seg] button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === eff)));
     document.querySelectorAll('meta[name="theme-color"]').forEach((m) => { m.setAttribute("content", eff === "dark" ? "#000000" : "#f2f2f7"); m.removeAttribute("media"); });
   }
   const themeToggle = () => `<button type="button" class="theme-btn" data-theme-toggle></button>`;
-  // two icon buttons: light and dark (until one is picked, the theme follows the device)
-  const themeSeg = () => `<div class="theme-icons" role="group" aria-label="Тема">${[["light", SUN, "Светла тема"], ["dark", MOON, "Тъмна тема"]].map(([m, ic, l]) => `<button type="button" data-mode="${m}" aria-pressed="false" aria-label="${l}" title="${l}">${ic}</button>`).join("")}</div>`;
   document.addEventListener("click", (e) => {
     const t = e.target.closest("[data-theme-toggle]");
-    if (t) { setTheme(effectiveTheme() === "dark" ? "light" : "dark"); return; }
-    const m = e.target.closest("[data-theme-seg] button");
-    if (m) setTheme(m.dataset.mode);
+    if (t) setTheme(effectiveTheme() === "dark" ? "light" : "dark");
   });
   if (darkMQ && darkMQ.addEventListener) darkMQ.addEventListener("change", syncTheme);
-  document.querySelectorAll(".side-theme").forEach((el) => (el.innerHTML = themeSeg()));
+  syncTheme();
 
   // ---------- chrome: sidebar, navbar, tab bar ----------
   const nav = document.getElementById("nav");
@@ -300,7 +295,6 @@
       <header class="large">${themeToggle()}<span class="eyebrow">${chapters.length} глави</span><h1>Глави</h1><p class="lede">Всяка глава има интерактивен модел, илюстрации и правилата с членовете от закона.</p></header>
       <div class="list">${chapters.map((c) => chapterRow(c, "")).join("")}</div>
       <h2 class="section-title">Настройки</h2>
-      <div class="card settings"><div class="set-row"><span>Тема</span><div data-theme-seg>${themeSeg()}</div></div></div>
     </div>`);
   }
 

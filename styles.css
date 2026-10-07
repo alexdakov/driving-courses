@@ -606,16 +606,7 @@ input[type="range"] { accent-color: var(--accent); }
 }
 .theme-btn svg { width: 22px; height: 22px; }
 .theme-btn:hover { background: var(--surface-2); }
-.side-theme { display: grid; gap: 6px; padding: 0 6px; }
-.side-theme > span { font-size: .8rem; color: var(--muted); text-transform: uppercase; letter-spacing: .02em; padding-left: 8px; }
-.side-theme .seg, .settings .seg { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; }
-.side-theme .seg button, .settings .seg button { padding: 6px 4px; font-size: .82rem; }
-.settings { gap: 12px; }
-.set-row { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 12px; align-items: center; }
-.set-row > span { font-weight: 500; }
-.set-row .btn { justify-self: start; }
 @media (max-width: 899px) { .theme-btn { top: -2px; } }
-.side-theme { margin-top: auto; }
 .sidebar .side-foot { margin-top: 0; }
 
 /* ---------- Layout fixes: content next to the sidebar, one readable column of rules ---------- */
@@ -756,14 +747,6 @@ input[type="range"] { accent-color: var(--accent); }
 @media (max-width: 860px) { .spd-main { grid-template-columns: minmax(0, 1fr); } .spd-row { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
 @media (max-width: 560px) { .spd-pick { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
-/* ---------- Theme: two icons ---------- */
-.side-theme { display: flex; justify-content: flex-start; padding: 0 6px; margin-top: auto; }
-.theme-icons { display: inline-flex; gap: 4px; padding: 3px; border-radius: 999px; background: var(--surface-2); }
-.theme-icons button { width: 38px; height: 34px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); display: grid; place-items: center; cursor: pointer; padding: 0; }
-.theme-icons button svg { width: 19px; height: 19px; }
-.theme-icons button[aria-pressed="true"] { background: var(--surface); color: var(--accent); box-shadow: 0 1px 3px rgb(0 0 0 / 14%); }
-.theme-icons button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.set-row .theme-icons { justify-self: start; }
 
 /* ---------- One scrollbar, full width ---------- */
 .sidebar { scrollbar-width: none; overscroll-behavior: contain; }
@@ -838,11 +821,10 @@ input[type="range"] { accent-color: var(--accent); }
   .rule-il svg.il { max-height: 300px; }
 }
 
-/* ---------- Sidebar: brand + theme on top, topic icons ---------- */
+/* ---------- Sidebar: brand + search and theme icons on top, topic icons ---------- */
 .side-top { display: grid; gap: 10px; padding-bottom: 4px; }
 .brand-mark { width: 40px; height: 40px; border-radius: 11px; background: linear-gradient(135deg, #0a84ff, #5856d6); color: #fff; display: grid; place-items: center; flex: none; }
 .brand-mark svg { width: 26px; height: 26px; }
-.side-top .side-theme { margin-top: 0; padding: 0 6px; }
 .tico { width: 30px; height: 30px; border-radius: 8px; background: var(--c); display: grid; place-items: center; flex: none; justify-self: center; }
 .tico svg { width: 19px; height: 19px; }
 .row .tico { grid-column: 1; grid-row: 1 / span 2; }
@@ -1371,9 +1353,6 @@ button, .tabbar, .navbar, .row, .seg, .btn { -webkit-user-select: none; user-sel
 .mark-card.has-play { padding-bottom: 46px !important; }
 .mark-card.has-play .play-btn { top: auto; bottom: 6px; left: 12px; width: 32px; height: 32px; }
 /* search */
-.side-search { display: flex; align-items: center; gap: 8px; margin: 4px 12px 10px; padding: 8px 12px; border-radius: 10px; background: var(--surface-2); color: var(--muted); text-decoration: none; font-size: .88rem; }
-.side-search svg { width: 16px; height: 16px; flex: none; }
-.side-search:hover { color: var(--ink); }
 .nav-r { display: inline-flex; align-items: center; gap: 4px; justify-self: end; }
 .navbar a.nav-srch { padding: 6px; color: var(--accent); }
 .navbar a.nav-srch::before { content: none; }
@@ -1398,7 +1377,7 @@ button, .tabbar, .navbar, .row, .seg, .btn { -webkit-user-select: none; user-sel
   @page { size: A4; margin: 10mm; }
   :root { color-scheme: light; }
   html, body { background: #fff !important; color: #000 !important; }
-  .sidebar, .navbar, .tabbar, .theme-btn, .print-btn, .pager, .sec-link, .install-card, [data-theme-seg], .side-search { display: none !important; }
+  .sidebar, .navbar, .tabbar, .theme-btn, .print-btn, .pager, .sec-link, .install-card, .side-icons { display: none !important; }
   .app, .pane, main, .content { display: block !important; margin: 0 !important; padding: 0 !important; max-width: none !important; width: auto !important; }
   .print-only { display: block; font-size: 9pt; margin-bottom: 4mm; }
   header.large h1 { font-size: 16pt; margin: 0; }
@@ -1447,3 +1426,10 @@ button, .tabbar, .navbar, .row, .seg, .btn { -webkit-user-select: none; user-sel
 .sx-pod .sx-pair img:last-child { right: 0; bottom: 0; }
 .sc-order { margin: 4px 0 8px; padding-left: 1.2em; display: grid; gap: 4px; font-size: .92rem; }
 .sc-nav { justify-content: space-between; }
+
+/* Sidebar: search and theme as two plain icons, like the mobile navbar */
+.side-icons { display: flex; gap: 6px; padding: 0 4px; }
+.side-ic { width: 40px; height: 40px; border: 0; border-radius: 10px; background: transparent; color: var(--accent); display: grid; place-items: center; cursor: pointer; padding: 0; }
+.side-ic svg { width: 22px; height: 22px; display: block; }
+.side-ic:hover { background: var(--surface-2); }
+.side-ic:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
