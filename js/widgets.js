@@ -69,7 +69,7 @@
     // one more category: signs that are easy to mix up (content in js/more/podobni.js, drawn by js/extras.js)
     if (window.BGPodobni) {
       const g1 = ALL.find((s) => s.c === "Г1"), d4 = ALL.find((s) => s.c === "Д4");
-      const b = h(`<button type="button" role="tab" data-g="podobni" class="sx-pod"><span class="sx-pair"><img src="${g1.f}" alt=""><img src="${d4.f}" alt=""></span><span><b>≈</b> Подобни знаци</span><small>как да не ги бъркаш</small></button>`);
+      const b = h(`<button type="button" role="tab" data-g="podobni" class="sx-pod"><span class="sx-pair" aria-hidden="true"><img src="${g1.f}" alt=""><img src="${d4.f}" alt=""></span><span>Подобни знаци</span></button>`);
       b.addEventListener("click", () => { group = "podobni"; query = ""; input.value = ""; draw(); });
       groupsEl.appendChild(b);
     }
