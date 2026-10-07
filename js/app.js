@@ -2,7 +2,7 @@
 (function () {
   const { CATS, RULES } = window.BGData;
   const { signSVG, DATA: SIGNDATA } = window.BGSigns;
-  const W = window.BGWidgets;
+  const W = () => window.BGWidgets || {};
 
   // ---------- last opened chapter (so "Днес" can offer to continue) ----------
   const LAST_KEY = "bg-driving-refresher.last";
@@ -313,9 +313,9 @@
       <div class="r-slot"></div>
       <nav class="pager" aria-label="Съседни глави"></nav>
     </div>`);
-    if (W[c.id]) {
+    if (W()[c.id]) {
       page.querySelector(".w-slot").appendChild(h(`<h2 class="section-title">${c.id === "situacii" ? "Пусни анимацията" : "Опитай"}</h2>`));
-      W[c.id](page.querySelector(".w-slot"));
+      W()[c.id](page.querySelector(".w-slot"));
     }
     const rules = RULES[c.id] || [];
     if (rules.length) {
@@ -359,14 +359,30 @@
   const onScroll = () => navbar.classList.toggle("scrolled", window.scrollY > 4);
   window.addEventListener("scroll", onScroll, { passive: true });
 
-  // scripts only some pages need are loaded when such a page is first opened, so the first load is lighter
-  const LAZY = { skorosti: ["js/speeds.js"], kola: ["js/docs.js", "js/car.js"], parkirane: ["js/parking.js"] };
+  // Each page loads only its own code: the first visit downloads just what the home page needs, and a
+  // chapter's interactive parts, 3D helper, animations or content file arrive when that page is opened.
+  const MORE_IDS = ["novo", "magistrala", "kolela", "avtomat", "pomosht", "globi", "chuzhbina"];
+  const THREE_D = ["regulirovchik", "krugovo", "ogledala", "parkirane", "skorosti"];
+  function scriptsFor(id) {
+    const list = [];
+    if (MORE_IDS.includes(id)) list.push(`js/more/${id}.js`);
+    if (id === "znaci") list.push("js/more/podobni.js");
+    if (id === "tarsene") MORE_IDS.forEach((m) => list.push(`js/more/${m}.js`));
+    if (id === "nakratko") list.push("js/more/globi.js");
+    if (THREE_D.includes(id)) list.push("js/scene3d.js");
+    if (id === "predimstvo") list.push("js/anim.js");
+    if (CATS.some((c) => c.id === id)) list.push("js/widgets.js", "js/extras.js");
+    if (id === "skorosti") list.push("js/speeds.js");
+    if (id === "kola") list.push("js/docs.js", "js/car.js");
+    if (id === "parkirane") list.push("js/parking.js");
+    return list;
+  }
   const loadedJS = new Set();
   const loadScript = (src) => new Promise((res, rej) => { const el = document.createElement("script"); el.src = src; el.onload = res; el.onerror = rej; document.body.appendChild(el); });
   function ensureScripts(id) {
-    const need = (LAZY[id] || []).filter((src) => !loadedJS.has(src));
+    const need = scriptsFor(id).filter((src) => !loadedJS.has(src));
     if (!need.length) return null;
-    return need.reduce((p, src) => p.then(() => loadScript(src)).then(() => loadedJS.add(src)), Promise.resolve());
+    return need.reduce((p, src) => p.then(() => loadScript(src)).then(() => loadedJS.add(src)), Promise.resolve()).then(() => { window.BGData.mergeMore(); searchIndex = null; });
   }
   function route() {
     const pending = ensureScripts((location.hash || "#nachalo").slice(1).split(":")[0]);

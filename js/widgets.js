@@ -1227,7 +1227,7 @@
     root.appendChild(box);
   }
 
-  window.BGWidgets = {
+  window.BGWidgets = Object.assign(window.BGWidgets || {}, {
     situacii: situationsWidget,
     znaci: signsWidget,
     markirovka: markingsWidget,
@@ -1239,5 +1239,5 @@
     ogledala: mirrorWidget,
     tablo: dashboardWidget,
     vreme: stoppingWidget,
-  };
+  });
 })();

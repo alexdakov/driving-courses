@@ -602,18 +602,36 @@
     { id: "highbeam", color: "blue", name: "Дълги светлини", what: "Включени са дългите светлини.", act: "Изключи ги при разминаване (поне 150 м), зад кола (под 50 м) и на осветен път.", tip: "Прави лъчи право напред светят „далеч“. Синьото е като нощното небе – само за тъмен, празен път." },
   ];
 
-  // chapters that live in their own files (js/more/*.js) join here, in this order
+  // chapters that live in their own files (js/more/*.js). The menu needs only their titles, so these are
+  // listed here; the file itself (rules and data) is loaded when the chapter is opened (see app.js).
   const ORDER = ["osnovni", "novo", "znaci", "markirovka", "svetofar", "regulirovchik", "predimstvo", "krugovo", "magistrala", "kolela", "parkirane", "ogledala", "avtomat", "tablo", "vreme", "kola", "pomosht", "globi", "chuzhbina", "situacii"];
+  const MORE_CHAPTERS = [
+    { id: "novo", title: "Какво ново в правилата", short: "Средна скорост, Зона 30, телефон, пешеходци, нови глоби, ГТП без стикер" },
+    { id: "magistrala", title: "Магистрала и ленти", short: "Влизане, дясна лента, камиони, авария, тунели, винетка, смяна на лента" },
+    { id: "kolela", title: "Колоездачи и тротинетки", short: "Изпреварване, врати, завиване, велоалеи, тротинетки, деца" },
+    { id: "avtomat", title: "Автоматична кутия и асистенти", short: "P, R, N, D, пълзене, наклон, ABS, ESP, темпомат, асистенти" },
+    { id: "pomosht", title: "Първа помощ при ПТП", short: "Безопасност, 112, дишане, сърдечен масаж, кървене, каска, аптечка" },
+    { id: "globi", title: "Глоби и точки", short: "Глоби, лишаване от права, контролни точки, фишове, плащане онлайн" },
+    { id: "chuzhbina", title: "Шофиране в чужбина", short: "Документи, „Зелена карта“, скорости, алкохол, винетки и съседите" },
+  ];
+  MORE_CHAPTERS.forEach((c) => CATS.push({ sign: "E5", lede: "", law: "", ...c, icon: true, more: true }));
   const MORE = {};
-  (window.BGMore || []).forEach((m) => {
-    if (CATS.some((c) => c.id === m.cat.id)) return;
-    // content that belongs to an existing chapter: its rules join that chapter, its data stays reachable
-    if (m.cat.into) { RULES[m.cat.into] = [...(RULES[m.cat.into] || []), ...(m.rules || [])]; MORE[m.cat.id] = m.data || {}; return; }
-    CATS.push({ sign: "E5", ...m.cat, icon: true });
-    RULES[m.cat.id] = m.rules || [];
-    MORE[m.cat.id] = m.data || {};
-  });
+  // merge every loaded js/more/*.js file into the chapters (safe to call again after more files load)
+  function mergeMore() {
+    (window.BGMore || []).forEach((m) => {
+      if (m.merged) return;
+      m.merged = true;
+      MORE[m.cat.id] = m.data || {};
+      // content that belongs to an existing chapter: its rules join that chapter
+      if (m.cat.into) { RULES[m.cat.into] = [...(RULES[m.cat.into] || []), ...(m.rules || [])]; return; }
+      const c = CATS.find((x) => x.id === m.cat.id);
+      if (c) Object.assign(c, m.cat, { icon: true });
+      else CATS.push({ sign: "E5", ...m.cat, icon: true });
+      RULES[m.cat.id] = m.rules || [];
+    });
+  }
+  mergeMore();
   const rank = (id) => { const i = ORDER.indexOf(id); return i < 0 ? ORDER.length : i; };
   CATS.sort((a, b) => rank(a.id) - rank(b.id));
-  window.BGData = { CATS, RULES, MARKINGS, DASH, MORE };
+  window.BGData = { CATS, RULES, MARKINGS, DASH, MORE, mergeMore };
 })();
