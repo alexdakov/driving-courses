@@ -1438,3 +1438,5 @@ button, .tabbar, .navbar, .row, .seg, .btn { -webkit-user-select: none; user-sel
 }
 .mx-chips { max-width: 100%; min-width: 0; }
 .mx-ab-ctl { min-width: 0; grid-template-columns: minmax(0, 1fr); }
+.nk-fines b { white-space: normal; text-align: right; flex: 0 1 45%; }
+.nk-fines span { min-width: 0; }
