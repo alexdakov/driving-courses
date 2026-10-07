@@ -49,6 +49,8 @@
     const marks = marksOf(svg);
     if (!marks || host.closest("[data-own-steps]")) return null;
     const total = marks.length - 1;
+    // steps only where there is something to step through
+    if (total < 3 || host.closest(".mark-card, [data-no-steps]")) return null;
     const st = document.createElement("div");
     st.className = "step-ctl";
     st.innerHTML = `<button type="button" class="step-prev" aria-label="Предишна стъпка">⏮</button><span class="step-no" aria-live="polite">0/${total}</span><button type="button" class="step-next" aria-label="Следваща стъпка">⏭</button>`;
@@ -75,6 +77,8 @@
 
   function attach(svg) {
     if (svg.dataset.play || !svg.querySelector(ANIM) || svg.closest(SKIP)) return;
+    // a still picture: freeze it on its first frame, no buttons
+    if (svg.closest("[data-still]")) { svg.dataset.play = "still"; try { svg.pauseAnimations(); svg.setCurrentTime(0); } catch (e) { /* ignore */ } return; }
     const host = svg.parentElement;
     if (!host) return;
     svg.dataset.play = "1";

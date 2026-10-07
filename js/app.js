@@ -77,22 +77,31 @@
     tablo: ["#ff9f0a", `<circle cx="12" cy="12" r="5.6"/><path d="M12 9.2v3.4"/><circle cx="12" cy="14.9" r=".5" fill="currentColor"/><path d="M4.6 7.4a9 9 0 0 0 0 9.2M19.4 7.4a9 9 0 0 1 0 9.2"/>`],
     vreme: ["#5ac8fa", `<path d="M7 15a4 4 0 1 1 .9-7.9A5.2 5.2 0 0 1 17.6 9a3 3 0 0 1-.2 6z"/><path d="M8.5 18l-1 2.5M12.5 18l-1 2.5M16.5 18l-1 2.5"/>`],
     kola: ["#00a37a", `<rect x="5" y="3.5" width="14" height="17.5" rx="2"/><path d="M9 3.5V2.5h6v1"/><path d="M8.5 9.5l1.5 1.5 3-3M8.5 15l1.5 1.5 3-3"/><path d="M15 10h1.5M15 15.5h1.5"/>`],
+    novo: ["#ff375f", `<path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z" fill="currentColor" stroke="none"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="currentColor" stroke="none"/>`],
+    podobni: ["#c4161c", `<circle cx="7.5" cy="12" r="5"/><rect x="13" y="7" width="9.5" height="10" rx="1.5"/><path d="M7.5 14.5v-5M5.6 11.4l1.9-1.9 1.9 1.9M17.75 14.5v-5M15.9 11.4l1.85-1.9 1.85 1.9"/>`],
+    magistrala: ["#1f8a4c", `<path d="M9 3 5 21M15 3l4 18"/><path d="M12 4v2.5M12 10v3M12 16.5v3.5"/>`],
+    kolela: ["#32ade6", `<circle cx="6" cy="16" r="3.6"/><circle cx="18" cy="16" r="3.6"/><path d="M6 16l4-7h5l3 7M10 9 8.5 6.5H7M15 9l-1.6-3H16"/>`],
+    avtomat: ["#5e5ce6", `<rect x="6.5" y="2.5" width="11" height="19" rx="3"/><path d="M10 7h4M10 10.5h4M10 14h4M10 17.5h4"/><circle cx="12" cy="17.5" r="1.4" fill="currentColor"/>`],
+    pomosht: ["#e5484d", `<path d="M9.5 3.5h5v6h6v5h-6v6h-5v-6h-6v-5h6z" fill="currentColor" stroke="none"/>`],
+    globi: ["#b25000", `<path d="M6 2.8h12v18.4l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4-2 1.4z"/><path d="M9 7.5h6M9 11h6M9 14.5h3.5"/>`],
+    chuzhbina: ["#0071a4", `<circle cx="12" cy="12" r="8.8"/><path d="M3.4 12h17.2M12 3.2c2.6 2.4 3.9 5.4 3.9 8.8s-1.3 6.4-3.9 8.8c-2.6-2.4-3.9-5.4-3.9-8.8S9.4 5.6 12 3.2z"/>`],
     situacii: ["#ff2d55", `<path d="M5.5 15.5v-4l2-5h9l2 5v4"/><path d="M4 11.5h16v4.5H4z"/><circle cx="7.6" cy="13.8" r=".9" fill="currentColor"/><circle cx="16.4" cy="13.8" r=".9" fill="currentColor"/><path d="M6.5 16v2.5M17.5 16v2.5"/>`],
   };
   const topicIcon = (id) => { const t = TOPIC[id]; return t ? `<span class="tico" style="--c:${t[0]};color:${t[2] || "#fff"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${t[1]}</svg></span>` : ""; };
 
-  const ROOTS = ["nachalo", "glavi", "znaci", "nakratko", "skorosti"];
-  const ROOT_TITLE = { nachalo: "Днес", glavi: "Глави", znaci: "Пътни знаци", nakratko: "Накратко", skorosti: "Скорости" };
+  const ROOTS = ["nachalo", "glavi", "znaci", "nakratko", "skorosti", "tarsene"];
+  const ROOT_TITLE = { nachalo: "Днес", glavi: "Глави", znaci: "Пътни знаци", nakratko: "Накратко", skorosti: "Скорости", tarsene: "Търсене" };
   const TABS = [["nachalo", "Днес"], ["glavi", "Глави"], ["znaci", "Знаци"], ["skorosti", "Скорости"], ["nakratko", "Накратко"]];
 
   function chapterRow(c, active) {
     return `<a class="row" href="#${c.id}" ${active === c.id ? 'aria-current="page"' : ""}>${topicIcon(c.id) || signSVG(c.sign, "")}<span class="t">${c.title}</span><small>${c.short}</small><span class="count"></span></a>`;
   }
+  const SEARCH_LINK = `<a href="#tarsene" class="nav-srch" aria-label="Търсене"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/></svg></a>`;
   function renderNav(active) {
     nav.innerHTML = `
       <div class="list"><a class="row" href="#skorosti" ${active === "skorosti" ? 'aria-current="page"' : ""}>${topicIcon("skorosti")}<span class="t">Скорости</span><small>Град, магистрала, дъжд, мъгла…</small><span class="count"></span></a><a class="row" href="#nakratko" ${active === "nakratko" ? 'aria-current="page"' : ""}>${topicIcon("nakratko")}<span class="t">Накратко</span><small>Всички числа на един екран</small><span class="count"></span></a></div>
       <div class="list">${chapters.map((c) => chapterRow(c, active)).join("")}</div>`;
-    const tabOf = ["nachalo", "znaci", "nakratko", "skorosti"].includes(active) ? active : "glavi";
+    const tabOf = ["nachalo", "znaci", "nakratko", "skorosti"].includes(active) ? active : active === "tarsene" ? "" : "glavi";
     tabbar.innerHTML = TABS.map(([id, label]) => `<a href="#${id}" ${tabOf === id ? 'aria-current="page"' : ""}>${ICON[id]}<span>${label}</span></a>`).join("");
     // phone: an app-style top bar. Root tabs show only the title once the large title scrolls away;
     // chapters get a back button. (Hidden on desktop by CSS.)
@@ -101,8 +110,8 @@
     navbar.hidden = false;
     navbar.classList.toggle("root", isRoot);
     navbar.innerHTML = isRoot
-      ? `<span></span><span class="nt">${ROOT_TITLE[active] || ""}</span>${themeToggle()}`
-      : `<a href="#glavi" class="back">Глави</a><span class="nt">${c ? c.title : ""}</span>${themeToggle()}`;
+      ? `<span></span><span class="nt">${ROOT_TITLE[active] || ""}</span><span class="nav-r">${active === "tarsene" ? "" : SEARCH_LINK}${themeToggle()}</span>`
+      : `<a href="#glavi" class="back">Глави</a><span class="nt">${c ? c.title : ""}</span><span class="nav-r">${SEARCH_LINK}${themeToggle()}</span>`;
   }
 
   // ---------- "install the app" card (phones, not yet installed) ----------
@@ -263,17 +272,84 @@
   }
 
   // ---------- Cheat sheet ----------
+  // the heaviest everyday fines, if the fines chapter is loaded
+  function topFines() {
+    const f = ((window.BGData.MORE || {}).globi || {}).fines || [];
+    if (!f.length) return "";
+    const pick = f.filter((x) => x.points || x.extra).slice(0, 10);
+    return `<h2 class="section-title">Глоби, които си струва да помниш <a href="#globi" class="sec-link">Всички ›</a></h2><div class="card nk-fines">${pick.map((x) => `<div><span>${x.t}</span><b>${x.fine}${x.points ? ` · −${x.points} т.` : ""}</b></div>`).join("")}</div>`;
+  }
   function nakratko() {
     return h(`<div>
-      <header class="large">${themeToggle()}<span class="eyebrow">Всичко важно на един екран</span><h1>Накратко</h1><p class="lede">Числата и правилата, които най-лесно се забравят. Подробностите са в главите.</p></header>
+      <header class="large">${themeToggle()}<span class="eyebrow">Всичко важно на един екран</span><h1>Накратко</h1><p class="lede">Числата и правилата, които най-лесно се забравят. Подробностите са в главите.</p><button type="button" class="btn small print-btn" onclick="window.print()">🖨 Отпечатай или запази като PDF</button></header>
+      <div class="print-only print-head"><b>Как да врум-врум</b> · категория B · по ЗДвП с изм. ДВ бр. 64/2025 · спешен номер 112</div>
       <h2 class="section-title">Скорости · категория B · km/h <a href="#skorosti" class="sec-link">Всички ситуации ›</a></h2>
       <div class="speed-strip">${FACTS.speeds.map(([v, t, , sign]) => `<div class="sp">${sign ? signSVG(sign, "") : `<span class="sp-road"></span>`}<b>${v}</b><span>${t}</span></div>`).join("")}</div>
       <h2 class="section-title">Разстояния</h2>${factList(FACTS.distances)}
       <h2 class="section-title">Числа</h2>${factList(FACTS.numbers)}
       <h2 class="section-title">Кой минава пръв</h2>${factList(FACTS.priority)}
       <h2 class="section-title">В колата</h2>${factList(FACTS.gear)}
+      ${topFines()}
       <nav class="pager"><a href="#glavi">Към главите<span>›</span></a></nav>
     </div>`);
+  }
+
+  // ---------- Search ----------
+  const plain = (html) => String(html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const norm = (t) => String(t).toLowerCase().replace(/ё/g, "е").replace(/^([abvgdet])(\d)/, (m, c, d) => ({ a: "а", b: "б", v: "в", g: "г", d: "д", e: "е", t: "т" })[c] + d);
+  let searchIndex = null;
+  function buildIndex() {
+    const out = [];
+    const MORE = window.BGData.MORE || {};
+    chapters.forEach((c) => {
+      out.push({ kind: "Глава", t: c.title, x: c.short, href: `#${c.id}` });
+      (RULES[c.id] || []).forEach((r, i) => out.push({ kind: c.title, t: r.t, x: plain(r.b), href: `#${c.id}:r${i}` }));
+    });
+    SIGNDATA.SIGNS.forEach((sg) => out.push({ kind: "Знак", t: `${sg.c} ${sg.n}`, x: `${sg.d} ${sg.m || ""}`, href: "#znaci", sign: sg.c, img: sg.f }));
+    (window.BGData.DASH || []).forEach((d) => out.push({ kind: "Лампа на таблото", t: d.name, x: `${d.what} ${d.act}`, href: "#tablo" }));
+    (window.BGScenarios || []).forEach((sc) => out.push({ kind: "Ситуация", t: sc.title, x: `${sc.q} ${sc.steps.join(" ")}`, href: `#situacii:sit-${sc.id}` }));
+    ((MORE.globi && MORE.globi.fines) || []).forEach((f) => out.push({ kind: "Глоба", t: f.t, x: `${f.fine} ${f.extra || ""}`, href: "#globi" }));
+    ((MORE.novo && MORE.novo.changes) || []).forEach((n) => out.push({ kind: "Ново", t: n.t, x: `${n.before} ${n.now}`, href: "#novo" }));
+    out.forEach((e) => { e.nt = norm(e.t); e.nx = norm(e.x); });
+    return out;
+  }
+  function searchPage() {
+    const page = h(`<div class="srch">
+      <header class="large">${themeToggle()}<span class="eyebrow">Знаци, правила, глоби, ситуации</span><h1>Търсене</h1></header>
+      <label class="srch-box"><span class="visually-hidden">Търси</span><input type="search" placeholder="Напр. В27, мъгла, телефон, 0,5 ‰, кръгово" autocomplete="off"></label>
+      <div class="srch-out" aria-live="polite"></div>
+    </div>`);
+    const input = page.querySelector("input"), out = page.querySelector(".srch-out");
+    const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    const mark = (t, words) => { let r = esc(t); words.forEach((w) => { if (w.length > 1) r = r.replace(new RegExp(`(${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi"), "<mark>$1</mark>"); }); return r; };
+    function run() {
+      const q = norm(input.value.trim());
+      try { sessionStorage.setItem("bg-search", input.value); } catch (e) { /* private mode */ }
+      if (q.length < 2) { out.innerHTML = `<p class="srch-hint">Напиши поне две букви. Търси се в главите, правилата, всички 182 знака, лампите на таблото, ситуациите и глобите.</p>`; return; }
+      searchIndex = searchIndex || buildIndex();
+      const words = q.split(/\s+/).filter(Boolean);
+      const hits = searchIndex.map((e) => {
+        let score = 0;
+        for (const w of words) {
+          if (e.nt.includes(w)) score += e.nt.startsWith(w) ? 6 : 4;
+          else if (e.nx.includes(w)) score += 1;
+          else return null;
+        }
+        return { e, score };
+      }).filter(Boolean).sort((a, b) => b.score - a.score).slice(0, 60);
+      if (!hits.length) { out.innerHTML = `<p class="srch-hint">Нищо не намерих за „${esc(input.value)}“.</p>`; return; }
+      out.innerHTML = `<p class="srch-count">${hits.length === 60 ? "Първите 60" : hits.length} резултата</p><div class="list srch-list">${hits.map(({ e }) => {
+        const i = e.nx.indexOf(words[0]);
+        const snip = e.x ? (i > 40 ? "…" : "") + e.x.slice(Math.max(0, i - 40), Math.max(0, i - 40) + 150) + (e.x.length > 150 ? "…" : "") : "";
+        return `<a class="row srch-row" href="${e.href}"${e.sign ? ` data-sign="${esc(e.sign)}"` : ""}>${e.img ? `<img src="${e.img}" alt="" class="srch-img" loading="lazy">` : `<span class="srch-kind">${esc(e.kind).slice(0, 1)}</span>`}<span class="t">${mark(e.t, words)}</span><small>${esc(e.kind)} · ${mark(snip, words)}</small></a>`;
+      }).join("")}</div>`;
+      out.querySelectorAll("[data-sign]").forEach((a) => a.addEventListener("click", () => { window.BGOpenSign = a.dataset.sign; }));
+    }
+    input.addEventListener("input", run);
+    try { input.value = sessionStorage.getItem("bg-search") || ""; } catch (e) { /* ignore */ }
+    run();
+    setTimeout(() => input.focus(), 50);
+    return page;
   }
 
   // ---------- Chapters list ----------
@@ -304,9 +380,10 @@
       const r = page.querySelector(".r-slot");
       r.appendChild(h(`<h2 class="section-title">Правилата</h2>`));
       const list = h(`<div class="rules"></div>`);
-      rules.forEach((x) => {
-        const il = x.il && window.BGIllustrations[x.il] ? `<figure class="rule-il">${window.BGIllustrations[x.il]()}</figure>` : "";
-        list.appendChild(h(`<article class="rule ${x.k || ""} ${il ? "has-il" : ""}">${il}<div class="rule-text"><h4>${x.t}</h4><div class="body">${x.b}</div><span class="lawref">${x.ref}</span></div></article>`));
+      rules.forEach((x, i) => {
+        const still = window.BGStill && window.BGStill.has(x.il) ? " data-still" : "";
+        const il = x.il && window.BGIllustrations[x.il] ? `<figure class="rule-il"${still}>${window.BGIllustrations[x.il]()}</figure>` : "";
+        list.appendChild(h(`<article class="rule ${x.k || ""} ${il ? "has-il" : ""}" id="r-${c.id}-${i}">${il}<div class="rule-text"><h4>${x.t}</h4><div class="body">${x.b}</div><span class="lawref">${x.ref}</span></div></article>`));
       });
       r.appendChild(list);
     }
@@ -340,20 +417,34 @@
   const onScroll = () => navbar.classList.toggle("scrolled", window.scrollY > 4);
   window.addEventListener("scroll", onScroll, { passive: true });
 
+  // scripts only some pages need are loaded when such a page is first opened, so the first load is lighter
+  const LAZY = { skorosti: ["js/speeds.js"], kola: ["js/docs.js", "js/car.js"], parkirane: ["js/parking.js"] };
+  const loadedJS = new Set();
+  const loadScript = (src) => new Promise((res, rej) => { const el = document.createElement("script"); el.src = src; el.onload = res; el.onerror = rej; document.body.appendChild(el); });
+  function ensureScripts(id) {
+    const need = (LAZY[id] || []).filter((src) => !loadedJS.has(src));
+    if (!need.length) return null;
+    return need.reduce((p, src) => p.then(() => loadScript(src)).then(() => loadedJS.add(src)), Promise.resolve());
+  }
   function route() {
+    const pending = ensureScripts((location.hash || "#nachalo").slice(1).split(":")[0]);
+    if (pending) { main.setAttribute("aria-busy", "true"); pending.then(route, route).finally(() => main.removeAttribute("aria-busy")); return; }
     const prev = current;
     if (prev) scrollMemo[prev] = window.scrollY;
-    const id = (location.hash || "#nachalo").slice(1);
+    const [id, anchor] = (location.hash || "#nachalo").slice(1).split(":");
     const c = CATS.find((x) => x.id === id);
-    current = c ? c.id : ["glavi", "nakratko", "skorosti", "znaci"].includes(id) ? id : "nachalo";
+    current = c ? c.id : ["glavi", "nakratko", "skorosti", "znaci", "tarsene"].includes(id) ? id : "nachalo";
     main.innerHTML = "";
-    main.appendChild(current === "glavi" ? chaptersPage() : current === "nakratko" ? nakratko() : current === "skorosti" ? window.BGSpeeds.page(themeToggle()) : !c ? today() : chapter(c));
+    main.appendChild(current === "tarsene" ? searchPage() : current === "glavi" ? chaptersPage() : current === "nakratko" ? nakratko() : current === "skorosti" ? window.BGSpeeds.page(themeToggle()) : !c ? today() : chapter(c));
     renderNav(current);
     syncTheme();
     // push (deeper), pop (back) or a tab switch
     const dir = !routed ? "" : depth(current) > depth(prev) ? "push" : depth(current) < depth(prev) ? "pop" : current === prev ? "" : "fade";
     const keep = (dir === "pop" || dir === "fade") && scrollMemo[current] != null;
     window.scrollTo({ top: keep ? scrollMemo[current] : 0 });
+    // deep link from the search: scroll to the rule or situation and flash it
+    const target = anchor && document.getElementById(anchor.startsWith("r") && !anchor.startsWith("r-") ? `r-${current}-${anchor.slice(1)}` : anchor);
+    if (target) { setTimeout(() => { target.scrollIntoView({ block: "center" }); target.classList.add("flash"); setTimeout(() => target.classList.remove("flash"), 2200); }, 60); }
     if (dir && isPhone()) {
       main.classList.remove("enter-push", "enter-pop", "enter-fade");
       void main.offsetWidth;

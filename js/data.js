@@ -602,5 +602,16 @@
     { id: "highbeam", color: "blue", name: "Дълги светлини", what: "Включени са дългите светлини.", act: "Изключи ги при разминаване (поне 150 м), зад кола (под 50 м) и на осветен път.", tip: "Прави лъчи право напред светят „далеч“. Синьото е като нощното небе – само за тъмен, празен път." },
   ];
 
-  window.BGData = { CATS, RULES, MARKINGS, DASH };
+  // chapters that live in their own files (js/more/*.js) join here, in this order
+  const ORDER = ["osnovni", "novo", "znaci", "podobni", "markirovka", "svetofar", "regulirovchik", "predimstvo", "krugovo", "magistrala", "kolela", "parkirane", "ogledala", "avtomat", "tablo", "vreme", "kola", "pomosht", "globi", "chuzhbina", "situacii"];
+  const MORE = {};
+  (window.BGMore || []).forEach((m) => {
+    if (CATS.some((c) => c.id === m.cat.id)) return;
+    CATS.push({ sign: "E5", ...m.cat, icon: true });
+    RULES[m.cat.id] = m.rules || [];
+    MORE[m.cat.id] = m.data || {};
+  });
+  const rank = (id) => { const i = ORDER.indexOf(id); return i < 0 ? ORDER.length : i; };
+  CATS.sort((a, b) => rank(a.id) - rank(b.id));
+  window.BGData = { CATS, RULES, MARKINGS, DASH, MORE };
 })();

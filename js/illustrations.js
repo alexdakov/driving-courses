@@ -600,5 +600,7 @@
 
   window.BGIllustrations = IL;
   // drawing kit, shared with js/scenarios.js
+  // pictures where motion adds nothing: shown as a still frame, without ▶ and step buttons
+  window.BGStill = new Set(["speeds", "alcohol", "phone", "childSeat", "belt", "bridgeIce", "winterTyres", "dayLights"]);
   window.BGDraw = { C, W, H, S, svg, T, label, dim, dashes, vdashes, zebra, car, sideCar, person, walker, ground, roadH, loop, cruise };
 })();

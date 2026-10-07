@@ -45,6 +45,10 @@
   function signsWidget(root) {
     const ALL = SIGNDATA.SIGNS;
     let group = "Б", mode = "learn", query = "", current = ALL.find((s) => s.c === "Б1");
+    // opened from the search: show that sign
+    const wanted = window.BGOpenSign && ALL.find((s) => s.c === window.BGOpenSign);
+    window.BGOpenSign = null;
+    if (wanted) { current = wanted; group = wanted.g; }
     const box = h(`<div class="widget sx">
       <div class="sx-groups" role="tablist" aria-label="Групи знаци"></div>
       <p class="sx-hook"></p>
@@ -1116,6 +1120,17 @@
   }
 
   // ================= Everyday situations =================
+  // one situation card (also used by other chapters through window.BGSitCard)
+  function sitCard(x, cats = window.BGScenarioCats || {}) {
+    let pic = "";
+    try { pic = x.svg(); } catch (e) { pic = ""; }
+    const stepper = x.marks ? `<div class="sit-stepbar"><button type="button" class="btn small sit-prev" aria-label="Предишна стъпка">◀</button><span class="sit-stepno">Стъпка по стъпка</span><button type="button" class="btn small sit-next" aria-label="Следваща стъпка">▶</button></div>` : "";
+    const card = h(`<article class="rule has-il sit-card" id="sit-${x.id}"><figure class="rule-il"${x.marks ? " data-own-steps" : ""}>${pic}</figure><div class="rule-text"><span class="eyebrow">${cats[x.cat] || ""}</span><h4>${x.title}</h4><p class="sit-q">${x.q}</p><ol class="sit-steps${x.marks ? " stepable" : ""}">${x.steps.map((t, i) => `<li data-n="${i}">${t}</li>`).join("")}</ol>${stepper}<span class="lawref">${x.ref}</span></div></article>`);
+    if (x.marks) stepThrough(card, x.marks);
+    return card;
+  }
+  window.BGSitCard = sitCard;
+
   function situationsWidget(root) {
     const list = window.BGScenarios || [];
     const cats = window.BGScenarioCats || {};
@@ -1127,14 +1142,7 @@
     box.querySelector(".sit-filter").appendChild(segmented([["all", "Всички"], ...used.map((k) => [k, cats[k]])], cat, (v) => { cat = v; draw(); }, "Вид ситуация"));
     function draw() {
       grid.innerHTML = "";
-      list.filter((x) => cat === "all" || x.cat === cat).forEach((x) => {
-        let pic = "";
-        try { pic = x.svg(); } catch (e) { pic = ""; }
-        const stepper = x.marks ? `<div class="sit-stepbar"><button type="button" class="btn small sit-prev" aria-label="Предишна стъпка">◀</button><span class="sit-stepno">Стъпка по стъпка</span><button type="button" class="btn small sit-next" aria-label="Следваща стъпка">▶</button></div>` : "";
-        const card = h(`<article class="rule has-il sit-card" id="sit-${x.id}"><figure class="rule-il"${x.marks ? " data-own-steps" : ""}>${pic}</figure><div class="rule-text"><span class="eyebrow">${cats[x.cat] || ""}</span><h4>${x.title}</h4><p class="sit-q">${x.q}</p><ol class="sit-steps${x.marks ? " stepable" : ""}">${x.steps.map((t, i) => `<li data-n="${i}">${t}</li>`).join("")}</ol>${stepper}<span class="lawref">${x.ref}</span></div></article>`);
-        if (x.marks) stepThrough(card, x.marks);
-        grid.appendChild(card);
-      });
+      list.filter((x) => cat === "all" || x.cat === cat).forEach((x) => grid.appendChild(sitCard(x, cats)));
     }
     draw();
     root.appendChild(box);
